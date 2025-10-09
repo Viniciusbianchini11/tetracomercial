@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { MetricCard } from "@/components/MetricCard";
 import { FunnelStage } from "@/components/FunnelStage";
 import { FilterSection } from "@/components/FilterSection";
+import { Header } from "@/components/Header";
 import { useFunnelData } from "@/hooks/useFunnelData";
 import { useFilterOptions } from "@/hooks/useFilterOptions";
 import { Clock, TrendingUp, Users, Target } from "lucide-react";
@@ -33,9 +34,9 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background p-8">
-      <div className="max-w-7xl mx-auto">
-        <h1 className="text-4xl font-bold text-foreground mb-8">Dashboard Comercial</h1>
+    <div className="min-h-screen bg-background">
+      <Header />
+      <div className="max-w-7xl mx-auto p-8">
 
         <Tabs defaultValue="performance" className="w-full">
           <TabsList className="mb-6">
