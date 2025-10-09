@@ -100,6 +100,26 @@ export const useFunnelData = (filters: Filters) => {
         buildQuery("contato_status_perdido"),
       ]);
 
+      // Check for errors in any of the results
+      const results = [
+        entrouNoFunilResult,
+        prospeccaoResult,
+        conexaoResult,
+        negociacaoResult,
+        agendadoResult,
+        fechadoResult,
+        ganhoResult,
+        perdidoResult,
+      ];
+
+      const errorResult = results.find((r) => r.error);
+      if (errorResult?.error) {
+        console.error("Error fetching funnel data:", errorResult.error);
+        toast.error("Você não tem permissão para visualizar os dados. Contate o administrador para atribuir uma role ao seu usuário.");
+        setLoading(false);
+        return;
+      }
+
       setFunnelData({
         entrouNoFunil: entrouNoFunilResult.count || 0,
         prospeccao: prospeccaoResult.count || 0,
