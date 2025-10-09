@@ -42,9 +42,6 @@ export const useFunnelData = (filters: Filters) => {
     ganho: 0,
     perdido: 0,
   });
-  const [loading, setLoading] = useState(true);
-  const [retryCount, setRetryCount] = useState(0);
-  const maxRetries = 3;
 
   useEffect(() => {
     fetchFunnelData();
@@ -80,8 +77,6 @@ export const useFunnelData = (filters: Filters) => {
 
   const fetchFunnelData = async () => {
     try {
-      setLoading(true);
-
       const [
         entrouNoFunilResult,
         prospeccaoResult,
@@ -117,33 +112,9 @@ export const useFunnelData = (filters: Filters) => {
       const errorResult = results.find((r) => r.error);
       if (errorResult?.error) {
         console.error("Error fetching funnel data:", errorResult.error);
-        
-        // Check if it's a permission error or server error
-        const error = errorResult.error;
-        const isPermissionError = error.code === 'PGRST301' || error.message?.includes('permission');
-        const isServerError = error.message?.includes('503') || error.message?.includes('unavailable');
-        
-        if (isServerError) {
-          // Don't show error for temporary server issues
-          console.log("Servidor temporariamente indisponível, aguardando...");
-          if (retryCount < maxRetries) {
-            setTimeout(() => {
-              setRetryCount(prev => prev + 1);
-              fetchFunnelData();
-            }, 5000); // Wait 5 seconds before retry
-          } else {
-            toast.error("Servidor temporariamente indisponível. Tente novamente em alguns minutos.");
-          }
-        } else if (isPermissionError) {
-          toast.error("Você não tem permissão para visualizar os dados. Contate o administrador.");
-        }
-        
-        setLoading(false);
+        toast.error("Erro ao carregar dados do funil");
         return;
       }
-      
-      // Reset retry count on success
-      setRetryCount(0);
 
       setFunnelData({
         entrouNoFunil: entrouNoFunilResult.count || 0,
@@ -158,10 +129,8 @@ export const useFunnelData = (filters: Filters) => {
     } catch (error) {
       console.error("Error fetching funnel data:", error);
       toast.error("Erro ao carregar dados do funil");
-    } finally {
-      setLoading(false);
     }
   };
 
-  return { funnelData, loading };
+  return { funnelData };
 };

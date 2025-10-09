@@ -17,7 +17,7 @@ const Index = () => {
   const [endDate, setEndDate] = useState<Date | undefined>(undefined);
 
   const { sellers, origins, tags } = useFilterOptions();
-  const { funnelData, loading } = useFunnelData({
+  const { funnelData } = useFunnelData({
     seller: selectedSeller,
     origin: selectedOrigin,
     tag: selectedTag,
@@ -64,22 +64,22 @@ const Index = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               <MetricCard
                 title="Tempo Médio de Conversão"
-                value={loading ? "..." : "42 dias"}
+                value="42 dias"
                 icon={Clock}
               />
               <MetricCard
                 title="Taxa de Conversão"
-                value={loading ? "..." : `${conversionRate}%`}
+                value={`${conversionRate}%`}
                 icon={TrendingUp}
               />
               <MetricCard
                 title="Total de Entradas"
-                value={loading ? "..." : totalEntries}
+                value={totalEntries}
                 icon={Users}
               />
               <MetricCard
                 title="Total de Ganhos"
-                value={loading ? "..." : funnelData.ganho}
+                value={funnelData.ganho}
                 icon={Target}
               />
             </div>
@@ -89,10 +89,7 @@ const Index = () => {
                 <CardTitle className="text-2xl">Funil de Vendas</CardTitle>
               </CardHeader>
               <CardContent>
-                {loading ? (
-                  <div className="text-center py-8 text-muted-foreground">Carregando...</div>
-                ) : (
-                  <div className="space-y-4">
+                <div className="space-y-4">
                     <FunnelStage
                       label="Entrou no Funil"
                       count={funnelData.entrouNoFunil}
@@ -141,7 +138,6 @@ const Index = () => {
                       </div>
                     </div>
                   </div>
-                )}
               </CardContent>
             </Card>
           </TabsContent>
