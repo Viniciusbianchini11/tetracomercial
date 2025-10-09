@@ -43,6 +43,8 @@ export const useFunnelData = (filters: Filters) => {
     perdido: 0,
   });
   const [loading, setLoading] = useState(true);
+  const [retryCount, setRetryCount] = useState(0);
+  const maxRetries = 3;
 
   useEffect(() => {
     fetchFunnelData();
@@ -115,10 +117,33 @@ export const useFunnelData = (filters: Filters) => {
       const errorResult = results.find((r) => r.error);
       if (errorResult?.error) {
         console.error("Error fetching funnel data:", errorResult.error);
-        toast.error("Você não tem permissão para visualizar os dados. Contate o administrador para atribuir uma role ao seu usuário.");
+        
+        // Check if it's a permission error or server error
+        const error = errorResult.error;
+        const isPermissionError = error.code === 'PGRST301' || error.message?.includes('permission');
+        const isServerError = error.message?.includes('503') || error.message?.includes('unavailable');
+        
+        if (isServerError) {
+          // Don't show error for temporary server issues
+          console.log("Servidor temporariamente indisponível, aguardando...");
+          if (retryCount < maxRetries) {
+            setTimeout(() => {
+              setRetryCount(prev => prev + 1);
+              fetchFunnelData();
+            }, 5000); // Wait 5 seconds before retry
+          } else {
+            toast.error("Servidor temporariamente indisponível. Tente novamente em alguns minutos.");
+          }
+        } else if (isPermissionError) {
+          toast.error("Você não tem permissão para visualizar os dados. Contate o administrador.");
+        }
+        
         setLoading(false);
         return;
       }
+      
+      // Reset retry count on success
+      setRetryCount(0);
 
       setFunnelData({
         entrouNoFunil: entrouNoFunilResult.count || 0,
