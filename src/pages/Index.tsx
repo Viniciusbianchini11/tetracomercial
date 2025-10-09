@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { MetricCard } from "@/components/MetricCard";
 import { FunnelStage } from "@/components/FunnelStage";
 import { FilterSection } from "@/components/FilterSection";
+import { SalesTable } from "@/components/SalesTable";
 import { Header } from "@/components/Header";
 import { useFunnelData } from "@/hooks/useFunnelData";
 import { useFilterOptions } from "@/hooks/useFilterOptions";
@@ -143,13 +144,7 @@ const Index = () => {
           </TabsContent>
 
           <TabsContent value="acompanhamento">
-            <Card>
-              <CardContent className="p-8">
-                <p className="text-center text-muted-foreground">
-                  Funcionalidade de acompanhamento de vendas em desenvolvimento
-                </p>
-              </CardContent>
-            </Card>
+            <SalesTable />
           </TabsContent>
         </Tabs>
       </div>

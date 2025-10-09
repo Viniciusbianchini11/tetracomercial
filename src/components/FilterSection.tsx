@@ -2,7 +2,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
-import { CalendarIcon } from "lucide-react";
+import { CalendarIcon, X } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
@@ -38,8 +38,16 @@ export const FilterSection = ({
   onStartDateChange,
   onEndDateChange,
 }: FilterSectionProps) => {
+  const hasDateFilter = startDate || endDate;
+  
+  const clearDateFilters = () => {
+    onStartDateChange(undefined);
+    onEndDateChange(undefined);
+  };
+  
   return (
-    <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
+    <div className="space-y-4 mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
       <Select value={selectedSeller} onValueChange={onSellerChange}>
         <SelectTrigger className="bg-card">
           <SelectValue placeholder="Todos os Vendedores" />
@@ -129,6 +137,21 @@ export const FilterSection = ({
           />
         </PopoverContent>
       </Popover>
+      </div>
+      
+      {hasDateFilter && (
+        <div className="flex justify-end">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={clearDateFilters}
+            className="gap-2"
+          >
+            <X className="h-4 w-4" />
+            Limpar Filtros de Data
+          </Button>
+        </div>
+      )}
     </div>
   );
 };

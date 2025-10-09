@@ -111,8 +111,25 @@ export const useFunnelData = (filters: Filters) => {
 
       const errorResult = results.find((r) => r.error);
       if (errorResult?.error) {
-        console.error("Error fetching funnel data:", errorResult.error);
-        toast.error("Erro ao carregar dados do funil");
+        const error = errorResult.error;
+        console.error("Error fetching funnel data:", error);
+        
+        // Only show toast for real errors with messages
+        if (error.message && error.message.length > 0) {
+          toast.error(`Erro ao carregar dados: ${error.message}`);
+        }
+        
+        // Set default values even on error to avoid infinite loading
+        setFunnelData({
+          entrouNoFunil: 0,
+          prospeccao: 0,
+          conexao: 0,
+          negociacao: 0,
+          agendado: 0,
+          fechado: 0,
+          ganho: 0,
+          perdido: 0,
+        });
         return;
       }
 
