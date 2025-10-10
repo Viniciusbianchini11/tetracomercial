@@ -79,22 +79,30 @@ export const useSalesStats = (filters?: SalesStatsFilters) => {
 
       if (!data) return;
 
-      // Aplicar filtros adicionais
-      let filteredData = data;
+      // Aplicar filtros simples
+      let filteredData = [...data];
       
-      if (filters?.month && filters.month !== "all") {
+      // Filtro de mês (se não houver data específica)
+      if (filters?.month && filters.month !== "all" && !filters?.startDate && !filters?.endDate) {
         filteredData = filteredData.filter(sale => {
-          const saleMonth = sale.DATA?.split('-')[1];
+          if (!sale.DATA) return false;
+          const saleMonth = sale.DATA.split('-')[1];
           return saleMonth === filters.month;
         });
       }
       
-      if (filters?.year && filters.year !== "all") {
-        filteredData = filteredData.filter(sale => sale.ANO === parseInt(filters.year));
+      // Filtro de ano (se não houver data específica)
+      if (filters?.year && filters.year !== "all" && !filters?.startDate && !filters?.endDate) {
+        filteredData = filteredData.filter(sale => {
+          return sale.ANO === parseInt(filters.year);
+        });
       }
       
+      // Filtro de lançamento
       if (filters?.launch && filters.launch !== "all") {
-        filteredData = filteredData.filter(sale => sale.LANÇAMENTO === filters.launch);
+        filteredData = filteredData.filter(sale => {
+          return sale.LANÇAMENTO === filters.launch;
+        });
       }
 
       // Calcular estatísticas gerais
