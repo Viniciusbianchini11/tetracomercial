@@ -60,39 +60,28 @@ export const useSalesStats = (filters?: SalesStatsFilters) => {
     try {
       setLoading(true);
       
-      // Construir query com filtros nativos do Supabase
+      // Query simples - buscar tudo
       let query = supabase.from("relatorio_faturamento").select("*");
       
-      // Filtro de DATA (range ou específica)
+      // Aplicar filtros se existirem
       if (filters?.startDate) {
         query = query.gte("DATA", filters.startDate.toISOString().split('T')[0]);
       }
       if (filters?.endDate) {
         query = query.lte("DATA", filters.endDate.toISOString().split('T')[0]);
       }
-      
-      // Filtro de ANO (se não houver filtro de data)
-      if (filters?.year && filters.year !== "all" && !filters?.startDate && !filters?.endDate) {
+      if (filters?.year && filters.year !== "all") {
         query = query.eq("ANO", parseInt(filters.year));
       }
-      
-      // Filtro de LANÇAMENTO
       if (filters?.launch && filters.launch !== "all") {
         query = query.eq("LANÇAMENTO", filters.launch);
-      }
-      
-      // Se não houver nenhum filtro, limitar aos últimos 30 dias
-      if (!filters?.startDate && !filters?.endDate && (!filters?.year || filters.year === "all")) {
-        const thirtyDaysAgo = new Date();
-        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-        query = query.gte("DATA", thirtyDaysAgo.toISOString().split('T')[0]);
       }
 
       const { data, error } = await query;
 
       if (error) {
         console.error("Error fetching sales stats:", error);
-        toast.error("Erro ao carregar vendas: " + error.message);
+        toast.error("Erro ao carregar vendas");
         setLoading(false);
         return;
       }
@@ -102,9 +91,9 @@ export const useSalesStats = (filters?: SalesStatsFilters) => {
         return;
       }
 
-      // Filtro de mês no cliente (apenas se necessário e não houver filtro de data)
+      // Filtro de mês (apenas se especificado)
       let filteredData = data;
-      if (filters?.month && filters.month !== "all" && !filters?.startDate && !filters?.endDate) {
+      if (filters?.month && filters.month !== "all") {
         filteredData = data.filter(sale => {
           if (!sale.DATA) return false;
           const saleMonth = sale.DATA.split('-')[1];

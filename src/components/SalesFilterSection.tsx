@@ -141,11 +141,26 @@ export const SalesFilterSection = ({
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Todos</SelectItem>
-              <SelectItem value="SIM">Sim</SelectItem>
-              <SelectItem value="NAO">Não</SelectItem>
+              <SelectItem value="CPB13">CPB13</SelectItem>
+              <SelectItem value="FORA LANÇAMENTO">Fora Lançamento</SelectItem>
             </SelectContent>
           </Select>
         </div>
+      </div>
+      
+      <div className="flex justify-end">
+        <Button 
+          variant="outline" 
+          onClick={() => {
+            onStartDateChange(undefined);
+            onEndDateChange(undefined);
+            onMonthChange("all");
+            onYearChange("all");
+            onLaunchChange("all");
+          }}
+        >
+          Limpar Filtros
+        </Button>
       </div>
     </div>
   );
