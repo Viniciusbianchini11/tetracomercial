@@ -4,6 +4,7 @@ import { toast } from "sonner";
 
 interface SellerStats {
   faturamentoBruto: number;
+  valorFinal: number;
   vendas: number;
   taxaConversao: number;
 }
@@ -26,6 +27,7 @@ interface SellerStatsFilters {
 export const useSellerStats = (filters?: SellerStatsFilters) => {
   const [stats, setStats] = useState<SellerStats>({
     faturamentoBruto: 0,
+    valorFinal: 0,
     vendas: 0,
     taxaConversao: 0,
   });
@@ -44,6 +46,8 @@ export const useSellerStats = (filters?: SellerStatsFilters) => {
 
       // Extrair o nome do vendedor do email (primeira parte antes do ponto)
       const sellerName = filters?.sellerEmail?.split('@')[0].split('.')[0].toUpperCase();
+      
+      console.log('Fetching sales for seller:', sellerName, 'from email:', filters?.sellerEmail);
 
       let query = supabase
         .from("relatorio_faturamento")
@@ -65,7 +69,13 @@ export const useSellerStats = (filters?: SellerStatsFilters) => {
 
       const { data, error } = await query;
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching sales:', error);
+        throw error;
+      }
+      
+      console.log('Sales data fetched:', data?.length, 'records');
+      
       if (!data) return;
 
       let filteredData = [...data];
@@ -83,13 +93,21 @@ export const useSellerStats = (filters?: SellerStatsFilters) => {
         0
       );
 
+      const valorFinal = filteredData.reduce(
+        (sum, sale) => sum + (sale["VALOR FINAL"] || 0),
+        0
+      );
+
       const vendas = filteredData.length;
 
       const totalLeads = await fetchTotalLeads();
       const taxaConversao = totalLeads > 0 ? (vendas / totalLeads) * 100 : 0;
 
+      console.log('Stats calculated:', { faturamentoBruto, valorFinal, vendas, taxaConversao, totalLeads });
+
       setStats({
         faturamentoBruto,
+        valorFinal,
         vendas,
         taxaConversao,
       });

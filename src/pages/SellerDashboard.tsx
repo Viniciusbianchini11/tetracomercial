@@ -223,10 +223,15 @@ const SellerDashboard = () => {
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-6">
               <MetricCard
-                title="Faturamento Total"
+                title="Faturamento Total (Líquido)"
                 value={formatCurrency(stats.faturamentoBruto)}
+                icon={DollarSign}
+              />
+              <MetricCard
+                title="Valor Final"
+                value={formatCurrency(stats.valorFinal)}
                 icon={DollarSign}
               />
               <MetricCard
