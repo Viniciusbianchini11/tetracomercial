@@ -107,10 +107,11 @@ export const useSalesStats = (startDate?: Date | null, endDate?: Date | null) =>
       
       data.forEach(sale => {
         const vendedor = sale.VENDEDOR || "Sem vendedor";
+        const valorFinal = sale["VALOR FIINAL"] || sale["VALOR FINAL"] || 0;
         const current = sellerMap.get(vendedor) || { vendas: 0, faturamento: 0 };
         sellerMap.set(vendedor, {
           vendas: current.vendas + 1,
-          faturamento: current.faturamento + (sale["VALOR FIINAL"] || 0),
+          faturamento: current.faturamento + valorFinal,
         });
       });
 
@@ -135,16 +136,17 @@ export const useSalesStats = (startDate?: Date | null, endDate?: Date | null) =>
       
       yesterdayData.forEach(sale => {
         const vendedor = sale.VENDEDOR || "Sem vendedor";
+        const valorFinal = sale["VALOR FIINAL"] || sale["VALOR FINAL"] || 0;
         const current = yesterdayByVendedor.get(vendedor) || { vendas: 0, faturamento: 0 };
         yesterdayByVendedor.set(vendedor, {
           vendas: current.vendas + 1,
-          faturamento: current.faturamento + (sale["VALOR FIINAL"] || 0),
+          faturamento: current.faturamento + valorFinal,
         });
       });
 
       setYesterdaySales({
         vendas: yesterdayData.length,
-        faturamento: yesterdayData.reduce((sum, sale) => sum + (sale["VALOR FIINAL"] || 0), 0),
+        faturamento: yesterdayData.reduce((sum, sale) => sum + (sale["VALOR FIINAL"] || sale["VALOR FINAL"] || 0), 0),
         porVendedor: Array.from(yesterdayByVendedor.entries())
           .map(([vendedor, stats]) => ({
             vendedor,
@@ -161,18 +163,19 @@ export const useSalesStats = (startDate?: Date | null, endDate?: Date | null) =>
       
       todayData.forEach(sale => {
         const vendedor = sale.VENDEDOR || "Sem vendedor";
+        const valorFinal = sale["VALOR FIINAL"] || sale["VALOR FINAL"] || 0;
         const current = todayByVendedor.get(vendedor) || { vendas: 0, faturamento: 0, faturamentoFinal: 0 };
         todayByVendedor.set(vendedor, {
           vendas: current.vendas + 1,
           faturamento: current.faturamento + (sale["VALOR FATURADO (CHEIO)"] || 0),
-          faturamentoFinal: current.faturamentoFinal + (sale["VALOR FIINAL"] || 0),
+          faturamentoFinal: current.faturamentoFinal + valorFinal,
         });
       });
 
       setTodaySales({
         vendas: todayData.length,
         faturamento: todayData.reduce((sum, sale) => sum + (sale["VALOR FATURADO (CHEIO)"] || 0), 0),
-        faturamentoFinal: todayData.reduce((sum, sale) => sum + (sale["VALOR FIINAL"] || 0), 0),
+        faturamentoFinal: todayData.reduce((sum, sale) => sum + (sale["VALOR FIINAL"] || sale["VALOR FINAL"] || 0), 0),
         porVendedor: Array.from(todayByVendedor.entries())
           .map(([vendedor, stats]) => ({
             vendedor,
