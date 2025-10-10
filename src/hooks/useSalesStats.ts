@@ -20,10 +20,12 @@ interface SellerRanking {
 interface DailySales {
   vendas: number;
   faturamento: number;
+  faturamentoFinal?: number;
   porVendedor: Array<{
     vendedor: string;
     vendas: number;
     faturamento: number;
+    faturamentoFinal?: number;
   }>;
 }
 
@@ -70,7 +72,7 @@ export const useSalesStats = (startDate?: Date | null, endDate?: Date | null) =>
       if (!data) return;
 
       // Calcular estatísticas gerais
-      const faturamentoBruto = data.reduce((sum, sale) => sum + (sale["VALOR BRUTO"] || 0), 0);
+      const faturamentoBruto = data.reduce((sum, sale) => sum + (sale["VALOR FATURADO (CHEIO)"] || 0), 0);
       const vendas = data.length;
       
       // Contar pistas únicas (baseado em emails únicos)
@@ -100,7 +102,7 @@ export const useSalesStats = (startDate?: Date | null, endDate?: Date | null) =>
         foraLancamento,
       });
 
-      // Calcular ranking de vendedores
+      // Calcular ranking de vendedores (usando VALOR FIINAL)
       const sellerMap = new Map<string, { vendas: number; faturamento: number }>();
       
       data.forEach(sale => {
@@ -108,7 +110,7 @@ export const useSalesStats = (startDate?: Date | null, endDate?: Date | null) =>
         const current = sellerMap.get(vendedor) || { vendas: 0, faturamento: 0 };
         sellerMap.set(vendedor, {
           vendas: current.vendas + 1,
-          faturamento: current.faturamento + (sale["VALOR LIQUIDO"] || 0),
+          faturamento: current.faturamento + (sale["VALOR FIINAL"] || 0),
         });
       });
 
@@ -136,13 +138,13 @@ export const useSalesStats = (startDate?: Date | null, endDate?: Date | null) =>
         const current = yesterdayByVendedor.get(vendedor) || { vendas: 0, faturamento: 0 };
         yesterdayByVendedor.set(vendedor, {
           vendas: current.vendas + 1,
-          faturamento: current.faturamento + (sale["VALOR LIQUIDO"] || 0),
+          faturamento: current.faturamento + (sale["VALOR FIINAL"] || 0),
         });
       });
 
       setYesterdaySales({
         vendas: yesterdayData.length,
-        faturamento: yesterdayData.reduce((sum, sale) => sum + (sale["VALOR LIQUIDO"] || 0), 0),
+        faturamento: yesterdayData.reduce((sum, sale) => sum + (sale["VALOR FIINAL"] || 0), 0),
         porVendedor: Array.from(yesterdayByVendedor.entries())
           .map(([vendedor, stats]) => ({
             vendedor,
@@ -152,28 +154,31 @@ export const useSalesStats = (startDate?: Date | null, endDate?: Date | null) =>
           .sort((a, b) => b.vendas - a.vendas),
       });
 
-      // Calcular vendas de hoje
+      // Calcular vendas de hoje (VALOR FATURADO (CHEIO) + VALOR FIINAL)
       const today = new Date().toISOString().split('T')[0];
       const todayData = data.filter(sale => sale.DATA === today);
-      const todayByVendedor = new Map<string, { vendas: number; faturamento: number }>();
+      const todayByVendedor = new Map<string, { vendas: number; faturamento: number; faturamentoFinal: number }>();
       
       todayData.forEach(sale => {
         const vendedor = sale.VENDEDOR || "Sem vendedor";
-        const current = todayByVendedor.get(vendedor) || { vendas: 0, faturamento: 0 };
+        const current = todayByVendedor.get(vendedor) || { vendas: 0, faturamento: 0, faturamentoFinal: 0 };
         todayByVendedor.set(vendedor, {
           vendas: current.vendas + 1,
-          faturamento: current.faturamento + (sale["VALOR LIQUIDO"] || 0),
+          faturamento: current.faturamento + (sale["VALOR FATURADO (CHEIO)"] || 0),
+          faturamentoFinal: current.faturamentoFinal + (sale["VALOR FIINAL"] || 0),
         });
       });
 
       setTodaySales({
         vendas: todayData.length,
-        faturamento: todayData.reduce((sum, sale) => sum + (sale["VALOR LIQUIDO"] || 0), 0),
+        faturamento: todayData.reduce((sum, sale) => sum + (sale["VALOR FATURADO (CHEIO)"] || 0), 0),
+        faturamentoFinal: todayData.reduce((sum, sale) => sum + (sale["VALOR FIINAL"] || 0), 0),
         porVendedor: Array.from(todayByVendedor.entries())
           .map(([vendedor, stats]) => ({
             vendedor,
             vendas: stats.vendas,
             faturamento: stats.faturamento,
+            faturamentoFinal: stats.faturamentoFinal,
           }))
           .sort((a, b) => b.vendas - a.vendas),
       });

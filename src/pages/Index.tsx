@@ -205,6 +205,7 @@ const Index = () => {
                     title="Vendas do dia"
                     vendas={todaySales.vendas}
                     faturamento={todaySales.faturamento}
+                    faturamentoFinal={todaySales.faturamentoFinal}
                     porVendedor={todaySales.porVendedor}
                   />
                 </div>
