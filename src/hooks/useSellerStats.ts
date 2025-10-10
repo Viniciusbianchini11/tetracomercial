@@ -50,10 +50,10 @@ export const useSellerStats = (filters?: SellerStatsFilters) => {
     }
   }, [filters?.sellerEmail, filters?.startDate, filters?.endDate, filters?.month, filters?.year, filters?.launch]);
 
-  const getPhoneLast5Digits = (phone: string | null): string | null => {
+  const getPhoneLast8Digits = (phone: string | null): string | null => {
     if (!phone) return null;
     const digits = phone.replace(/\D/g, ''); // Remove tudo que não é número
-    return digits.slice(-5); // Pega os últimos 5 dígitos
+    return digits.slice(-8); // Pega os últimos 8 dígitos (DDD + número)
   };
 
   const calculateAverageConversionTime = async (
@@ -61,11 +61,14 @@ export const useSellerStats = (filters?: SellerStatsFilters) => {
     sellerEmail: string
   ): Promise<number> => {
     try {
+      // Extrair o nome do vendedor do email
+      const sellerName = sellerEmail.split('@')[0].split('.')[0].toUpperCase();
+      
       // Buscar registros de entrounofunil do vendedor
       const { data: funnelEntries, error } = await supabase
         .from("entrounofunil")
-        .select("data_de_criacao, nome, email, telefone")
-        .eq("dono_do_negocio", sellerEmail);
+        .select("data_de_entrada_na_etapa, nome, email, telefone, dono_do_negocio")
+        .ilike("dono_do_negocio", `%${sellerName}%`);
 
       if (error) {
         console.error('Error fetching funnel entries:', error);
@@ -78,69 +81,59 @@ export const useSellerStats = (filters?: SellerStatsFilters) => {
       }
 
       console.log(`Found ${funnelEntries.length} funnel entries for seller`);
+      console.log('Sample funnel entries:', funnelEntries.slice(0, 3));
 
       const conversionTimes: number[] = [];
       let matchStats = {
         byEmail: 0,
-        byNamePhone: 0,
+        byName: 0,
         byPhone: 0,
-        noMatch: 0
+        noMatch: 0,
+        negativeTime: 0
       };
 
       for (const sale of sales) {
         const saleEmail = sale["E-MAIL"]?.toLowerCase().trim();
         const saleName = sale["NOME"]?.toLowerCase().trim();
-        const salePhone = getPhoneLast5Digits(sale["TELEFONE"]);
+        const salePhone = getPhoneLast8Digits(sale["TELEFONE"]);
         const saleDate = new Date(sale["DATA"]);
 
-        let matchedEntry = null;
-        let matchType = '';
-
-        // Nível 1: Tentar match por email
-        if (saleEmail) {
-          matchedEntry = funnelEntries.find(
-            entry => entry.email && entry.email.toLowerCase().trim() === saleEmail
-          );
-          if (matchedEntry) {
-            matchType = 'email';
-            matchStats.byEmail++;
-          }
-        }
-
-        // Nível 2: Tentar por nome + últimos 5 dígitos do telefone
-        if (!matchedEntry && saleName && salePhone) {
-          matchedEntry = funnelEntries.find(entry => {
-            const entryName = entry.nome?.toLowerCase().trim();
-            const entryPhone = getPhoneLast5Digits(entry.telefone);
-            return entryName === saleName && entryPhone === salePhone;
-          });
-          if (matchedEntry) {
-            matchType = 'name+phone';
-            matchStats.byNamePhone++;
-          }
-        }
-
-        // Nível 3: Tentar apenas por últimos 5 dígitos do telefone
-        if (!matchedEntry && salePhone) {
-          matchedEntry = funnelEntries.find(entry => {
-            const entryPhone = getPhoneLast5Digits(entry.telefone);
-            return entryPhone === salePhone;
-          });
-          if (matchedEntry) {
-            matchType = 'phone';
-            matchStats.byPhone++;
-          }
-        }
+        // Match se QUALQUER UM dos critérios for atendido (OU lógico)
+        const matchedEntry = funnelEntries.find(entry => {
+          const emailMatch = saleEmail && entry.email && 
+            entry.email.toLowerCase().trim() === saleEmail;
+          
+          const nameMatch = saleName && entry.nome && 
+            entry.nome.toLowerCase().trim() === saleName;
+          
+          const phoneMatch = salePhone && 
+            getPhoneLast8Digits(entry.telefone) === salePhone;
+          
+          return emailMatch || nameMatch || phoneMatch;
+        });
 
         // Se encontrou match, calcular tempo de conversão
-        if (matchedEntry && matchedEntry.data_de_criacao) {
-          const entryDate = new Date(matchedEntry.data_de_criacao);
+        if (matchedEntry && matchedEntry.data_de_entrada_na_etapa) {
+          const entryDate = new Date(matchedEntry.data_de_entrada_na_etapa);
           const diffTime = saleDate.getTime() - entryDate.getTime();
           const diffDays = diffTime / (1000 * 60 * 60 * 24);
           
-          // Apenas adicionar se for tempo positivo (venda depois da entrada no funil)
-          if (diffDays >= 0) {
+          if (diffDays < 0) {
+            console.warn(`Venda antes da entrada no funil: ${diffDays.toFixed(1)} dias`);
+            matchStats.negativeTime++;
+            // Considerar como conversão imediata
+            conversionTimes.push(0);
+          } else {
             conversionTimes.push(diffDays);
+          }
+
+          // Identificar tipo de match para estatísticas
+          if (saleEmail && matchedEntry.email?.toLowerCase().trim() === saleEmail) {
+            matchStats.byEmail++;
+          } else if (saleName && matchedEntry.nome?.toLowerCase().trim() === saleName) {
+            matchStats.byName++;
+          } else if (salePhone && getPhoneLast8Digits(matchedEntry.telefone) === salePhone) {
+            matchStats.byPhone++;
           }
         } else {
           matchStats.noMatch++;
