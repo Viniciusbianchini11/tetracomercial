@@ -15,9 +15,12 @@ import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useFilterOptions } from "@/hooks/useFilterOptions";
 
 const SellerDashboard = () => {
   const { user } = useSellerAuth();
+  const { origins, tags } = useFilterOptions();
   
   // Filtros de vendas
   const [salesStartDate, setSalesStartDate] = useState<Date | undefined>(undefined);
@@ -29,6 +32,8 @@ const SellerDashboard = () => {
   // Filtros do funil
   const [funnelStartDate, setFunnelStartDate] = useState<Date | undefined>(undefined);
   const [funnelEndDate, setFunnelEndDate] = useState<Date | undefined>(undefined);
+  const [selectedOrigin, setSelectedOrigin] = useState("all");
+  const [selectedTag, setSelectedTag] = useState("all");
 
   const { stats, monthlySales, loading: statsLoading } = useSellerStats({
     sellerEmail: user?.email || undefined,
@@ -41,8 +46,8 @@ const SellerDashboard = () => {
 
   const { funnelData } = useFunnelData({
     seller: user?.email || "all",
-    origin: "all",
-    tag: "all",
+    origin: selectedOrigin,
+    tag: selectedTag,
     startDate: funnelStartDate,
     endDate: funnelEndDate,
   });
@@ -67,118 +72,130 @@ const SellerDashboard = () => {
 
         <h2 className="text-xl font-semibold mb-4">Funil de Vendas</h2>
         <div className="space-y-4 mb-6">
-          <div className="flex gap-4">
-            <div className="flex gap-2">
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className={cn(
-                      "justify-start text-left font-normal bg-card",
-                      !funnelStartDate && "text-muted-foreground"
-                    )}
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {funnelStartDate ? format(funnelStartDate, "dd/MM/yyyy", { locale: ptBR }) : "Data Início"}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={funnelStartDate}
-                    onSelect={setFunnelStartDate}
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
-
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className={cn(
-                      "justify-start text-left font-normal bg-card",
-                      !funnelEndDate && "text-muted-foreground"
-                    )}
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {funnelEndDate ? format(funnelEndDate, "dd/MM/yyyy", { locale: ptBR }) : "Data Fim"}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={funnelEndDate}
-                    onSelect={setFunnelEndDate}
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
-
-              {(funnelStartDate || funnelEndDate) && (
+          <div className="flex flex-wrap gap-4">
+            <Popover>
+              <PopoverTrigger asChild>
                 <Button
                   variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    setFunnelStartDate(undefined);
-                    setFunnelEndDate(undefined);
-                  }}
+                  className={cn(
+                    "justify-start text-left font-normal bg-card",
+                    !funnelStartDate && "text-muted-foreground"
+                  )}
                 >
-                  Limpar
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {funnelStartDate ? format(funnelStartDate, "dd/MM/yyyy", { locale: ptBR }) : "Data Início"}
                 </Button>
-              )}
-            </div>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={funnelStartDate}
+                  onSelect={setFunnelStartDate}
+                  initialFocus
+                />
+              </PopoverContent>
+            </Popover>
+
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className={cn(
+                    "justify-start text-left font-normal bg-card",
+                    !funnelEndDate && "text-muted-foreground"
+                  )}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {funnelEndDate ? format(funnelEndDate, "dd/MM/yyyy", { locale: ptBR }) : "Data Fim"}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={funnelEndDate}
+                  onSelect={setFunnelEndDate}
+                  initialFocus
+                />
+              </PopoverContent>
+            </Popover>
+
+            <Select value={selectedOrigin} onValueChange={setSelectedOrigin}>
+              <SelectTrigger className="w-[200px] bg-card">
+                <SelectValue placeholder="Origem" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todas as origens</SelectItem>
+                {origins.map((origin) => (
+                  <SelectItem key={origin} value={origin}>
+                    {origin}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <Select value={selectedTag} onValueChange={setSelectedTag}>
+              <SelectTrigger className="w-[200px] bg-card">
+                <SelectValue placeholder="Tag" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todas as tags</SelectItem>
+                {tags.map((tag) => (
+                  <SelectItem key={tag} value={tag}>
+                    {tag}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            {(funnelStartDate || funnelEndDate || selectedOrigin !== "all" || selectedTag !== "all") && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setFunnelStartDate(undefined);
+                  setFunnelEndDate(undefined);
+                  setSelectedOrigin("all");
+                  setSelectedTag("all");
+                }}
+              >
+                Limpar Filtros
+              </Button>
+            )}
           </div>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4 mb-8">
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-8">
           <FunnelStage 
             label="Entrou no Funil" 
             count={funnelData.entrouNoFunil}
-            percentage={funnelData.entrouNoFunil > 0 ? 100 : 0}
-            totalEntries={funnelData.entrouNoFunil}
           />
           <FunnelStage 
             label="Prospecção" 
             count={funnelData.prospeccao}
-            percentage={funnelData.entrouNoFunil > 0 ? (funnelData.prospeccao / funnelData.entrouNoFunil) * 100 : 0}
-            totalEntries={funnelData.entrouNoFunil}
           />
           <FunnelStage 
             label="Conexão" 
             count={funnelData.conexao}
-            percentage={funnelData.entrouNoFunil > 0 ? (funnelData.conexao / funnelData.entrouNoFunil) * 100 : 0}
-            totalEntries={funnelData.entrouNoFunil}
           />
           <FunnelStage 
             label="Negociação" 
             count={funnelData.negociacao}
-            percentage={funnelData.entrouNoFunil > 0 ? (funnelData.negociacao / funnelData.entrouNoFunil) * 100 : 0}
-            totalEntries={funnelData.entrouNoFunil}
           />
           <FunnelStage 
             label="Agendado" 
             count={funnelData.agendado}
-            percentage={funnelData.entrouNoFunil > 0 ? (funnelData.agendado / funnelData.entrouNoFunil) * 100 : 0}
-            totalEntries={funnelData.entrouNoFunil}
           />
           <FunnelStage 
             label="Fechado" 
             count={funnelData.fechado}
-            percentage={funnelData.entrouNoFunil > 0 ? (funnelData.fechado / funnelData.entrouNoFunil) * 100 : 0}
-            totalEntries={funnelData.entrouNoFunil}
           />
           <FunnelStage 
             label="Ganho" 
             count={funnelData.ganho}
-            percentage={funnelData.entrouNoFunil > 0 ? (funnelData.ganho / funnelData.entrouNoFunil) * 100 : 0}
-            totalEntries={funnelData.entrouNoFunil}
           />
           <FunnelStage 
             label="Perdido" 
             count={funnelData.perdido}
-            percentage={funnelData.entrouNoFunil > 0 ? (funnelData.perdido / funnelData.entrouNoFunil) * 100 : 0}
-            totalEntries={funnelData.entrouNoFunil}
           />
         </div>
 
