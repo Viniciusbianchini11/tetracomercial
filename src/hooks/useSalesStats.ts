@@ -29,7 +29,13 @@ interface DailySales {
   }>;
 }
 
-export const useSalesStats = (startDate?: Date | null, endDate?: Date | null) => {
+interface SalesStatsFilters {
+  startDate?: Date | null;
+  endDate?: Date | null;
+  seller?: string;
+}
+
+export const useSalesStats = (filters?: SalesStatsFilters) => {
   const [stats, setStats] = useState<SalesStats>({
     faturamentoBruto: 0,
     pistas: 0,
@@ -46,7 +52,7 @@ export const useSalesStats = (startDate?: Date | null, endDate?: Date | null) =>
 
   useEffect(() => {
     fetchSalesStats();
-  }, [startDate, endDate]);
+  }, [filters?.startDate, filters?.endDate, filters?.seller]);
 
   const fetchSalesStats = async () => {
     try {
@@ -54,11 +60,11 @@ export const useSalesStats = (startDate?: Date | null, endDate?: Date | null) =>
       
       let query = supabase.from("relatorio_faturamento").select("*");
       
-      if (startDate) {
-        query = query.gte("DATA", startDate.toISOString().split('T')[0]);
+      if (filters?.startDate) {
+        query = query.gte("DATA", filters.startDate.toISOString().split('T')[0]);
       }
-      if (endDate) {
-        query = query.lte("DATA", endDate.toISOString().split('T')[0]);
+      if (filters?.endDate) {
+        query = query.lte("DATA", filters.endDate.toISOString().split('T')[0]);
       }
 
       const { data, error } = await query;
@@ -71,19 +77,26 @@ export const useSalesStats = (startDate?: Date | null, endDate?: Date | null) =>
 
       if (!data) return;
 
+      // Aplicar filtros adicionais
+      let filteredData = data;
+      
+      if (filters?.seller && filters.seller !== "all") {
+        filteredData = filteredData.filter(sale => sale.VENDEDOR === filters.seller);
+      }
+
       // Calcular estatísticas gerais
-      const faturamentoBruto = data.reduce((sum, sale) => sum + (sale["VALOR FATURADO (CHEIO)"] || 0), 0);
-      const vendas = data.length;
+      const faturamentoBruto = filteredData.reduce((sum, sale) => sum + (sale["VALOR FATURADO (CHEIO)"] || 0), 0);
+      const vendas = filteredData.length;
       
       // Contar pistas únicas (baseado em emails únicos)
-      const uniqueEmails = new Set(data.map(sale => sale["E-MAIL"]).filter(Boolean));
+      const uniqueEmails = new Set(filteredData.map(sale => sale["E-MAIL"]).filter(Boolean));
       const pistas = uniqueEmails.size;
       
       // Taxa de conversão (vendas / pistas * 100)
       const taxaConversao = pistas > 0 ? (vendas / pistas) * 100 : 0;
       
       // Contar recorrentes (parcelas > 1)
-      const recorrentes = data.filter(sale => {
+      const recorrentes = filteredData.filter(sale => {
         const parcela = sale.PARCELA;
         if (!parcela) return false;
         const num = parseInt(parcela.split('/')[0]);
@@ -91,7 +104,7 @@ export const useSalesStats = (startDate?: Date | null, endDate?: Date | null) =>
       }).length;
       
       // Contar fora do lançamento
-      const foraLancamento = data.filter(sale => sale.LANÇAMENTO !== "SIM").length;
+      const foraLancamento = filteredData.filter(sale => sale.LANÇAMENTO !== "SIM").length;
 
       setStats({
         faturamentoBruto,
@@ -105,7 +118,7 @@ export const useSalesStats = (startDate?: Date | null, endDate?: Date | null) =>
       // Calcular ranking de vendedores (usando VALOR FIINAL)
       const sellerMap = new Map<string, { vendas: number; faturamento: number }>();
       
-      data.forEach(sale => {
+      filteredData.forEach(sale => {
         const vendedor = sale.VENDEDOR || "Sem vendedor";
         const valorFinal = sale["VALOR FIINAL"] || sale["VALOR FINAL"] || 0;
         const current = sellerMap.get(vendedor) || { vendas: 0, faturamento: 0 };
@@ -131,7 +144,7 @@ export const useSalesStats = (startDate?: Date | null, endDate?: Date | null) =>
       yesterday.setDate(yesterday.getDate() - 1);
       const yesterdayStr = `${yesterday.getFullYear()}-${String(yesterday.getMonth() + 1).padStart(2, '0')}-${String(yesterday.getDate()).padStart(2, '0')}`;
       
-      const yesterdayData = data.filter(sale => sale.DATA === yesterdayStr);
+      const yesterdayData = filteredData.filter(sale => sale.DATA === yesterdayStr);
       const yesterdayByVendedor = new Map<string, { vendas: number; faturamento: number }>();
       
       yesterdayData.forEach(sale => {
@@ -159,7 +172,7 @@ export const useSalesStats = (startDate?: Date | null, endDate?: Date | null) =>
       // Calcular vendas de hoje (VALOR FATURADO (CHEIO) + VALOR FIINAL) - usando data local
       const today = new Date();
       const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
-      const todayData = data.filter(sale => sale.DATA === todayStr);
+      const todayData = filteredData.filter(sale => sale.DATA === todayStr);
       const todayByVendedor = new Map<string, { vendas: number; faturamento: number; faturamentoFinal: number }>();
       
       todayData.forEach(sale => {

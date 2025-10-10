@@ -40,7 +40,11 @@ const Index = () => {
     yesterdaySales,
     todaySales,
     loading: statsLoading,
-  } = useSalesStats(startDate, endDate);
+  } = useSalesStats({
+    startDate,
+    endDate,
+    seller: selectedSeller,
+  });
 
   const totalEntries = funnelData.entrouNoFunil;
   const conversionRate =
@@ -160,6 +164,22 @@ const Index = () => {
           </TabsContent>
 
           <TabsContent value="acompanhamento" className="space-y-4">
+            <FilterSection
+              sellers={sellers}
+              origins={origins}
+              tags={tags}
+              selectedSeller={selectedSeller}
+              selectedOrigin={selectedOrigin}
+              selectedTag={selectedTag}
+              startDate={startDate}
+              endDate={endDate}
+              onSellerChange={setSelectedSeller}
+              onOriginChange={setSelectedOrigin}
+              onTagChange={setSelectedTag}
+              onStartDateChange={setStartDate}
+              onEndDateChange={setEndDate}
+            />
+            
             {statsLoading ? (
               <div className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
