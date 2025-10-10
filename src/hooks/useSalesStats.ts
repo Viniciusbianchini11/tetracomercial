@@ -126,10 +126,10 @@ export const useSalesStats = (startDate?: Date | null, endDate?: Date | null) =>
       setTopSellers(ranking.slice(0, 3));
       setMonthlyRanking(ranking.slice(0, 10));
 
-      // Calcular vendas de ontem
+      // Calcular vendas de ontem (usando data local)
       const yesterday = new Date();
       yesterday.setDate(yesterday.getDate() - 1);
-      const yesterdayStr = yesterday.toISOString().split('T')[0];
+      const yesterdayStr = `${yesterday.getFullYear()}-${String(yesterday.getMonth() + 1).padStart(2, '0')}-${String(yesterday.getDate()).padStart(2, '0')}`;
       
       const yesterdayData = data.filter(sale => sale.DATA === yesterdayStr);
       const yesterdayByVendedor = new Map<string, { vendas: number; faturamento: number }>();
@@ -156,9 +156,10 @@ export const useSalesStats = (startDate?: Date | null, endDate?: Date | null) =>
           .sort((a, b) => b.vendas - a.vendas),
       });
 
-      // Calcular vendas de hoje (VALOR FATURADO (CHEIO) + VALOR FIINAL)
-      const today = new Date().toISOString().split('T')[0];
-      const todayData = data.filter(sale => sale.DATA === today);
+      // Calcular vendas de hoje (VALOR FATURADO (CHEIO) + VALOR FIINAL) - usando data local
+      const today = new Date();
+      const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+      const todayData = data.filter(sale => sale.DATA === todayStr);
       const todayByVendedor = new Map<string, { vendas: number; faturamento: number; faturamentoFinal: number }>();
       
       todayData.forEach(sale => {
