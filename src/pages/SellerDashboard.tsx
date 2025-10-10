@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Header } from "@/components/Header";
+import { useSellerAuth } from "@/contexts/SellerAuthContext";
 import { useSellerStats } from "@/hooks/useSellerStats";
 import { SalesFilterSection } from "@/components/SalesFilterSection";
 import { MetricCard } from "@/components/MetricCard";
@@ -8,6 +9,7 @@ import { DollarSign, TrendingUp, Target } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 
 const SellerDashboard = () => {
+  const { user } = useSellerAuth();
   const [salesStartDate, setSalesStartDate] = useState<Date | undefined>(undefined);
   const [salesEndDate, setSalesEndDate] = useState<Date | undefined>(undefined);
   const [selectedMonth, setSelectedMonth] = useState("all");
@@ -15,7 +17,7 @@ const SellerDashboard = () => {
   const [selectedLaunch, setSelectedLaunch] = useState("all");
 
   const { stats, monthlySales, loading: statsLoading } = useSellerStats({
-    sellerName: undefined,
+    sellerName: user?.email || undefined,
     startDate: salesStartDate,
     endDate: salesEndDate,
     month: selectedMonth,
@@ -35,7 +37,10 @@ const SellerDashboard = () => {
       <Header />
       <div className="max-w-7xl mx-auto p-8">
         <div className="mb-6">
-          <h1 className="text-3xl font-bold">Desempenho de Vendas</h1>
+          <h1 className="text-3xl font-bold">Meu Desempenho</h1>
+          <p className="text-muted-foreground mt-2">
+            Vendedor: {user?.email}
+          </p>
         </div>
 
         <SalesFilterSection

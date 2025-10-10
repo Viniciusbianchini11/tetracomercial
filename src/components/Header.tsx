@@ -1,9 +1,11 @@
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { LayoutDashboard, User } from "lucide-react";
+import { LayoutDashboard, User, LogOut } from "lucide-react";
+import { useSellerAuth } from "@/contexts/SellerAuthContext";
 
 export const Header = () => {
   const location = useLocation();
+  const { user, logout } = useSellerAuth();
 
   return (
     <div className="border-b bg-background">
@@ -29,6 +31,16 @@ export const Header = () => {
                 Meu Desempenho
               </Button>
             </Link>
+            {user && (
+              <Button 
+                variant="outline"
+                size="sm"
+                onClick={logout}
+              >
+                <LogOut className="mr-2 h-4 w-4" />
+                Sair
+              </Button>
+            )}
           </div>
         </div>
       </div>
