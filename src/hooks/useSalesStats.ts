@@ -60,48 +60,55 @@ export const useSalesStats = (filters?: SalesStatsFilters) => {
     try {
       setLoading(true);
       
+      // Construir query com filtros nativos do Supabase
       let query = supabase.from("relatorio_faturamento").select("*");
       
+      // Filtro de DATA (range ou específica)
       if (filters?.startDate) {
         query = query.gte("DATA", filters.startDate.toISOString().split('T')[0]);
       }
       if (filters?.endDate) {
         query = query.lte("DATA", filters.endDate.toISOString().split('T')[0]);
       }
+      
+      // Filtro de ANO (se não houver filtro de data)
+      if (filters?.year && filters.year !== "all" && !filters?.startDate && !filters?.endDate) {
+        query = query.eq("ANO", parseInt(filters.year));
+      }
+      
+      // Filtro de LANÇAMENTO
+      if (filters?.launch && filters.launch !== "all") {
+        query = query.eq("LANÇAMENTO", filters.launch);
+      }
+      
+      // Se não houver nenhum filtro, limitar aos últimos 30 dias
+      if (!filters?.startDate && !filters?.endDate && (!filters?.year || filters.year === "all")) {
+        const thirtyDaysAgo = new Date();
+        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+        query = query.gte("DATA", thirtyDaysAgo.toISOString().split('T')[0]);
+      }
 
       const { data, error } = await query;
 
       if (error) {
         console.error("Error fetching sales stats:", error);
-        toast.error("Erro ao carregar estatísticas");
+        toast.error("Erro ao carregar vendas: " + error.message);
+        setLoading(false);
         return;
       }
 
-      if (!data) return;
+      if (!data) {
+        setLoading(false);
+        return;
+      }
 
-      // Aplicar filtros simples
-      let filteredData = [...data];
-      
-      // Filtro de mês (se não houver data específica)
+      // Filtro de mês no cliente (apenas se necessário e não houver filtro de data)
+      let filteredData = data;
       if (filters?.month && filters.month !== "all" && !filters?.startDate && !filters?.endDate) {
-        filteredData = filteredData.filter(sale => {
+        filteredData = data.filter(sale => {
           if (!sale.DATA) return false;
           const saleMonth = sale.DATA.split('-')[1];
           return saleMonth === filters.month;
-        });
-      }
-      
-      // Filtro de ano (se não houver data específica)
-      if (filters?.year && filters.year !== "all" && !filters?.startDate && !filters?.endDate) {
-        filteredData = filteredData.filter(sale => {
-          return sale.ANO === parseInt(filters.year);
-        });
-      }
-      
-      // Filtro de lançamento
-      if (filters?.launch && filters.launch !== "all") {
-        filteredData = filteredData.filter(sale => {
-          return sale.LANÇAMENTO === filters.launch;
         });
       }
 
