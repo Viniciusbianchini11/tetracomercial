@@ -1,9 +1,22 @@
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { LayoutDashboard, User } from "lucide-react";
+import { LayoutDashboard, User, LogOut } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 export const Header = () => {
   const location = useLocation();
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    try {
+      await supabase.auth.signOut();
+      toast.success("Logout realizado com sucesso!");
+      navigate("/login");
+    } catch (error) {
+      toast.error("Erro ao fazer logout");
+    }
+  };
 
   return (
     <div className="border-b bg-background">
@@ -29,6 +42,14 @@ export const Header = () => {
                 Meu Desempenho
               </Button>
             </Link>
+            <Button 
+              variant="outline"
+              size="sm"
+              onClick={handleLogout}
+            >
+              <LogOut className="mr-2 h-4 w-4" />
+              Sair
+            </Button>
           </div>
         </div>
       </div>

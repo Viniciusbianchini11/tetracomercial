@@ -48,23 +48,6 @@ const SellerDashboard = () => {
     );
   }
 
-  if (!profile?.seller_name) {
-    return (
-      <div className="min-h-screen bg-background">
-        <Header />
-        <div className="max-w-7xl mx-auto p-8">
-          <Card>
-            <CardContent className="pt-6">
-              <p className="text-center text-muted-foreground">
-                Seu perfil não está configurado como vendedor. Entre em contato com o administrador.
-              </p>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen bg-background">
       <Header />
