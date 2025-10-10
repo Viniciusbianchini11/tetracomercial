@@ -89,7 +89,7 @@ export const useSellerStats = (filters?: SellerStatsFilters) => {
       }
 
       const faturamentoBruto = filteredData.reduce(
-        (sum, sale) => sum + (sale["VALOR LIQUIDO"] || 0),
+        (sum, sale) => sum + (sale["VALOR FATURADO (CHEIO)"] || 0),
         0
       );
 
@@ -123,7 +123,7 @@ export const useSellerStats = (filters?: SellerStatsFilters) => {
           };
         }
         acc[mesAno].vendas++;
-        acc[mesAno].faturamento += sale["VALOR LIQUIDO"] || 0;
+        acc[mesAno].faturamento += sale["VALOR FINAL"] || 0;
         return acc;
       }, {});
 
