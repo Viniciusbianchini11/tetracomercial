@@ -24,6 +24,13 @@ interface SellerStatsFilters {
   launch?: string;
 }
 
+const toNumber = (v: any) => {
+  if (v === null || v === undefined) return 0;
+  if (typeof v === 'number') return v;
+  const n = parseFloat(String(v).replace(',', '.'));
+  return isNaN(n) ? 0 : n;
+};
+
 export const useSellerStats = (filters?: SellerStatsFilters) => {
   const [stats, setStats] = useState<SellerStats>({
     faturamentoBruto: 0,
@@ -89,12 +96,12 @@ export const useSellerStats = (filters?: SellerStatsFilters) => {
       }
 
       const faturamentoBruto = filteredData.reduce(
-        (sum, sale) => sum + (sale["VALOR FATURADO (CHEIO)"] || 0),
+        (sum, sale) => sum + toNumber(sale["VALOR FATURADO (CHEIO)"] ),
         0
       );
 
       const valorFinal = filteredData.reduce(
-        (sum, sale) => sum + (sale["VALOR FINAL"] || 0),
+        (sum, sale) => sum + toNumber(sale["VALOR FINAL"] ),
         0
       );
 
@@ -123,7 +130,7 @@ export const useSellerStats = (filters?: SellerStatsFilters) => {
           };
         }
         acc[mesAno].vendas++;
-        acc[mesAno].faturamento += sale["VALOR FINAL"] || 0;
+        acc[mesAno].faturamento += toNumber(sale["VALOR FINAL"]);
         return acc;
       }, {});
 
