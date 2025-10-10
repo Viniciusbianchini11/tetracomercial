@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { format, startOfMonth, endOfMonth } from "date-fns";
 
 interface SellerStats {
   faturamentoBruto: number;
@@ -56,61 +57,80 @@ export const useSellerStats = (filters?: SellerStatsFilters) => {
       
       console.log('Fetching sales for seller:', sellerName, 'from email:', filters?.sellerEmail);
 
+      // Construir query base com filtros comuns
       let query = supabase
         .from("relatorio_faturamento")
-        .select("*")
-        .ilike("VENDEDOR", `%${sellerName}%`);
+        .select('"VALOR FATURADO (CHEIO)", "VALOR FINAL", "MÊS/ANO"')
+        .eq("VENDEDOR", sellerName); // Usar eq exato, não ilike
 
-      if (filters?.startDate) {
-        query = query.gte("DATA", filters.startDate.toISOString().split('T')[0]);
+      // Se temos startDate e endDate, usar eles
+      if (filters?.startDate && filters?.endDate) {
+        query = query
+          .gte("DATA", format(filters.startDate, 'yyyy-MM-dd'))
+          .lte("DATA", format(filters.endDate, 'yyyy-MM-dd'));
+      } 
+      // Se temos mês e ano sem datas explícitas, calcular o intervalo do mês
+      else if (filters?.month && filters.month !== "all" && filters?.year && filters.year !== "all") {
+        const year = parseInt(filters.year);
+        const month = parseInt(filters.month) - 1; // Month é 0-indexed no Date
+        const start = startOfMonth(new Date(year, month));
+        const end = endOfMonth(new Date(year, month));
+        query = query
+          .gte("DATA", format(start, 'yyyy-MM-dd'))
+          .lte("DATA", format(end, 'yyyy-MM-dd'));
       }
-      if (filters?.endDate) {
-        query = query.lte("DATA", filters.endDate.toISOString().split('T')[0]);
-      }
-      if (filters?.year && filters.year !== "all") {
+
+      // Filtro de ano (se não usamos no intervalo de mês acima)
+      if (filters?.year && filters.year !== "all" && (!filters?.month || filters.month === "all")) {
         query = query.eq("ANO", parseInt(filters.year));
       }
+
+      // Filtro de lançamento
       if (filters?.launch && filters.launch !== "all") {
         query = query.eq("LANÇAMENTO", filters.launch);
       }
 
-      const { data, error } = await query;
+      console.log('Query filters applied:', {
+        sellerName,
+        startDate: filters?.startDate ? format(filters.startDate, 'yyyy-MM-dd') : null,
+        endDate: filters?.endDate ? format(filters.endDate, 'yyyy-MM-dd') : null,
+        month: filters?.month,
+        year: filters?.year,
+        launch: filters?.launch
+      });
+
+      const { data, error, count } = await query;
 
       if (error) {
         console.error('Error fetching sales:', error);
         throw error;
       }
-      
-      console.log('Sales data fetched:', data?.length, 'records');
-      
-      if (!data) return;
 
-      let filteredData = [...data];
-      
-      if (filters?.month && filters.month !== "all" && !filters?.startDate && !filters?.endDate) {
-        filteredData = filteredData.filter(sale => {
-          if (!sale.DATA) return false;
-          const saleMonth = sale.DATA.split('-')[1];
-          return saleMonth === filters.month;
-        });
-      }
+      console.log('Database returned:', data?.length, 'records');
 
-      const faturamentoBruto = filteredData.reduce(
-        (sum, sale) => sum + toNumber(sale["VALOR FATURADO (CHEIO)"] ),
+      // Calcular agregações a partir dos dados retornados
+      const faturamentoBruto = (data || []).reduce(
+        (sum, sale) => sum + toNumber(sale["VALOR FATURADO (CHEIO)"]),
         0
       );
 
-      const valorFinal = filteredData.reduce(
-        (sum, sale) => sum + toNumber(sale["VALOR FINAL"] ),
+      const valorFinal = (data || []).reduce(
+        (sum, sale) => sum + toNumber(sale["VALOR FINAL"]),
         0
       );
 
-      const vendas = filteredData.length;
+      const vendas = data?.length || 0;
 
+      console.log('Calculated totals:', { 
+        faturamentoBruto, 
+        valorFinal, 
+        vendas,
+        firstRecord: data?.[0]
+      });
+
+      // Buscar leads para taxa de conversão
       const totalLeads = await fetchTotalLeads();
       const taxaConversao = totalLeads > 0 ? (vendas / totalLeads) * 100 : 0;
-
-      console.log('Stats calculated:', { faturamentoBruto, valorFinal, vendas, taxaConversao, totalLeads });
 
       setStats({
         faturamentoBruto,
@@ -120,7 +140,7 @@ export const useSellerStats = (filters?: SellerStatsFilters) => {
       });
 
       // Agrupar vendas por mês
-      const salesByMonth = filteredData.reduce((acc: any, sale) => {
+      const salesByMonth = (data || []).reduce((acc: any, sale) => {
         const mesAno = sale["MÊS/ANO"] || "Sem data";
         if (!acc[mesAno]) {
           acc[mesAno] = {
