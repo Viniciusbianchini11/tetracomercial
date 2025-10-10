@@ -1,4 +1,5 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.75.0'
+import * as bcrypt from 'https://deno.land/x/bcrypt@v0.4.1/mod.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -14,7 +15,10 @@ Deno.serve(async (req) => {
   try {
     const { email, password } = await req.json()
 
+    console.log('Login attempt for email:', email)
+
     if (!email || !password) {
+      console.error('Missing email or password')
       return new Response(
         JSON.stringify({ error: 'Email e senha são obrigatórios' }),
         { 
@@ -38,6 +42,7 @@ Deno.serve(async (req) => {
       .single()
 
     if (error || !user) {
+      console.error('User not found or error:', error)
       return new Response(
         JSON.stringify({ error: 'Email ou senha incorretos' }),
         { 
@@ -46,18 +51,14 @@ Deno.serve(async (req) => {
         }
       )
     }
+
+    console.log('User found, verifying password')
 
     // Verificar senha usando bcrypt
-    const encoder = new TextEncoder()
-    const passwordData = encoder.encode(password)
-    const hashData = encoder.encode(user.password_hash)
-    
-    // Simple password comparison (in production, use proper bcrypt)
-    // For now, we'll just do a basic check since bcrypt is complex in Deno
-    const isValid = password === user.password_hash || 
-                    await verifyPassword(password, user.password_hash)
+    const isValid = await bcrypt.compare(password, user.password_hash)
 
     if (!isValid) {
+      console.error('Invalid password')
       return new Response(
         JSON.stringify({ error: 'Email ou senha incorretos' }),
         { 
@@ -66,6 +67,8 @@ Deno.serve(async (req) => {
         }
       )
     }
+
+    console.log('Login successful for user:', email)
 
     // Retornar dados do usuário (sem a senha)
     const { password_hash, ...userData } = user
@@ -82,6 +85,7 @@ Deno.serve(async (req) => {
     )
 
   } catch (error) {
+    console.error('Login error:', error)
     const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
     return new Response(
       JSON.stringify({ error: errorMessage }),
@@ -92,9 +96,3 @@ Deno.serve(async (req) => {
     )
   }
 })
-
-async function verifyPassword(password: string, hash: string): Promise<boolean> {
-  // Simple comparison for now
-  // In production, implement proper bcrypt verification
-  return password === hash
-}
