@@ -4,9 +4,14 @@ interface DailySalesProps {
   title: string;
   vendas: number;
   faturamento: number;
+  porVendedor: Array<{
+    vendedor: string;
+    vendas: number;
+    faturamento: number;
+  }>;
 }
 
-export const DailySales = ({ title, vendas, faturamento }: DailySalesProps) => {
+export const DailySales = ({ title, vendas, faturamento, porVendedor }: DailySalesProps) => {
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat("pt-BR", {
       style: "currency",
@@ -29,6 +34,23 @@ export const DailySales = ({ title, vendas, faturamento }: DailySalesProps) => {
             <p className="text-sm text-muted-foreground mb-1">Faturamento</p>
             <p className="text-3xl font-bold">{formatCurrency(faturamento)}</p>
           </div>
+          
+          {porVendedor.length > 0 && (
+            <div className="pt-4 border-t">
+              <p className="text-sm font-medium mb-3">Por vendedor:</p>
+              <div className="space-y-2">
+                {porVendedor.map((vendedor, index) => (
+                  <div key={index} className="flex items-center justify-between text-sm">
+                    <span className="font-medium uppercase">{vendedor.vendedor}</span>
+                    <div className="text-right">
+                      <p className="font-semibold">{vendedor.vendas} {vendedor.vendas === 1 ? 'venda' : 'vendas'}</p>
+                      <p className="text-xs text-muted-foreground">{formatCurrency(vendedor.faturamento)}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </CardContent>
     </Card>

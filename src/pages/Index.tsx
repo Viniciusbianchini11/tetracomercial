@@ -199,11 +199,13 @@ const Index = () => {
                     title="Dia anterior"
                     vendas={yesterdaySales.vendas}
                     faturamento={yesterdaySales.faturamento}
+                    porVendedor={yesterdaySales.porVendedor}
                   />
                   <DailySales
                     title="Vendas do dia"
                     vendas={todaySales.vendas}
                     faturamento={todaySales.faturamento}
+                    porVendedor={todaySales.porVendedor}
                   />
                 </div>
 

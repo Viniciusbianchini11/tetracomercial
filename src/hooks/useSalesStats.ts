@@ -20,6 +20,11 @@ interface SellerRanking {
 interface DailySales {
   vendas: number;
   faturamento: number;
+  porVendedor: Array<{
+    vendedor: string;
+    vendas: number;
+    faturamento: number;
+  }>;
 }
 
 export const useSalesStats = (startDate?: Date | null, endDate?: Date | null) => {
@@ -33,8 +38,8 @@ export const useSalesStats = (startDate?: Date | null, endDate?: Date | null) =>
   });
   const [topSellers, setTopSellers] = useState<SellerRanking[]>([]);
   const [monthlyRanking, setMonthlyRanking] = useState<SellerRanking[]>([]);
-  const [yesterdaySales, setYesterdaySales] = useState<DailySales>({ vendas: 0, faturamento: 0 });
-  const [todaySales, setTodaySales] = useState<DailySales>({ vendas: 0, faturamento: 0 });
+  const [yesterdaySales, setYesterdaySales] = useState<DailySales>({ vendas: 0, faturamento: 0, porVendedor: [] });
+  const [todaySales, setTodaySales] = useState<DailySales>({ vendas: 0, faturamento: 0, porVendedor: [] });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -124,17 +129,53 @@ export const useSalesStats = (startDate?: Date | null, endDate?: Date | null) =>
       const yesterdayStr = yesterday.toISOString().split('T')[0];
       
       const yesterdayData = data.filter(sale => sale.DATA === yesterdayStr);
+      const yesterdayByVendedor = new Map<string, { vendas: number; faturamento: number }>();
+      
+      yesterdayData.forEach(sale => {
+        const vendedor = sale.VENDEDOR || "Sem vendedor";
+        const current = yesterdayByVendedor.get(vendedor) || { vendas: 0, faturamento: 0 };
+        yesterdayByVendedor.set(vendedor, {
+          vendas: current.vendas + 1,
+          faturamento: current.faturamento + (sale["VALOR LIQUIDO"] || 0),
+        });
+      });
+
       setYesterdaySales({
         vendas: yesterdayData.length,
         faturamento: yesterdayData.reduce((sum, sale) => sum + (sale["VALOR LIQUIDO"] || 0), 0),
+        porVendedor: Array.from(yesterdayByVendedor.entries())
+          .map(([vendedor, stats]) => ({
+            vendedor,
+            vendas: stats.vendas,
+            faturamento: stats.faturamento,
+          }))
+          .sort((a, b) => b.vendas - a.vendas),
       });
 
       // Calcular vendas de hoje
       const today = new Date().toISOString().split('T')[0];
       const todayData = data.filter(sale => sale.DATA === today);
+      const todayByVendedor = new Map<string, { vendas: number; faturamento: number }>();
+      
+      todayData.forEach(sale => {
+        const vendedor = sale.VENDEDOR || "Sem vendedor";
+        const current = todayByVendedor.get(vendedor) || { vendas: 0, faturamento: 0 };
+        todayByVendedor.set(vendedor, {
+          vendas: current.vendas + 1,
+          faturamento: current.faturamento + (sale["VALOR LIQUIDO"] || 0),
+        });
+      });
+
       setTodaySales({
         vendas: todayData.length,
         faturamento: todayData.reduce((sum, sale) => sum + (sale["VALOR LIQUIDO"] || 0), 0),
+        porVendedor: Array.from(todayByVendedor.entries())
+          .map(([vendedor, stats]) => ({
+            vendedor,
+            vendas: stats.vendas,
+            faturamento: stats.faturamento,
+          }))
+          .sort((a, b) => b.vendas - a.vendas),
       });
 
     } catch (error) {
