@@ -5,6 +5,13 @@ import { MetricCard } from "@/components/MetricCard";
 import { FunnelStage } from "@/components/FunnelStage";
 import { FilterSection } from "@/components/FilterSection";
 import { SalesTable } from "@/components/SalesTable";
+import { useSalesStats } from "@/hooks/useSalesStats";
+import { SalesMetricsCards } from "@/components/sales/SalesMetricsCards";
+import { TopSellersChart } from "@/components/sales/TopSellersChart";
+import { SellersRanking } from "@/components/sales/SellersRanking";
+import { DailySales } from "@/components/sales/DailySales";
+import { GoalsCard } from "@/components/sales/GoalsCard";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Header } from "@/components/Header";
 import { useFunnelData } from "@/hooks/useFunnelData";
 import { useFilterOptions } from "@/hooks/useFilterOptions";
@@ -25,6 +32,15 @@ const Index = () => {
     startDate,
     endDate,
   });
+
+  const {
+    stats,
+    topSellers,
+    monthlyRanking,
+    yesterdaySales,
+    todaySales,
+    loading: statsLoading,
+  } = useSalesStats(startDate, endDate);
 
   const totalEntries = funnelData.entrouNoFunil;
   const conversionRate =
@@ -143,8 +159,57 @@ const Index = () => {
             </Card>
           </TabsContent>
 
-          <TabsContent value="acompanhamento">
-            <SalesTable />
+          <TabsContent value="acompanhamento" className="space-y-4">
+            {statsLoading ? (
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
+                  {[...Array(6)].map((_, i) => (
+                    <Skeleton key={i} className="h-24" />
+                  ))}
+                </div>
+                <Skeleton className="h-[400px]" />
+              </div>
+            ) : (
+              <>
+                <SalesMetricsCards
+                  faturamentoBruto={stats.faturamentoBruto}
+                  pistas={stats.pistas}
+                  vendas={stats.vendas}
+                  taxaConversao={stats.taxaConversao}
+                  recorrentes={stats.recorrentes}
+                  foraLancamento={stats.foraLancamento}
+                />
+                
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                  <TopSellersChart sellers={topSellers} />
+                  <SellersRanking
+                    title="Ranking Lançamento"
+                    sellers={topSellers}
+                    showSalesCount={true}
+                  />
+                  <GoalsCard />
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                  <SellersRanking
+                    title="Classificação Mensal"
+                    sellers={monthlyRanking}
+                  />
+                  <DailySales
+                    title="Dia anterior"
+                    vendas={yesterdaySales.vendas}
+                    faturamento={yesterdaySales.faturamento}
+                  />
+                  <DailySales
+                    title="Vendas do dia"
+                    vendas={todaySales.vendas}
+                    faturamento={todaySales.faturamento}
+                  />
+                </div>
+
+                <SalesTable />
+              </>
+            )}
           </TabsContent>
         </Tabs>
       </div>
