@@ -15,7 +15,7 @@ interface MonthlySales {
 }
 
 interface SellerStatsFilters {
-  sellerName?: string;
+  sellerEmail?: string;
   startDate?: Date;
   endDate?: Date;
   month?: string;
@@ -33,19 +33,22 @@ export const useSellerStats = (filters?: SellerStatsFilters) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (filters?.sellerName) {
+    if (filters?.sellerEmail) {
       fetchSellerStats();
     }
-  }, [filters?.sellerName, filters?.startDate, filters?.endDate, filters?.month, filters?.year, filters?.launch]);
+  }, [filters?.sellerEmail, filters?.startDate, filters?.endDate, filters?.month, filters?.year, filters?.launch]);
 
   const fetchSellerStats = async () => {
     try {
       setLoading(true);
 
+      // Extrair o nome do vendedor do email (primeira parte antes do ponto)
+      const sellerName = filters?.sellerEmail?.split('@')[0].split('.')[0].toUpperCase();
+
       let query = supabase
         .from("relatorio_faturamento")
         .select("*")
-        .eq("VENDEDOR", filters?.sellerName);
+        .ilike("VENDEDOR", `%${sellerName}%`);
 
       if (filters?.startDate) {
         query = query.gte("DATA", filters.startDate.toISOString().split('T')[0]);
@@ -120,7 +123,7 @@ export const useSellerStats = (filters?: SellerStatsFilters) => {
       const { count } = await supabase
         .from("leads")
         .select("*", { count: "exact", head: true })
-        .eq("dono_do_negocio", filters?.sellerName);
+        .eq("dono_do_negocio", filters?.sellerEmail);
 
       return count || 0;
     } catch (error) {

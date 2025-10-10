@@ -3,26 +3,48 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Header } from "@/components/Header";
 import { useSellerAuth } from "@/contexts/SellerAuthContext";
 import { useSellerStats } from "@/hooks/useSellerStats";
+import { useFunnelData } from "@/hooks/useFunnelData";
 import { SalesFilterSection } from "@/components/SalesFilterSection";
+import { FunnelStage } from "@/components/FunnelStage";
 import { MetricCard } from "@/components/MetricCard";
-import { DollarSign, TrendingUp, Target } from "lucide-react";
+import { DollarSign, TrendingUp, Target, CalendarIcon } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
+import { cn } from "@/lib/utils";
 
 const SellerDashboard = () => {
   const { user } = useSellerAuth();
+  
+  // Filtros de vendas
   const [salesStartDate, setSalesStartDate] = useState<Date | undefined>(undefined);
   const [salesEndDate, setSalesEndDate] = useState<Date | undefined>(undefined);
   const [selectedMonth, setSelectedMonth] = useState("all");
   const [selectedYear, setSelectedYear] = useState("all");
   const [selectedLaunch, setSelectedLaunch] = useState("all");
 
+  // Filtros do funil
+  const [funnelStartDate, setFunnelStartDate] = useState<Date | undefined>(undefined);
+  const [funnelEndDate, setFunnelEndDate] = useState<Date | undefined>(undefined);
+
   const { stats, monthlySales, loading: statsLoading } = useSellerStats({
-    sellerName: user?.email || undefined,
+    sellerEmail: user?.email || undefined,
     startDate: salesStartDate,
     endDate: salesEndDate,
     month: selectedMonth,
     year: selectedYear,
     launch: selectedLaunch,
+  });
+
+  const { funnelData } = useFunnelData({
+    seller: user?.email || "all",
+    origin: "all",
+    tag: "all",
+    startDate: funnelStartDate,
+    endDate: funnelEndDate,
   });
 
   const formatCurrency = (value: number) => {
@@ -43,6 +65,124 @@ const SellerDashboard = () => {
           </p>
         </div>
 
+        <h2 className="text-xl font-semibold mb-4">Funil de Vendas</h2>
+        <div className="space-y-4 mb-6">
+          <div className="flex gap-4">
+            <div className="flex gap-2">
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "justify-start text-left font-normal bg-card",
+                      !funnelStartDate && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {funnelStartDate ? format(funnelStartDate, "dd/MM/yyyy", { locale: ptBR }) : "Data Início"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={funnelStartDate}
+                    onSelect={setFunnelStartDate}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
+
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "justify-start text-left font-normal bg-card",
+                      !funnelEndDate && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {funnelEndDate ? format(funnelEndDate, "dd/MM/yyyy", { locale: ptBR }) : "Data Fim"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={funnelEndDate}
+                    onSelect={setFunnelEndDate}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
+
+              {(funnelStartDate || funnelEndDate) && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setFunnelStartDate(undefined);
+                    setFunnelEndDate(undefined);
+                  }}
+                >
+                  Limpar
+                </Button>
+              )}
+            </div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4 mb-8">
+          <FunnelStage 
+            label="Entrou no Funil" 
+            count={funnelData.entrouNoFunil}
+            percentage={funnelData.entrouNoFunil > 0 ? 100 : 0}
+            totalEntries={funnelData.entrouNoFunil}
+          />
+          <FunnelStage 
+            label="Prospecção" 
+            count={funnelData.prospeccao}
+            percentage={funnelData.entrouNoFunil > 0 ? (funnelData.prospeccao / funnelData.entrouNoFunil) * 100 : 0}
+            totalEntries={funnelData.entrouNoFunil}
+          />
+          <FunnelStage 
+            label="Conexão" 
+            count={funnelData.conexao}
+            percentage={funnelData.entrouNoFunil > 0 ? (funnelData.conexao / funnelData.entrouNoFunil) * 100 : 0}
+            totalEntries={funnelData.entrouNoFunil}
+          />
+          <FunnelStage 
+            label="Negociação" 
+            count={funnelData.negociacao}
+            percentage={funnelData.entrouNoFunil > 0 ? (funnelData.negociacao / funnelData.entrouNoFunil) * 100 : 0}
+            totalEntries={funnelData.entrouNoFunil}
+          />
+          <FunnelStage 
+            label="Agendado" 
+            count={funnelData.agendado}
+            percentage={funnelData.entrouNoFunil > 0 ? (funnelData.agendado / funnelData.entrouNoFunil) * 100 : 0}
+            totalEntries={funnelData.entrouNoFunil}
+          />
+          <FunnelStage 
+            label="Fechado" 
+            count={funnelData.fechado}
+            percentage={funnelData.entrouNoFunil > 0 ? (funnelData.fechado / funnelData.entrouNoFunil) * 100 : 0}
+            totalEntries={funnelData.entrouNoFunil}
+          />
+          <FunnelStage 
+            label="Ganho" 
+            count={funnelData.ganho}
+            percentage={funnelData.entrouNoFunil > 0 ? (funnelData.ganho / funnelData.entrouNoFunil) * 100 : 0}
+            totalEntries={funnelData.entrouNoFunil}
+          />
+          <FunnelStage 
+            label="Perdido" 
+            count={funnelData.perdido}
+            percentage={funnelData.entrouNoFunil > 0 ? (funnelData.perdido / funnelData.entrouNoFunil) * 100 : 0}
+            totalEntries={funnelData.entrouNoFunil}
+          />
+        </div>
+
+        <h2 className="text-xl font-semibold mb-4">Vendas</h2>
         <SalesFilterSection
           startDate={salesStartDate}
           endDate={salesEndDate}
