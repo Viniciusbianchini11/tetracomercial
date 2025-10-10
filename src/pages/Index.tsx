@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { MetricCard } from "@/components/MetricCard";
 import { FunnelStage } from "@/components/FunnelStage";
 import { FilterSection } from "@/components/FilterSection";
+import { SalesFilterSection } from "@/components/SalesFilterSection";
 import { SalesTable } from "@/components/SalesTable";
 import { useSalesStats } from "@/hooks/useSalesStats";
 import { SalesMetricsCards } from "@/components/sales/SalesMetricsCards";
@@ -23,6 +24,13 @@ const Index = () => {
   const [selectedTag, setSelectedTag] = useState("all");
   const [startDate, setStartDate] = useState<Date | undefined>(undefined);
   const [endDate, setEndDate] = useState<Date | undefined>(undefined);
+  
+  // Filtros específicos para Acompanhamento de vendas
+  const [salesStartDate, setSalesStartDate] = useState<Date | undefined>(undefined);
+  const [salesEndDate, setSalesEndDate] = useState<Date | undefined>(undefined);
+  const [selectedMonth, setSelectedMonth] = useState("all");
+  const [selectedYear, setSelectedYear] = useState("all");
+  const [selectedLaunch, setSelectedLaunch] = useState("all");
 
   const { sellers, origins, tags } = useFilterOptions();
   const { funnelData } = useFunnelData({
@@ -41,9 +49,11 @@ const Index = () => {
     todaySales,
     loading: statsLoading,
   } = useSalesStats({
-    startDate,
-    endDate,
-    seller: selectedSeller,
+    startDate: salesStartDate,
+    endDate: salesEndDate,
+    month: selectedMonth,
+    year: selectedYear,
+    launch: selectedLaunch,
   });
 
   const totalEntries = funnelData.entrouNoFunil;
@@ -164,20 +174,17 @@ const Index = () => {
           </TabsContent>
 
           <TabsContent value="acompanhamento" className="space-y-4">
-            <FilterSection
-              sellers={sellers}
-              origins={origins}
-              tags={tags}
-              selectedSeller={selectedSeller}
-              selectedOrigin={selectedOrigin}
-              selectedTag={selectedTag}
-              startDate={startDate}
-              endDate={endDate}
-              onSellerChange={setSelectedSeller}
-              onOriginChange={setSelectedOrigin}
-              onTagChange={setSelectedTag}
-              onStartDateChange={setStartDate}
-              onEndDateChange={setEndDate}
+            <SalesFilterSection
+              startDate={salesStartDate}
+              endDate={salesEndDate}
+              selectedMonth={selectedMonth}
+              selectedYear={selectedYear}
+              selectedLaunch={selectedLaunch}
+              onStartDateChange={setSalesStartDate}
+              onEndDateChange={setSalesEndDate}
+              onMonthChange={setSelectedMonth}
+              onYearChange={setSelectedYear}
+              onLaunchChange={setSelectedLaunch}
             />
             
             {statsLoading ? (

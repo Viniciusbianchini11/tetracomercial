@@ -32,7 +32,9 @@ interface DailySales {
 interface SalesStatsFilters {
   startDate?: Date | null;
   endDate?: Date | null;
-  seller?: string;
+  month?: string;
+  year?: string;
+  launch?: string;
 }
 
 export const useSalesStats = (filters?: SalesStatsFilters) => {
@@ -52,7 +54,7 @@ export const useSalesStats = (filters?: SalesStatsFilters) => {
 
   useEffect(() => {
     fetchSalesStats();
-  }, [filters?.startDate, filters?.endDate, filters?.seller]);
+  }, [filters?.startDate, filters?.endDate, filters?.month, filters?.year, filters?.launch]);
 
   const fetchSalesStats = async () => {
     try {
@@ -80,8 +82,19 @@ export const useSalesStats = (filters?: SalesStatsFilters) => {
       // Aplicar filtros adicionais
       let filteredData = data;
       
-      if (filters?.seller && filters.seller !== "all") {
-        filteredData = filteredData.filter(sale => sale.VENDEDOR === filters.seller);
+      if (filters?.month && filters.month !== "all") {
+        filteredData = filteredData.filter(sale => {
+          const saleMonth = sale.DATA?.split('-')[1];
+          return saleMonth === filters.month;
+        });
+      }
+      
+      if (filters?.year && filters.year !== "all") {
+        filteredData = filteredData.filter(sale => sale.ANO === parseInt(filters.year));
+      }
+      
+      if (filters?.launch && filters.launch !== "all") {
+        filteredData = filteredData.filter(sale => sale.LANÇAMENTO === filters.launch);
       }
 
       // Calcular estatísticas gerais
