@@ -7,7 +7,7 @@ import { useFunnelData } from "@/hooks/useFunnelData";
 import { SalesFilterSection } from "@/components/SalesFilterSection";
 import { FunnelStage } from "@/components/FunnelStage";
 import { MetricCard } from "@/components/MetricCard";
-import { DollarSign, TrendingUp, Target, CalendarIcon } from "lucide-react";
+import { DollarSign, TrendingUp, Target, CalendarIcon, Clock } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
@@ -223,7 +223,7 @@ const SellerDashboard = () => {
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mt-6">
               <MetricCard
                 title="Faturamento Bruto"
                 value={formatCurrency(stats.faturamentoBruto)}
@@ -243,6 +243,11 @@ const SellerDashboard = () => {
                 title="Taxa de Conversão"
                 value={`${stats.taxaConversao.toFixed(1)}%`}
                 icon={Target}
+              />
+              <MetricCard
+                title="Tempo Médio de Conversão"
+                value={stats.tempoMedioConversao > 0 ? `${stats.tempoMedioConversao} dias` : "-"}
+                icon={Clock}
               />
             </div>
 
