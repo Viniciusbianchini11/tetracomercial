@@ -134,9 +134,9 @@ export const useSalesStats = (filters?: SalesStatsFilters) => {
         return num > 1;
       }).length;
       
-      // Contar fora do lançamento (apenas vendas explicitamente marcadas como "NÃO")
+      // Contar fora do lançamento
       const foraLancamento = filteredData.filter(sale => 
-        sale.LANÇAMENTO && sale.LANÇAMENTO.toUpperCase() === "NÃO"
+        sale.LANÇAMENTO && sale.LANÇAMENTO.toUpperCase() === "FORA LANÇAMENTO"
       ).length;
 
       setStats({
