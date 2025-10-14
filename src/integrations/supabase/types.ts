@@ -638,6 +638,51 @@ export type Database = {
         }
         Relationships: []
       }
+      resumo_funil: {
+        Row: {
+          agendado: number | null
+          conexao: number | null
+          data_resumo: string
+          dono_do_negocio: string | null
+          entraram_no_funil: number | null
+          fechado: number | null
+          ganho: number | null
+          id: string
+          negociacao: number | null
+          perdido: number | null
+          prospeccao: number | null
+          tipo_resumo: string | null
+        }
+        Insert: {
+          agendado?: number | null
+          conexao?: number | null
+          data_resumo: string
+          dono_do_negocio?: string | null
+          entraram_no_funil?: number | null
+          fechado?: number | null
+          ganho?: number | null
+          id?: string
+          negociacao?: number | null
+          perdido?: number | null
+          prospeccao?: number | null
+          tipo_resumo?: string | null
+        }
+        Update: {
+          agendado?: number | null
+          conexao?: number | null
+          data_resumo?: string
+          dono_do_negocio?: string | null
+          entraram_no_funil?: number | null
+          fechado?: number | null
+          ganho?: number | null
+          id?: string
+          negociacao?: number | null
+          perdido?: number | null
+          prospeccao?: number | null
+          tipo_resumo?: string | null
+        }
+        Relationships: []
+      }
       stage_movements_log: {
         Row: {
           action: string | null
@@ -680,6 +725,36 @@ export type Database = {
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
           user_id?: string
+        }
+        Relationships: []
+      }
+      users_desempenho: {
+        Row: {
+          created_at: string
+          email: string
+          id: number
+          is_active: boolean
+          is_admin: boolean
+          password_hash: string
+          permissions: Json
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: number
+          is_active?: boolean
+          is_admin?: boolean
+          password_hash: string
+          permissions?: Json
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: number
+          is_active?: boolean
+          is_admin?: boolean
+          password_hash?: string
+          permissions?: Json
         }
         Relationships: []
       }
