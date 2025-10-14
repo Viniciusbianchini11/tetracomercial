@@ -143,35 +143,28 @@ export const useFunnelData = (filters: Filters) => {
       console.log('🔍 Filtering: GERAL (all sellers)');
     }
 
-    // Filtro de data: pegar exatamente o(s) dia(s) selecionado(s)
+    // Filtro de data: usar ::date cast para comparação precisa
     if (filters.startDate && filters.endDate) {
       const start = formatDateOnly(filters.startDate);
       const end = formatDateOnly(filters.endDate);
+      
       if (start === end) {
-        // Um único dia: [YYYY-MM-DD, nextDay)
-        const nextDay = new Date(filters.endDate);
-        nextDay.setDate(nextDay.getDate() + 1);
-        const next = formatDateOnly(nextDay);
-        query = query.gte("data_resumo", start).lt("data_resumo", next);
-        console.log('🔍 Date range (single day):', { start, nextExclusive: next });
+        // Um único dia: usar equality no date cast
+        query = query.eq("data_resumo::date", start);
+        console.log('🔍 Date filter (single day):', start);
       } else {
-        // Intervalo: [start, endNextDay)
-        const endNext = new Date(filters.endDate);
-        endNext.setDate(endNext.getDate() + 1);
-        const endNextStr = formatDateOnly(endNext);
-        query = query.gte("data_resumo", start).lt("data_resumo", endNextStr);
-        console.log('🔍 Date range:', { start, endExclusive: endNextStr });
+        // Intervalo: usar range no date cast (inclusivo em ambos os lados)
+        query = query.gte("data_resumo::date", start).lte("data_resumo::date", end);
+        console.log('🔍 Date range:', { start, end });
       }
     } else if (filters.startDate) {
       const start = formatDateOnly(filters.startDate);
-      query = query.gte("data_resumo", start);
+      query = query.gte("data_resumo::date", start);
       console.log('🔍 Start date (open-ended):', start);
     } else if (filters.endDate) {
-      const endNext = new Date(filters.endDate);
-      endNext.setDate(endNext.getDate() + 1);
-      const endNextStr = formatDateOnly(endNext);
-      query = query.lt("data_resumo", endNextStr);
-      console.log('🔍 End date (until, exclusive next day):', endNextStr);
+      const end = formatDateOnly(filters.endDate);
+      query = query.lte("data_resumo::date", end);
+      console.log('🔍 End date (until):', end);
     }
 
     const { data, error } = await query;
