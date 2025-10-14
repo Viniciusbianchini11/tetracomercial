@@ -91,22 +91,43 @@ export const useFunnelData = (filters: Filters) => {
   };
 
   const fetchFromSnapshots = async () => {
-    let query = supabase.from("leads_daily_snapshot").select("*");
+    // Tipagem explícita para a tabela resumo_funil
+    interface ResumoFunil {
+      entraram_no_funil: number;
+      prospeccao: number;
+      conexao: number;
+      negociacao: number;
+      agendado: number;
+      fechado: number;
+      ganho: number;
+      perdido: number;
+    }
 
+    // Usar any para bypass do TypeScript já que a tabela não está nos tipos gerados
+    const supabaseClient = supabase as any;
+    let query = supabaseClient.from("resumo_funil").select("*");
+
+    // Filtrar por tipo de resumo baseado no vendedor selecionado
+    if (filters.seller !== "all") {
+      query = query.eq("tipo_resumo", "POR VENDEDOR").eq("dono_do_negocio", filters.seller);
+    } else {
+      query = query.eq("tipo_resumo", "GERAL");
+    }
+
+    // Filtrar por data
     if (filters.startDate) {
-      query = query.gte("snapshot_date", filters.startDate.toISOString().split('T')[0]);
+      query = query.gte("data_resumo", filters.startDate.toISOString());
     }
     if (filters.endDate) {
-      query = query.lte("snapshot_date", filters.endDate.toISOString().split('T')[0]);
-    }
-    if (filters.seller !== "all") {
-      query = query.eq("dono_do_negocio", filters.seller);
+      const endOfDay = new Date(filters.endDate);
+      endOfDay.setHours(23, 59, 59, 999);
+      query = query.lte("data_resumo", endOfDay.toISOString());
     }
 
     const { data, error } = await query;
 
     if (error) {
-      console.error("Error fetching snapshot data:", error);
+      console.error("Error fetching resumo_funil data:", error);
       setFunnelData({
         entrouNoFunil: 0,
         prospeccao: 0,
@@ -120,7 +141,7 @@ export const useFunnelData = (filters: Filters) => {
       return;
     }
 
-    // Agregar dados por estágio
+    // Agregar dados do período selecionado
     const aggregated = {
       entrouNoFunil: 0,
       prospeccao: 0,
@@ -132,20 +153,15 @@ export const useFunnelData = (filters: Filters) => {
       perdido: 0,
     };
 
-    data?.forEach((row) => {
-      if (row.action !== "entered") return;
-      
-      const stage = row.stage_name?.toLowerCase();
-      const count = row.cnt || 0;
-
-      if (stage === "entrounofunil") aggregated.entrouNoFunil += count;
-      else if (stage === "prospecção" || stage === "prospeccao") aggregated.prospeccao += count;
-      else if (stage === "conexão" || stage === "conexao") aggregated.conexao += count;
-      else if (stage === "negociação" || stage === "negociacao") aggregated.negociacao += count;
-      else if (stage === "agendado") aggregated.agendado += count;
-      else if (stage === "fechado") aggregated.fechado += count;
-      else if (stage === "ganho") aggregated.ganho += count;
-      else if (stage === "perdido") aggregated.perdido += count;
+    (data as ResumoFunil[])?.forEach((row) => {
+      aggregated.entrouNoFunil += row.entraram_no_funil || 0;
+      aggregated.prospeccao += row.prospeccao || 0;
+      aggregated.conexao += row.conexao || 0;
+      aggregated.negociacao += row.negociacao || 0;
+      aggregated.agendado += row.agendado || 0;
+      aggregated.fechado += row.fechado || 0;
+      aggregated.ganho += row.ganho || 0;
+      aggregated.perdido += row.perdido || 0;
     });
 
     setFunnelData(aggregated);
