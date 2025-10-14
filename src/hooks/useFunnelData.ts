@@ -143,27 +143,27 @@ export const useFunnelData = (filters: Filters) => {
       console.log('🔍 Filtering: GERAL (all sellers)');
     }
 
-    // Filtro de data: usar ::date cast para comparação precisa
+    // Filtro de data: comparação direta (data_resumo já é tipo date)
     if (filters.startDate && filters.endDate) {
       const start = formatDateOnly(filters.startDate);
       const end = formatDateOnly(filters.endDate);
       
       if (start === end) {
-        // Um único dia: usar equality no date cast
-        query = query.eq("data_resumo::date", start);
+        // Um único dia: usar equality
+        query = query.eq("data_resumo", start);
         console.log('🔍 Date filter (single day):', start);
       } else {
-        // Intervalo: usar range no date cast (inclusivo em ambos os lados)
-        query = query.gte("data_resumo::date", start).lte("data_resumo::date", end);
+        // Intervalo: usar range (inclusivo em ambos os lados)
+        query = query.gte("data_resumo", start).lte("data_resumo", end);
         console.log('🔍 Date range:', { start, end });
       }
     } else if (filters.startDate) {
       const start = formatDateOnly(filters.startDate);
-      query = query.gte("data_resumo::date", start);
+      query = query.gte("data_resumo", start);
       console.log('🔍 Start date (open-ended):', start);
     } else if (filters.endDate) {
       const end = formatDateOnly(filters.endDate);
-      query = query.lte("data_resumo::date", end);
+      query = query.lte("data_resumo", end);
       console.log('🔍 End date (until):', end);
     }
 
