@@ -91,6 +91,26 @@ export const useFunnelData = (filters: Filters) => {
   };
 
   const fetchFromSnapshots = async () => {
+    // Helper para normalizar nome do vendedor
+    const normalizeSellerName = (seller: string): string => {
+      if (seller === "all") return seller;
+      // Se for email, extrair primeiro nome
+      if (seller.includes("@")) {
+        const firstName = seller.split("@")[0].split(".")[0];
+        return firstName.toUpperCase();
+      }
+      // Se já for nome, apenas converter para maiúsculas
+      return seller.toUpperCase();
+    };
+
+    // Helper para formatar data sem timezone
+    const formatDateOnly = (date: Date): string => {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    };
+
     // Tipagem explícita para a tabela resumo_funil
     interface ResumoFunil {
       entraram_no_funil: number;
@@ -109,22 +129,39 @@ export const useFunnelData = (filters: Filters) => {
 
     // Filtrar por tipo de resumo baseado no vendedor selecionado
     if (filters.seller !== "all") {
-      query = query.eq("tipo_resumo", "POR VENDEDOR").eq("dono_do_negocio", filters.seller);
+      const normalizedSeller = normalizeSellerName(filters.seller);
+      query = query
+        .eq("tipo_resumo", "POR VENDEDOR")
+        .eq("dono_do_negocio", normalizedSeller);
+      
+      console.log('🔍 Filtering by seller:', {
+        original: filters.seller,
+        normalized: normalizedSeller
+      });
     } else {
       query = query.eq("tipo_resumo", "GERAL");
+      console.log('🔍 Filtering: GERAL (all sellers)');
     }
 
-    // Filtrar por data
+    // Filtrar por data (apenas YYYY-MM-DD)
     if (filters.startDate) {
-      query = query.gte("data_resumo", filters.startDate.toISOString());
+      const startDateStr = formatDateOnly(filters.startDate);
+      query = query.gte("data_resumo::date", startDateStr);
+      console.log('🔍 Start date:', startDateStr);
     }
     if (filters.endDate) {
-      const endOfDay = new Date(filters.endDate);
-      endOfDay.setHours(23, 59, 59, 999);
-      query = query.lte("data_resumo", endOfDay.toISOString());
+      const endDateStr = formatDateOnly(filters.endDate);
+      query = query.lte("data_resumo::date", endDateStr);
+      console.log('🔍 End date:', endDateStr);
     }
 
     const { data, error } = await query;
+
+    console.log('📊 Query result:', {
+      recordsFound: data?.length || 0,
+      error: error?.message,
+      sampleRecord: data?.[0]
+    });
 
     if (error) {
       console.error("Error fetching resumo_funil data:", error);
