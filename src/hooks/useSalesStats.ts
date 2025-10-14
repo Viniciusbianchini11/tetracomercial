@@ -60,6 +60,21 @@ export const useSalesStats = (filters?: SalesStatsFilters) => {
     try {
       setLoading(true);
       
+      // Buscar pistas da tabela entrounofunil
+      let pistasQuery = supabase
+        .from("entrounofunil")
+        .select("*", { count: 'exact', head: true });
+
+      // Aplicar os mesmos filtros de data para pistas
+      if (filters?.startDate) {
+        pistasQuery = pistasQuery.gte("data_de_criacao", filters.startDate.toISOString().split('T')[0]);
+      }
+      if (filters?.endDate) {
+        pistasQuery = pistasQuery.lte("data_de_criacao", filters.endDate.toISOString().split('T')[0]);
+      }
+
+      const { count: pistasCount } = await pistasQuery;
+      
       // Query simples - buscar tudo
       let query = supabase.from("relatorio_faturamento").select("*");
       
@@ -105,9 +120,8 @@ export const useSalesStats = (filters?: SalesStatsFilters) => {
       const faturamentoBruto = filteredData.reduce((sum, sale) => sum + (sale["VALOR FATURADO (CHEIO)"] || 0), 0);
       const vendas = filteredData.length;
       
-      // Contar pistas únicas (baseado em emails únicos)
-      const uniqueEmails = new Set(filteredData.map(sale => sale["E-MAIL"]).filter(Boolean));
-      const pistas = uniqueEmails.size;
+      // Usar pistas da tabela entrounofunil
+      const pistas = pistasCount || 0;
       
       // Taxa de conversão (vendas / pistas * 100)
       const taxaConversao = pistas > 0 ? (vendas / pistas) * 100 : 0;
@@ -120,8 +134,10 @@ export const useSalesStats = (filters?: SalesStatsFilters) => {
         return num > 1;
       }).length;
       
-      // Contar fora do lançamento
-      const foraLancamento = filteredData.filter(sale => sale.LANÇAMENTO !== "SIM").length;
+      // Contar fora do lançamento (apenas vendas explicitamente marcadas como "NÃO")
+      const foraLancamento = filteredData.filter(sale => 
+        sale.LANÇAMENTO && sale.LANÇAMENTO.toUpperCase() === "NÃO"
+      ).length;
 
       setStats({
         faturamentoBruto,
