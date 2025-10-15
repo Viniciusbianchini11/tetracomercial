@@ -143,6 +143,12 @@ export const useFunnelData = (filters: Filters) => {
       console.log('🔍 Filtering: GERAL (all sellers)');
     }
 
+    // Filtro de origem
+    if (filters.origin !== "all") {
+      query = query.eq("Origem", filters.origin);
+      console.log('🔍 Filtering by origin:', filters.origin);
+    }
+
     // Filtro de data: comparação direta (data_resumo já é tipo date)
     if (filters.startDate && filters.endDate) {
       const start = formatDateOnly(filters.startDate);
