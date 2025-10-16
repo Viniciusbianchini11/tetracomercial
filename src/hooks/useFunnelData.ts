@@ -129,11 +129,21 @@ export const useFunnelData = (filters: Filters) => {
     const supabaseClient = supabase as any;
     let query = supabaseClient.from("resumo_funil").select("*");
 
-    // Filtrar por vendedor usando email direto da base
+    // Filtrar por vendedor - aceitar email OU nome normalizado
     if (filters.seller !== "all") {
-      // Usar o email do vendedor EXATAMENTE como está na tabela resumo_funil
-      query = query.eq("dono_do_negocio", filters.seller);
-      console.log('🔍 Filtering by seller:', filters.seller);
+      // Normalizar: extrair primeiro nome em maiúsculas do email
+      const normalizedName = filters.seller.includes("@")
+        ? filters.seller.split("@")[0].split(".")[0].toUpperCase()
+        : filters.seller.toUpperCase();
+      
+      // Buscar por email OU nome normalizado
+      query = query.or(`dono_do_negocio.eq.${filters.seller},dono_do_negocio.eq.${normalizedName}`);
+      
+      console.log('🔍 Filtering by seller:', {
+        original: filters.seller,
+        normalized: normalizedName,
+        willMatch: `email="${filters.seller}" OR name="${normalizedName}"`
+      });
     } else {
       // "Todos Vendedores" = buscar registros com dono_do_negocio vazio/NULL
       query = query.or("dono_do_negocio.is.null,dono_do_negocio.eq.");
