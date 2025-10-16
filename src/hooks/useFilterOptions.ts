@@ -23,15 +23,32 @@ export const useFilterOptions = () => {
       ];
       setSellers(uniqueSellers);
 
-      // Fetch unique origins
-      const { data: originsData } = await supabase
-        .from("leads")
-        .select("origem")
-        .not("origem", "is", null);
-
-      const uniqueOrigins = [
-        ...new Set(originsData?.map((item) => item.origem).filter(Boolean) as string[]),
+      // Fetch unique origins from all funnel tables
+      const originsTables = [
+        'entrounofunil',
+        'contato_prospeccao',
+        'contato_conexao',
+        'contato_negociacao',
+        'contato_agendado',
+        'contato_fechado',
+        'contato_status_ganho',
+        'contato_status_perdido'
       ];
+
+      const allOrigins: string[] = [];
+
+      for (const table of originsTables) {
+        const { data } = await supabase
+          .from(table as any)
+          .select("origem")
+          .not("origem", "is", null);
+        
+        if (data) {
+          allOrigins.push(...data.map((item: any) => item.origem).filter(Boolean));
+        }
+      }
+
+      const uniqueOrigins = [...new Set(allOrigins)].sort();
       setOrigins(uniqueOrigins);
 
       // Fetch unique tags

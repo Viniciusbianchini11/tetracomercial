@@ -77,10 +77,24 @@ export const useFunnelData = (filters: Filters) => {
 
   const fetchFunnelData = async () => {
     try {
+      console.log('📊 Decisão de busca:', {
+        hasDateFilter: !!(filters.startDate || filters.endDate),
+        willUseSnapshots: !!(filters.startDate || filters.endDate),
+        filters: {
+          seller: filters.seller,
+          origin: filters.origin,
+          tag: filters.tag,
+          startDate: filters.startDate?.toISOString().split('T')[0],
+          endDate: filters.endDate?.toISOString().split('T')[0]
+        }
+      });
+      
       // Se houver filtro de data, usar snapshots diários
       if (filters.startDate || filters.endDate) {
+        console.log('🗄️ USANDO RESUMO_FUNIL (dados históricos agregados)');
         await fetchFromSnapshots();
       } else {
+        console.log('⚡ USANDO TABELAS INDIVIDUAIS (dados em tempo real)');
         // Sem filtro de data, buscar dados em tempo real
         await fetchRealTimeData();
       }
