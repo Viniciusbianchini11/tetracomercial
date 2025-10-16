@@ -105,18 +105,6 @@ export const useFunnelData = (filters: Filters) => {
   };
 
   const fetchFromSnapshots = async () => {
-    // Helper para normalizar nome do vendedor
-    const normalizeSellerName = (seller: string): string => {
-      if (seller === "all") return seller;
-      // Se for email, extrair primeiro nome
-      if (seller.includes("@")) {
-        const firstName = seller.split("@")[0].split(".")[0];
-        return firstName.toUpperCase();
-      }
-      // Se já for nome, apenas converter para maiúsculas
-      return seller.toUpperCase();
-    };
-
     // Helper para formatar data (YYYY-MM-DD)
     const formatDateOnly = (date: Date): string => {
       const year = date.getFullYear();
@@ -141,19 +129,14 @@ export const useFunnelData = (filters: Filters) => {
     const supabaseClient = supabase as any;
     let query = supabaseClient.from("resumo_funil").select("*");
 
-    // Filtrar por tipo de resumo baseado no vendedor selecionado
+    // Filtrar por vendedor usando email direto da base
     if (filters.seller !== "all") {
-      const normalizedSeller = normalizeSellerName(filters.seller);
-      query = query
-        .eq("tipo_resumo", "POR VENDEDOR")
-        .eq("dono_do_negocio", normalizedSeller);
-      
-      console.log('🔍 Filtering by seller:', {
-        original: filters.seller,
-        normalized: normalizedSeller
-      });
+      // Usar o email do vendedor EXATAMENTE como está na tabela resumo_funil
+      query = query.eq("dono_do_negocio", filters.seller);
+      console.log('🔍 Filtering by seller:', filters.seller);
     } else {
-      query = query.eq("tipo_resumo", "GERAL");
+      // "Todos Vendedores" = buscar registros com dono_do_negocio vazio/NULL
+      query = query.or("dono_do_negocio.is.null,dono_do_negocio.eq.");
       console.log('🔍 Filtering: GERAL (all sellers)');
     }
 
