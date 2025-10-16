@@ -159,8 +159,13 @@ export const useFunnelData = (filters: Filters) => {
 
     // Filtro de origem
     if (filters.origin !== "all") {
+      // Origem específica selecionada (ex: "Perpétuo", "Pop-up Check-out...")
       query = query.eq("Origem", filters.origin);
       console.log('🔍 Filtering by origin:', filters.origin);
+    } else {
+      // "Todas as Origens" = buscar APENAS o resumo geral (Origem = NULL)
+      query = query.is("Origem", null);
+      console.log('🔍 Filtering by origin: NULL (resumo geral - todas as origens agregadas)');
     }
 
     // Filtro de data: comparação direta (data_resumo já é tipo date)
