@@ -17,6 +17,7 @@ interface SalesFilterSectionProps {
   onMonthChange: (month: string) => void;
   onYearChange: (year: string) => void;
   onLaunchChange: (launch: string) => void;
+  onClearFilters?: () => void;
 }
 
 const months = [
@@ -55,6 +56,7 @@ export const SalesFilterSection = ({
   onMonthChange,
   onYearChange,
   onLaunchChange,
+  onClearFilters,
 }: SalesFilterSectionProps) => {
   return (
     <div className="bg-card p-6 rounded-lg shadow-sm space-y-4">
@@ -151,13 +153,13 @@ export const SalesFilterSection = ({
       <div className="flex justify-end">
         <Button 
           variant="outline" 
-          onClick={() => {
+          onClick={onClearFilters || (() => {
             onStartDateChange(undefined);
             onEndDateChange(undefined);
             onMonthChange("all");
             onYearChange("all");
             onLaunchChange("all");
-          }}
+          })}
         >
           Limpar Filtros
         </Button>

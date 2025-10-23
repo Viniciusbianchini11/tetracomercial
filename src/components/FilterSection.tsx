@@ -21,6 +21,7 @@ interface FilterSectionProps {
   onTagChange: (value: string) => void;
   onStartDateChange: (date: Date | undefined) => void;
   onEndDateChange: (date: Date | undefined) => void;
+  onClearFilters?: () => void;
 }
 
 export const FilterSection = ({
@@ -37,8 +38,9 @@ export const FilterSection = ({
   onTagChange,
   onStartDateChange,
   onEndDateChange,
+  onClearFilters,
 }: FilterSectionProps) => {
-  const hasDateFilter = startDate || endDate;
+  const hasAnyFilter = selectedSeller !== "all" || selectedOrigin !== "all" || selectedTag !== "all" || startDate || endDate;
   
   const clearDateFilters = () => {
     onStartDateChange(undefined);
@@ -139,16 +141,27 @@ export const FilterSection = ({
       </Popover>
       </div>
       
-      {hasDateFilter && (
-        <div className="flex justify-end">
+      {hasAnyFilter && onClearFilters && (
+        <div className="flex justify-end gap-2">
+          {(startDate || endDate) && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={clearDateFilters}
+              className="gap-2"
+            >
+              <X className="h-4 w-4" />
+              Limpar Datas
+            </Button>
+          )}
           <Button
             variant="outline"
             size="sm"
-            onClick={clearDateFilters}
+            onClick={onClearFilters}
             className="gap-2"
           >
             <X className="h-4 w-4" />
-            Limpar Filtros de Data
+            Limpar Todos os Filtros
           </Button>
         </div>
       )}

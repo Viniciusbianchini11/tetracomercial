@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { MetricCard } from "@/components/MetricCard";
@@ -16,29 +15,59 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Header } from "@/components/Header";
 import { useFunnelData } from "@/hooks/useFunnelData";
 import { useFilterOptions } from "@/hooks/useFilterOptions";
+import { usePersistedFilters } from "@/hooks/usePersistedFilters";
 import { Clock, TrendingUp, Users, Target } from "lucide-react";
 
+interface PerformanceFilters {
+  selectedSeller: string;
+  selectedOrigin: string;
+  selectedTag: string;
+  startDate: Date | undefined;
+  endDate: Date | undefined;
+}
+
+interface SalesFilters {
+  salesStartDate: Date | undefined;
+  salesEndDate: Date | undefined;
+  selectedMonth: string;
+  selectedYear: string;
+  selectedLaunch: string;
+}
+
 const Index = () => {
-  const [selectedSeller, setSelectedSeller] = useState("all");
-  const [selectedOrigin, setSelectedOrigin] = useState("all");
-  const [selectedTag, setSelectedTag] = useState("all");
-  const [startDate, setStartDate] = useState<Date | undefined>(undefined);
-  const [endDate, setEndDate] = useState<Date | undefined>(undefined);
-  
-  // Filtros específicos para Acompanhamento de vendas
-  const [salesStartDate, setSalesStartDate] = useState<Date | undefined>(undefined);
-  const [salesEndDate, setSalesEndDate] = useState<Date | undefined>(undefined);
-  const [selectedMonth, setSelectedMonth] = useState("all");
-  const [selectedYear, setSelectedYear] = useState("all");
-  const [selectedLaunch, setSelectedLaunch] = useState("all");
+  // Filtros Performance com persistência
+  const { filters: performanceFilters, setFilters: setPerformanceFilters, clearFilters: clearPerformanceFilters } = 
+    usePersistedFilters<PerformanceFilters>({
+      key: 'performance-filters',
+      defaultValues: {
+        selectedSeller: "all",
+        selectedOrigin: "all",
+        selectedTag: "all",
+        startDate: undefined,
+        endDate: undefined,
+      },
+    });
+
+  // Filtros Acompanhamento de vendas com persistência
+  const { filters: salesFilters, setFilters: setSalesFilters, clearFilters: clearSalesFilters } = 
+    usePersistedFilters<SalesFilters>({
+      key: 'sales-filters',
+      defaultValues: {
+        salesStartDate: undefined,
+        salesEndDate: undefined,
+        selectedMonth: "all",
+        selectedYear: "all",
+        selectedLaunch: "all",
+      },
+    });
 
   const { sellers, origins, tags } = useFilterOptions();
   const { funnelData } = useFunnelData({
-    seller: selectedSeller,
-    origin: selectedOrigin,
-    tag: selectedTag,
-    startDate,
-    endDate,
+    seller: performanceFilters.selectedSeller,
+    origin: performanceFilters.selectedOrigin,
+    tag: performanceFilters.selectedTag,
+    startDate: performanceFilters.startDate,
+    endDate: performanceFilters.endDate,
   });
 
   const {
@@ -49,11 +78,11 @@ const Index = () => {
     todaySales,
     loading: statsLoading,
   } = useSalesStats({
-    startDate: salesStartDate,
-    endDate: salesEndDate,
-    month: selectedMonth,
-    year: selectedYear,
-    launch: selectedLaunch,
+    startDate: salesFilters.salesStartDate,
+    endDate: salesFilters.salesEndDate,
+    month: salesFilters.selectedMonth,
+    year: salesFilters.selectedYear,
+    launch: salesFilters.selectedLaunch,
   });
 
   const totalEntries = funnelData.entrouNoFunil;
@@ -80,16 +109,17 @@ const Index = () => {
               sellers={sellers}
               origins={origins}
               tags={tags}
-              selectedSeller={selectedSeller}
-              selectedOrigin={selectedOrigin}
-              selectedTag={selectedTag}
-              startDate={startDate}
-              endDate={endDate}
-              onSellerChange={setSelectedSeller}
-              onOriginChange={setSelectedOrigin}
-              onTagChange={setSelectedTag}
-              onStartDateChange={setStartDate}
-              onEndDateChange={setEndDate}
+              selectedSeller={performanceFilters.selectedSeller}
+              selectedOrigin={performanceFilters.selectedOrigin}
+              selectedTag={performanceFilters.selectedTag}
+              startDate={performanceFilters.startDate}
+              endDate={performanceFilters.endDate}
+              onSellerChange={(value) => setPerformanceFilters({ selectedSeller: value })}
+              onOriginChange={(value) => setPerformanceFilters({ selectedOrigin: value })}
+              onTagChange={(value) => setPerformanceFilters({ selectedTag: value })}
+              onStartDateChange={(value) => setPerformanceFilters({ startDate: value })}
+              onEndDateChange={(value) => setPerformanceFilters({ endDate: value })}
+              onClearFilters={clearPerformanceFilters}
             />
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -163,16 +193,17 @@ const Index = () => {
 
           <TabsContent value="acompanhamento" className="space-y-4">
             <SalesFilterSection
-              startDate={salesStartDate}
-              endDate={salesEndDate}
-              selectedMonth={selectedMonth}
-              selectedYear={selectedYear}
-              selectedLaunch={selectedLaunch}
-              onStartDateChange={setSalesStartDate}
-              onEndDateChange={setSalesEndDate}
-              onMonthChange={setSelectedMonth}
-              onYearChange={setSelectedYear}
-              onLaunchChange={setSelectedLaunch}
+              startDate={salesFilters.salesStartDate}
+              endDate={salesFilters.salesEndDate}
+              selectedMonth={salesFilters.selectedMonth}
+              selectedYear={salesFilters.selectedYear}
+              selectedLaunch={salesFilters.selectedLaunch}
+              onStartDateChange={(value) => setSalesFilters({ salesStartDate: value })}
+              onEndDateChange={(value) => setSalesFilters({ salesEndDate: value })}
+              onMonthChange={(value) => setSalesFilters({ selectedMonth: value })}
+              onYearChange={(value) => setSalesFilters({ selectedYear: value })}
+              onLaunchChange={(value) => setSalesFilters({ selectedLaunch: value })}
+              onClearFilters={clearSalesFilters}
             />
             
             {statsLoading ? (
