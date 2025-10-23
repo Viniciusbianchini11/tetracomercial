@@ -162,9 +162,9 @@ export const useFunnelData = (filters: Filters) => {
         console.log('🔍 Not filtering origin (will fetch and sum all origins for specific seller)');
         // NÃO adicionar filtro de Origem - queremos todos os registros do vendedor
       } else {
-        // TODOS VENDEDORES: buscar apenas o resumo geral pré-agregado (origem = NULL)
-        query = query.is("origem", null);
-        console.log('🔍 Filtering by origin: NULL (resumo geral - todas as origens agregadas)');
+        // TODOS VENDEDORES: buscar apenas o resumo geral pré-agregado (origem = '')
+        query = query.eq("origem", "");
+        console.log('🔍 Filtering by origin: "" (resumo geral - todas as origens agregadas)');
       }
     }
 
