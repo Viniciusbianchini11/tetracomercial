@@ -186,8 +186,8 @@ export const useFunnelData = (filters: Filters) => {
     } else {
       // "Todas as Origens" - Para agregados (GERAL/POR VENDEDOR), usar origem IS NULL
       if (tipoResumo === "GERAL" || tipoResumo === "POR VENDEDOR") {
-        query = query.is("origem", null);
-        console.log('🔍 Origin filter: IS NULL (aggregated)');
+        query = query.or("origem.is.null");
+        console.log('🔍 Origin filter: IS NULL using .or()');
       }
     }
 
@@ -225,56 +225,6 @@ export const useFunnelData = (filters: Filters) => {
     });
 
     let { data, error } = await query;
-    
-    // Fallback de compatibilidade: se não encontrou resultados e origem era "all",
-    // tentar novamente com origem = 'GERAL' (dados legados)
-    if ((!data || data.length === 0) && filters.origin === "all" && !error) {
-      console.log('⚠️ No results with origem IS NULL, trying fallback with origem = "GERAL"');
-      let fallbackQuery = supabaseClient.from("resumo_filtros").select("*");
-      
-      // Reaplicar filtros de vendedor
-      if (filters.seller !== "all") {
-        const seller = filters.seller.toLowerCase();
-        const isEmail = seller.includes("@");
-        if (isEmail) {
-          fallbackQuery = fallbackQuery.eq("dono_do_negocio", seller);
-        } else {
-          const normalizedName = seller
-            .split(' ')
-            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-            .join(' ');
-          fallbackQuery = fallbackQuery.eq("dono_do_negocio", normalizedName);
-        }
-      } else {
-        fallbackQuery = fallbackQuery.eq("dono_do_negocio", "GERAL");
-      }
-      
-      // Reaplicar tipo_resumo
-      fallbackQuery = fallbackQuery.eq("tipo_resumo", tipoResumo);
-      
-      // FALLBACK: usar origem = 'GERAL'
-      fallbackQuery = fallbackQuery.eq("origem", "GERAL");
-      
-      // Reaplicar filtros de data
-      if (filters.startDate && filters.endDate) {
-        const start = formatDateOnly(filters.startDate);
-        const end = formatDateOnly(filters.endDate);
-        if (start === end) {
-          fallbackQuery = fallbackQuery.eq("data_resumo", start);
-        } else {
-          fallbackQuery = fallbackQuery.gte("data_resumo", start);
-          fallbackQuery = fallbackQuery.lte("data_resumo", end);
-        }
-      }
-      
-      const fallbackResult = await fallbackQuery;
-      data = fallbackResult.data;
-      error = fallbackResult.error;
-      
-      if (data && data.length > 0) {
-        console.log('✅ Fallback successful with origem = "GERAL"');
-      }
-    }
 
     console.log('📊 Query result:', {
       recordsFound: data?.length || 0,
