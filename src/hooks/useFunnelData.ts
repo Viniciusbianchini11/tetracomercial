@@ -91,7 +91,7 @@ export const useFunnelData = (filters: Filters) => {
       
       // Se houver filtro de data, usar snapshots diários
       if (filters.startDate || filters.endDate) {
-        console.log('🗄️ USANDO RESUMO_FUNIL (dados históricos agregados)');
+        console.log('🗄️ USANDO RESUMO_FILTROS (dados históricos agregados)');
         await fetchFromSnapshots();
       } else {
         console.log('⚡ USANDO TABELAS INDIVIDUAIS (dados em tempo real)');
@@ -127,7 +127,7 @@ export const useFunnelData = (filters: Filters) => {
 
     // Usar any para bypass do TypeScript já que a tabela não está nos tipos gerados
     const supabaseClient = supabase as any;
-    let query = supabaseClient.from("resumo_funil").select("*");
+    let query = supabaseClient.from("resumo_filtros").select("*");
 
     // Filtrar por vendedor - aceitar email OU nome normalizado
     if (filters.seller !== "all") {
@@ -150,22 +150,34 @@ export const useFunnelData = (filters: Filters) => {
       console.log('🔍 Filtering: GERAL (all sellers)');
     }
 
+    // Determinar tipo_resumo baseado nos filtros aplicados
+    if (filters.seller !== "all" && filters.origin !== "all") {
+      // Cenário 1: Vendedor específico + Origem específica
+      query = query.eq("tipo_resumo", "POR VENDEDOR (POR ORIGEM)");
+      console.log('🔍 Using tipo_resumo: POR VENDEDOR (POR ORIGEM)');
+    } else if (filters.seller !== "all" && filters.origin === "all") {
+      // Cenário 2: Vendedor específico + Todas as Origens
+      query = query.eq("tipo_resumo", "POR VENDEDOR");
+      console.log('🔍 Using tipo_resumo: POR VENDEDOR');
+    } else if (filters.seller === "all" && filters.origin !== "all") {
+      // Cenário 3: Todos os vendedores + Origem específica
+      query = query.eq("tipo_resumo", "GERAL");
+      console.log('🔍 Using tipo_resumo: GERAL (specific origin)');
+    } else {
+      // Cenário 4: Todos os vendedores + Todas as Origens
+      query = query.eq("tipo_resumo", "GERAL");
+      console.log('🔍 Using tipo_resumo: GERAL (all origins)');
+    }
+
     // Filtro de origem
     if (filters.origin !== "all") {
-      // Origem específica selecionada (ex: "Perpétuo", "Pop-up Check-out...")
+      // Origem específica selecionada
       query = query.eq("origem", filters.origin);
       console.log('🔍 Filtering by origin:', filters.origin);
     } else {
-      // "Todas as Origens" - comportamento diferente por contexto
-      if (filters.seller !== "all") {
-        // VENDEDOR ESPECÍFICO: buscar todas as origens para somar
-        console.log('🔍 Not filtering origin (will fetch and sum all origins for specific seller)');
-        // NÃO adicionar filtro de Origem - queremos todos os registros do vendedor
-      } else {
-        // TODOS VENDEDORES: buscar apenas o resumo geral pré-agregado (origem = '')
-        query = query.eq("origem", "");
-        console.log('🔍 Filtering by origin: "" (resumo geral - todas as origens agregadas)');
-      }
+      // "Todas as Origens" - buscar registros com origem NULL ou vazio
+      query = query.or("origem.is.null,origem.eq.");
+      console.log('🔍 Origin filter: NULL or empty (aggregated)');
     }
 
     // Filtro de data: comparação direta (data_resumo já é tipo date)
@@ -201,7 +213,7 @@ export const useFunnelData = (filters: Filters) => {
     });
 
     if (error) {
-      console.error("Error fetching resumo_funil data:", error);
+      console.error("Error fetching resumo_filtros data:", error);
       setFunnelData({
         entrouNoFunil: 0,
         prospeccao: 0,
