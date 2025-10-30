@@ -77,22 +77,34 @@ export const useFunnelData = (filters: Filters) => {
 
   const fetchFunnelData = async () => {
     try {
+      // Normalização robusta das datas (aceita Date, string ISO, ou undefined)
+      const normalizeDate = (d: any): Date | undefined => {
+        if (!d) return undefined;
+        const dd = d instanceof Date ? d : new Date(d);
+        return isNaN(dd.getTime()) ? undefined : dd;
+      };
+
+      const startNorm = normalizeDate(filters.startDate as any);
+      const endNorm = normalizeDate(filters.endDate as any);
+      const startStr = startNorm ? startNorm.toISOString().slice(0, 10) : undefined;
+      const endStr = endNorm ? endNorm.toISOString().slice(0, 10) : undefined;
+
       console.log('📊 Decisão de busca:', {
-        hasDateFilter: !!(filters.startDate || filters.endDate),
-        willUseSnapshots: !!(filters.startDate || filters.endDate),
+        hasDateFilter: !!(startNorm || endNorm),
+        willUseSnapshots: !!(startNorm || endNorm),
         filters: {
           seller: filters.seller,
           origin: filters.origin,
           tag: filters.tag,
-          startDate: filters.startDate?.toISOString().split('T')[0],
-          endDate: filters.endDate?.toISOString().split('T')[0]
-        }
+          startDate: startStr,
+          endDate: endStr,
+        },
       });
-      
-      // Se houver filtro de data, usar snapshots diários
-      if (filters.startDate || filters.endDate) {
+
+      // Se houver filtro de data (normalizado), usar snapshots agregados
+      if (startNorm || endNorm) {
         console.log('🗄️ USANDO RESUMO_FILTROS (dados históricos agregados)');
-        await fetchFromSnapshots();
+        await fetchFromSnapshots(startNorm, endNorm);
       } else {
         console.log('⚡ USANDO TABELAS INDIVIDUAIS (dados em tempo real)');
         // Sem filtro de data, buscar dados em tempo real
@@ -104,7 +116,7 @@ export const useFunnelData = (filters: Filters) => {
     }
   };
 
-  const fetchFromSnapshots = async () => {
+  const fetchFromSnapshots = async (startNorm?: Date, endNorm?: Date) => {
     // Helper para formatar data (YYYY-MM-DD)
     const formatDateOnly = (date: Date): string => {
       const year = date.getFullYear();
@@ -186,31 +198,28 @@ export const useFunnelData = (filters: Filters) => {
     } else {
       // "Todas as Origens" - Para agregados (GERAL/POR VENDEDOR), usar origem IS NULL
       if (tipoResumo === "GERAL" || tipoResumo === "POR VENDEDOR") {
-        query = query.or("origem.is.null");
-        console.log('🔍 Origin filter: IS NULL using .or()');
+        query = query.is("origem", null);
+        console.log('🔍 Origin filter: IS NULL');
       }
     }
 
     // Filtro de data: comparação direta (data_resumo já é tipo date)
-    if (filters.startDate && filters.endDate) {
-      const start = formatDateOnly(filters.startDate);
-      const end = formatDateOnly(filters.endDate);
-      
+    if (startNorm && endNorm) {
+      const start = formatDateOnly(startNorm);
+      const end = formatDateOnly(endNorm);
       if (start === end) {
-        // Um único dia: usar equality
         query = query.eq("data_resumo", start);
         console.log('🔍 Date filter (single day):', start);
       } else {
-        // Intervalo: usar range (inclusivo em ambos os lados)
         query = query.gte("data_resumo", start).lte("data_resumo", end);
         console.log('🔍 Date range:', { start, end });
       }
-    } else if (filters.startDate) {
-      const start = formatDateOnly(filters.startDate);
+    } else if (startNorm) {
+      const start = formatDateOnly(startNorm);
       query = query.gte("data_resumo", start);
       console.log('🔍 Start date (open-ended):', start);
-    } else if (filters.endDate) {
-      const end = formatDateOnly(filters.endDate);
+    } else if (endNorm) {
+      const end = formatDateOnly(endNorm);
       query = query.lte("data_resumo", end);
       console.log('🔍 End date (until):', end);
     }
@@ -225,6 +234,64 @@ export const useFunnelData = (filters: Filters) => {
     });
 
     let { data, error } = await query;
+
+    // Fallback automático: tentar resumo_funil se não houver dados em resumo_filtros
+    if (!error && (!data || data.length === 0)) {
+      console.log('⚠️ No data in resumo_filtros, trying resumo_funil as fallback');
+      let fallbackQuery = supabaseClient.from("resumo_funil").select("*");
+
+      // Reaplicar filtros de vendedor
+      if (filters.seller !== "all") {
+        const seller = filters.seller.toLowerCase();
+        const isEmail = seller.includes("@");
+        if (isEmail) {
+          fallbackQuery = fallbackQuery.eq("dono_do_negocio", seller);
+        } else {
+          const normalizedName = seller
+            .split(' ')
+            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+            .join(' ');
+          fallbackQuery = fallbackQuery.eq("dono_do_negocio", normalizedName);
+        }
+      } else {
+        fallbackQuery = fallbackQuery.eq("dono_do_negocio", "GERAL");
+      }
+
+      // Reaplicar tipo_resumo
+      fallbackQuery = fallbackQuery.eq("tipo_resumo", tipoResumo);
+
+      // Reaplicar origem
+      if (filters.origin !== "all") {
+        fallbackQuery = fallbackQuery.eq("origem", filters.origin);
+      } else if (tipoResumo === "GERAL" || tipoResumo === "POR VENDEDOR") {
+        fallbackQuery = fallbackQuery.is("origem", null);
+      }
+
+      // Reaplicar filtros de data com datas normalizadas
+      if (startNorm && endNorm) {
+        const start = formatDateOnly(startNorm);
+        const end = formatDateOnly(endNorm);
+        if (start === end) {
+          fallbackQuery = fallbackQuery.eq("data_resumo", start);
+        } else {
+          fallbackQuery = fallbackQuery.gte("data_resumo", start).lte("data_resumo", end);
+        }
+      } else if (startNorm) {
+        const start = formatDateOnly(startNorm);
+        fallbackQuery = fallbackQuery.gte("data_resumo", start);
+      } else if (endNorm) {
+        const end = formatDateOnly(endNorm);
+        fallbackQuery = fallbackQuery.lte("data_resumo", end);
+      }
+
+      const fbRes = await fallbackQuery;
+      data = fbRes.data;
+      error = fbRes.error;
+
+      if (data && data.length > 0) {
+        console.log('✅ Fallback successful using resumo_funil');
+      }
+    }
 
     console.log('📊 Query result:', {
       recordsFound: data?.length || 0,

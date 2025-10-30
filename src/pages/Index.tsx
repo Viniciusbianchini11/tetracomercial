@@ -17,7 +17,7 @@ import { useFunnelData } from "@/hooks/useFunnelData";
 import { useFilterOptions } from "@/hooks/useFilterOptions";
 import { usePersistedFilters } from "@/hooks/usePersistedFilters";
 import { Clock, TrendingUp, Users, Target } from "lucide-react";
-
+import { useMemo } from "react";
 interface PerformanceFilters {
   selectedSeller: string;
   selectedOrigin: string;
@@ -62,13 +62,20 @@ const Index = () => {
     });
 
   const { sellers, origins, tags } = useFilterOptions();
-  const { funnelData } = useFunnelData({
+  const funnelFilters = useMemo(() => ({
     seller: performanceFilters.selectedSeller,
     origin: performanceFilters.selectedOrigin,
     tag: performanceFilters.selectedTag,
     startDate: performanceFilters.startDate,
     endDate: performanceFilters.endDate,
-  });
+  }), [
+    performanceFilters.selectedSeller,
+    performanceFilters.selectedOrigin,
+    performanceFilters.selectedTag,
+    performanceFilters.startDate,
+    performanceFilters.endDate,
+  ]);
+  const { funnelData } = useFunnelData(funnelFilters);
 
   const {
     stats,
