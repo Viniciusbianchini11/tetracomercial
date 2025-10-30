@@ -47,7 +47,7 @@ export const useFunnelData = (filters: Filters) => {
     fetchFunnelData();
   }, [filters]);
 
-  const buildQuery = (tableName: TableName) => {
+  const buildQuery = (tableName: TableName, dateOverride?: { start?: Date; end?: Date }) => {
     let query = supabase.from(tableName).select("*", { count: "exact", head: true });
 
     if (filters.seller !== "all") {
@@ -62,12 +62,18 @@ export const useFunnelData = (filters: Filters) => {
       query = query.ilike("tags", `%${filters.tag}%`);
     }
 
-    if (filters.startDate) {
-      query = query.gte("data_de_criacao", filters.startDate.toISOString());
+    // Use dateOverride se fornecido, caso contrário use filters
+    const startToUse = dateOverride?.start || filters.startDate;
+    const endToUse = dateOverride?.end || filters.endDate;
+
+    if (startToUse) {
+      const startOfDay = new Date(startToUse);
+      startOfDay.setHours(0, 0, 0, 0);
+      query = query.gte("data_de_criacao", startOfDay.toISOString());
     }
 
-    if (filters.endDate) {
-      const endOfDay = new Date(filters.endDate);
+    if (endToUse) {
+      const endOfDay = new Date(endToUse);
       endOfDay.setHours(23, 59, 59, 999);
       query = query.lte("data_de_criacao", endOfDay.toISOString());
     }
@@ -114,6 +120,57 @@ export const useFunnelData = (filters: Filters) => {
       console.error("Error fetching funnel data:", error);
       toast.error("Erro ao carregar dados do funil");
     }
+  };
+
+  const fetchFromRawWithDateRange = async (startNorm?: Date, endNorm?: Date) => {
+    console.log('🧮 Fallback: calculando ao vivo nas tabelas base');
+    
+    const dateOverride = { start: startNorm, end: endNorm };
+    
+    const [
+      entrou, prosp, conex, negoc, agend, fech, ganho, perdido
+    ] = await Promise.all([
+      buildQuery('entrounofunil', dateOverride),
+      buildQuery('contato_prospeccao', dateOverride),
+      buildQuery('contato_conexao', dateOverride),
+      buildQuery('contato_negociacao', dateOverride),
+      buildQuery('contato_agendado', dateOverride),
+      buildQuery('contato_fechado', dateOverride),
+      buildQuery('contato_status_ganho', dateOverride),
+      buildQuery('contato_status_perdido', dateOverride),
+    ]);
+
+    const results = [entrou, prosp, conex, negoc, agend, fech, ganho, perdido];
+    const errorResult = results.find(r => r.error);
+    
+    if (errorResult?.error) {
+      console.error('❌ Erro no fallback ao vivo:', errorResult.error);
+      setFunnelData({
+        entrouNoFunil: 0,
+        prospeccao: 0,
+        conexao: 0,
+        negociacao: 0,
+        agendado: 0,
+        fechado: 0,
+        ganho: 0,
+        perdido: 0
+      });
+      return;
+    }
+
+    const calculatedData = {
+      entrouNoFunil: entrou.count || 0,
+      prospeccao: prosp.count || 0,
+      conexao: conex.count || 0,
+      negociacao: negoc.count || 0,
+      agendado: agend.count || 0,
+      fechado: fech.count || 0,
+      ganho: ganho.count || 0,
+      perdido: perdido.count || 0,
+    };
+
+    console.log('✅ Dados calculados ao vivo:', calculatedData);
+    setFunnelData(calculatedData);
   };
 
   const fetchFromSnapshots = async (startNorm?: Date, endNorm?: Date) => {
@@ -233,67 +290,9 @@ export const useFunnelData = (filters: Filters) => {
         : 'none'
     });
 
-    let { data, error } = await query;
+    const { data, error } = await query;
 
-    // Fallback automático: tentar resumo_funil se não houver dados em resumo_filtros
-    if (!error && (!data || data.length === 0)) {
-      console.log('⚠️ No data in resumo_filtros, trying resumo_funil as fallback');
-      let fallbackQuery = supabaseClient.from("resumo_funil").select("*");
-
-      // Reaplicar filtros de vendedor
-      if (filters.seller !== "all") {
-        const seller = filters.seller.toLowerCase();
-        const isEmail = seller.includes("@");
-        if (isEmail) {
-          fallbackQuery = fallbackQuery.eq("dono_do_negocio", seller);
-        } else {
-          const normalizedName = seller
-            .split(' ')
-            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-            .join(' ');
-          fallbackQuery = fallbackQuery.eq("dono_do_negocio", normalizedName);
-        }
-      } else {
-        fallbackQuery = fallbackQuery.eq("dono_do_negocio", "GERAL");
-      }
-
-      // Reaplicar tipo_resumo
-      fallbackQuery = fallbackQuery.eq("tipo_resumo", tipoResumo);
-
-      // Reaplicar origem
-      if (filters.origin !== "all") {
-        fallbackQuery = fallbackQuery.eq("origem", filters.origin);
-      } else if (tipoResumo === "GERAL" || tipoResumo === "POR VENDEDOR") {
-        fallbackQuery = fallbackQuery.is("origem", null);
-      }
-
-      // Reaplicar filtros de data com datas normalizadas
-      if (startNorm && endNorm) {
-        const start = formatDateOnly(startNorm);
-        const end = formatDateOnly(endNorm);
-        if (start === end) {
-          fallbackQuery = fallbackQuery.eq("data_resumo", start);
-        } else {
-          fallbackQuery = fallbackQuery.gte("data_resumo", start).lte("data_resumo", end);
-        }
-      } else if (startNorm) {
-        const start = formatDateOnly(startNorm);
-        fallbackQuery = fallbackQuery.gte("data_resumo", start);
-      } else if (endNorm) {
-        const end = formatDateOnly(endNorm);
-        fallbackQuery = fallbackQuery.lte("data_resumo", end);
-      }
-
-      const fbRes = await fallbackQuery;
-      data = fbRes.data;
-      error = fbRes.error;
-
-      if (data && data.length > 0) {
-        console.log('✅ Fallback successful using resumo_funil');
-      }
-    }
-
-    console.log('📊 Query result:', {
+    console.log('📊 Query result (resumo_filtros):', {
       recordsFound: data?.length || 0,
       error: error?.message,
       sampleRecord: data?.[0]
@@ -311,6 +310,13 @@ export const useFunnelData = (filters: Filters) => {
         ganho: 0,
         perdido: 0,
       });
+      return;
+    }
+
+    // Se não houver dados no snapshot, calcular ao vivo
+    if (!data || data.length === 0) {
+      console.log('⚠️ Nenhum snapshot encontrado em resumo_filtros, calculando ao vivo...');
+      await fetchFromRawWithDateRange(startNorm, endNorm);
       return;
     }
 
