@@ -638,6 +638,57 @@ export type Database = {
         }
         Relationships: []
       }
+      resumo_filtros: {
+        Row: {
+          agendado: number | null
+          conexao: number | null
+          created_at: string | null
+          data_resumo: string
+          dono_do_negocio: string | null
+          entraram_no_funil: number | null
+          fechado: number | null
+          ganho: number | null
+          id: string
+          negociacao: number | null
+          origem: string | null
+          perdido: number | null
+          prospeccao: number | null
+          tipo_resumo: string
+        }
+        Insert: {
+          agendado?: number | null
+          conexao?: number | null
+          created_at?: string | null
+          data_resumo: string
+          dono_do_negocio?: string | null
+          entraram_no_funil?: number | null
+          fechado?: number | null
+          ganho?: number | null
+          id?: string
+          negociacao?: number | null
+          origem?: string | null
+          perdido?: number | null
+          prospeccao?: number | null
+          tipo_resumo: string
+        }
+        Update: {
+          agendado?: number | null
+          conexao?: number | null
+          created_at?: string | null
+          data_resumo?: string
+          dono_do_negocio?: string | null
+          entraram_no_funil?: number | null
+          fechado?: number | null
+          ganho?: number | null
+          id?: string
+          negociacao?: number | null
+          origem?: string | null
+          perdido?: number | null
+          prospeccao?: number | null
+          tipo_resumo?: string
+        }
+        Relationships: []
+      }
       resumo_funil: {
         Row: {
           agendado: number | null
@@ -649,6 +700,7 @@ export type Database = {
           ganho: number | null
           id: string
           negociacao: number | null
+          origem: string | null
           perdido: number | null
           prospeccao: number | null
           tipo_resumo: string | null
@@ -663,6 +715,7 @@ export type Database = {
           ganho?: number | null
           id?: string
           negociacao?: number | null
+          origem?: string | null
           perdido?: number | null
           prospeccao?: number | null
           tipo_resumo?: string | null
@@ -677,9 +730,43 @@ export type Database = {
           ganho?: number | null
           id?: string
           negociacao?: number | null
+          origem?: string | null
           perdido?: number | null
           prospeccao?: number | null
           tipo_resumo?: string | null
+        }
+        Relationships: []
+      }
+      resumo_vendas_por_origem_vendedor: {
+        Row: {
+          data_ultima_atualizacao: string | null
+          id: number
+          origem: string
+          quantidade_vendas: number
+          tempo_medio_conversao_dias: number | null
+          valor_faturado: number
+          valor_liquido: number
+          vendedor: string
+        }
+        Insert: {
+          data_ultima_atualizacao?: string | null
+          id?: number
+          origem?: string
+          quantidade_vendas?: number
+          tempo_medio_conversao_dias?: number | null
+          valor_faturado?: number
+          valor_liquido?: number
+          vendedor?: string
+        }
+        Update: {
+          data_ultima_atualizacao?: string | null
+          id?: number
+          origem?: string
+          quantidade_vendas?: number
+          tempo_medio_conversao_dias?: number | null
+          valor_faturado?: number
+          valor_liquido?: number
+          vendedor?: string
         }
         Relationships: []
       }
@@ -771,17 +858,15 @@ export type Database = {
       }
     }
     Functions: {
+      gerar_resumo_funil: { Args: never; Returns: undefined }
       get_funnel_counts: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           etapa: string
           quantidade: number
         }[]
       }
-      get_user_seller_name: {
-        Args: { _user_id: string }
-        Returns: string
-      }
+      get_user_seller_name: { Args: { _user_id: string }; Returns: string }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -789,14 +874,20 @@ export type Database = {
         }
         Returns: boolean
       }
+      normalize_phone: { Args: { txt: string }; Returns: string }
+      popula_resumo_funil: { Args: never; Returns: undefined }
+      popula_resumo_funil_today: { Args: never; Returns: undefined }
       populate_leads_daily_snapshot: {
         Args: { p_date: string }
         Returns: undefined
       }
-      populate_leads_snapshot_yesterday: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
+      populate_leads_snapshot_yesterday: { Args: never; Returns: undefined }
+      recalc_resumo_for:
+        | {
+            Args: { origem_in: string; vendedor_in: string }
+            Returns: undefined
+          }
+        | { Args: { p_id: string }; Returns: undefined }
     }
     Enums: {
       app_role: "admin" | "manager" | "seller" | "viewer"
