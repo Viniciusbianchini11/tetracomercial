@@ -129,25 +129,30 @@ export const useFunnelData = (filters: Filters) => {
     const supabaseClient = supabase as any;
     let query = supabaseClient.from("resumo_filtros").select("*");
 
-    // Filtrar por vendedor - aceitar email OU nome normalizado
+    // Filtrar por vendedor
     if (filters.seller !== "all") {
-      // Normalizar: extrair primeiro nome em maiúsculas do email
-      const normalizedName = filters.seller.includes("@")
-        ? filters.seller.split("@")[0].split(".")[0].toUpperCase()
-        : filters.seller.toUpperCase();
+      // Vendedor específico selecionado
+      const seller = filters.seller.toLowerCase();
       
-      // Buscar por email OU nome normalizado
-      query = query.or(`dono_do_negocio.eq.${filters.seller},dono_do_negocio.eq.${normalizedName}`);
+      // Verificar se é um email (contém @)
+      const isEmail = seller.includes("@");
       
-      console.log('🔍 Filtering by seller:', {
-        original: filters.seller,
-        normalized: normalizedName,
-        willMatch: `email="${filters.seller}" OR name="${normalizedName}"`
-      });
+      if (isEmail) {
+        query = query.eq("dono_do_negocio", seller);
+        console.log('🔍 Filtering by seller email:', seller);
+      } else {
+        // É um nome - normalizar para comparação
+        const normalizedName = seller
+          .split(' ')
+          .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+          .join(' ');
+        query = query.eq("dono_do_negocio", normalizedName);
+        console.log('🔍 Filtering by seller name (normalized):', normalizedName);
+      }
     } else {
-      // "Todos Vendedores" = buscar registros com dono_do_negocio vazio/NULL
-      query = query.or("dono_do_negocio.is.null,dono_do_negocio.eq.");
-      console.log('🔍 Filtering: GERAL (all sellers)');
+      // Todos os vendedores: buscar registros com dono_do_negocio = "GERAL" ou vazio/null
+      query = query.or("dono_do_negocio.eq.GERAL,dono_do_negocio.is.null,dono_do_negocio.eq.");
+      console.log('🔍 Filtering: GERAL (all sellers - dono_do_negocio = "GERAL" or null/empty)');
     }
 
     // Determinar tipo_resumo baseado nos filtros aplicados
@@ -175,9 +180,9 @@ export const useFunnelData = (filters: Filters) => {
       query = query.eq("origem", filters.origin);
       console.log('🔍 Filtering by origin:', filters.origin);
     } else {
-      // "Todas as Origens" - buscar registros com origem NULL ou vazio
-      query = query.or("origem.is.null,origem.eq.");
-      console.log('🔍 Origin filter: NULL or empty (aggregated)');
+      // "Todas as Origens" - buscar registros com origem "GERAL" ou vazio/null
+      query = query.or("origem.eq.GERAL,origem.is.null,origem.eq.");
+      console.log('🔍 Origin filter: "GERAL" or null/empty (aggregated)');
     }
 
     // Filtro de data: comparação direta (data_resumo já é tipo date)
@@ -203,6 +208,14 @@ export const useFunnelData = (filters: Filters) => {
       query = query.lte("data_resumo", end);
       console.log('🔍 End date (until):', end);
     }
+    
+    console.log('📊 Final query filters:', {
+      seller: filters.seller,
+      origin: filters.origin,
+      dateRange: filters.startDate && filters.endDate 
+        ? `${formatDateOnly(filters.startDate)} to ${formatDateOnly(filters.endDate)}`
+        : 'none'
+    });
 
     const { data, error } = await query;
 
