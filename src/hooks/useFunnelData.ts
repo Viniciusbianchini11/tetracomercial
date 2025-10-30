@@ -141,7 +141,7 @@ export const useFunnelData = (filters: Filters) => {
         query = query.eq("dono_do_negocio", seller);
         console.log('🔍 Filtering by seller email:', seller);
       } else {
-        // É um nome - normalizar para comparação
+        // É um nome - normalizar para comparação (Title Case)
         const normalizedName = seller
           .split(' ')
           .map(word => word.charAt(0).toUpperCase() + word.slice(1))
@@ -150,39 +150,45 @@ export const useFunnelData = (filters: Filters) => {
         console.log('🔍 Filtering by seller name (normalized):', normalizedName);
       }
     } else {
-      // Todos os vendedores: buscar registros com dono_do_negocio = "GERAL" ou vazio/null
-      query = query.or("dono_do_negocio.eq.GERAL,dono_do_negocio.is.null,dono_do_negocio.eq.");
-      console.log('🔍 Filtering: GERAL (all sellers - dono_do_negocio = "GERAL" or null/empty)');
+      // Todos os vendedores: buscar registros com dono_do_negocio = "GERAL"
+      query = query.eq("dono_do_negocio", "GERAL");
+      console.log('🔍 Filtering: GERAL (all sellers)');
     }
 
     // Determinar tipo_resumo baseado nos filtros aplicados
+    let tipoResumo: string;
     if (filters.seller !== "all" && filters.origin !== "all") {
       // Cenário 1: Vendedor específico + Origem específica
-      query = query.eq("tipo_resumo", "POR VENDEDOR (POR ORIGEM)");
+      tipoResumo = "POR VENDEDOR (POR ORIGEM)";
+      query = query.eq("tipo_resumo", tipoResumo);
       console.log('🔍 Using tipo_resumo: POR VENDEDOR (POR ORIGEM)');
     } else if (filters.seller !== "all" && filters.origin === "all") {
       // Cenário 2: Vendedor específico + Todas as Origens
-      query = query.eq("tipo_resumo", "POR VENDEDOR");
+      tipoResumo = "POR VENDEDOR";
+      query = query.eq("tipo_resumo", tipoResumo);
       console.log('🔍 Using tipo_resumo: POR VENDEDOR');
     } else if (filters.seller === "all" && filters.origin !== "all") {
       // Cenário 3: Todos os vendedores + Origem específica
-      query = query.eq("tipo_resumo", "GERAL");
+      tipoResumo = "GERAL";
+      query = query.eq("tipo_resumo", tipoResumo);
       console.log('🔍 Using tipo_resumo: GERAL (specific origin)');
     } else {
       // Cenário 4: Todos os vendedores + Todas as Origens
-      query = query.eq("tipo_resumo", "GERAL");
+      tipoResumo = "GERAL";
+      query = query.eq("tipo_resumo", tipoResumo);
       console.log('🔍 Using tipo_resumo: GERAL (all origins)');
     }
 
-    // Filtro de origem
+    // Filtrar por origem
     if (filters.origin !== "all") {
-      // Origem específica selecionada
       query = query.eq("origem", filters.origin);
       console.log('🔍 Filtering by origin:', filters.origin);
     } else {
-      // "Todas as Origens" - buscar registros com origem "GERAL" ou vazio/null
-      query = query.or("origem.eq.GERAL,origem.is.null,origem.eq.");
-      console.log('🔍 Origin filter: "GERAL" or null/empty (aggregated)');
+      // "Todas as Origens" - Para agregados (GERAL/POR VENDEDOR), usar origem IS NULL
+      if (tipoResumo === "GERAL" || tipoResumo === "POR VENDEDOR") {
+        query = query.is("origem", null);
+        console.log('🔍 Origin filter: IS NULL (aggregated)');
+      }
     }
 
     // Filtro de data: comparação direta (data_resumo já é tipo date)
@@ -210,14 +216,65 @@ export const useFunnelData = (filters: Filters) => {
     }
     
     console.log('📊 Final query filters:', {
-      seller: filters.seller,
-      origin: filters.origin,
+      tipo_resumo: tipoResumo,
+      dono_do_negocio: filters.seller === "all" ? "GERAL" : filters.seller,
+      origem: filters.origin === "all" ? "NULL" : filters.origin,
       dateRange: filters.startDate && filters.endDate 
         ? `${formatDateOnly(filters.startDate)} to ${formatDateOnly(filters.endDate)}`
         : 'none'
     });
 
-    const { data, error } = await query;
+    let { data, error } = await query;
+    
+    // Fallback de compatibilidade: se não encontrou resultados e origem era "all",
+    // tentar novamente com origem = 'GERAL' (dados legados)
+    if ((!data || data.length === 0) && filters.origin === "all" && !error) {
+      console.log('⚠️ No results with origem IS NULL, trying fallback with origem = "GERAL"');
+      let fallbackQuery = supabaseClient.from("resumo_filtros").select("*");
+      
+      // Reaplicar filtros de vendedor
+      if (filters.seller !== "all") {
+        const seller = filters.seller.toLowerCase();
+        const isEmail = seller.includes("@");
+        if (isEmail) {
+          fallbackQuery = fallbackQuery.eq("dono_do_negocio", seller);
+        } else {
+          const normalizedName = seller
+            .split(' ')
+            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+            .join(' ');
+          fallbackQuery = fallbackQuery.eq("dono_do_negocio", normalizedName);
+        }
+      } else {
+        fallbackQuery = fallbackQuery.eq("dono_do_negocio", "GERAL");
+      }
+      
+      // Reaplicar tipo_resumo
+      fallbackQuery = fallbackQuery.eq("tipo_resumo", tipoResumo);
+      
+      // FALLBACK: usar origem = 'GERAL'
+      fallbackQuery = fallbackQuery.eq("origem", "GERAL");
+      
+      // Reaplicar filtros de data
+      if (filters.startDate && filters.endDate) {
+        const start = formatDateOnly(filters.startDate);
+        const end = formatDateOnly(filters.endDate);
+        if (start === end) {
+          fallbackQuery = fallbackQuery.eq("data_resumo", start);
+        } else {
+          fallbackQuery = fallbackQuery.gte("data_resumo", start);
+          fallbackQuery = fallbackQuery.lte("data_resumo", end);
+        }
+      }
+      
+      const fallbackResult = await fallbackQuery;
+      data = fallbackResult.data;
+      error = fallbackResult.error;
+      
+      if (data && data.length > 0) {
+        console.log('✅ Fallback successful with origem = "GERAL"');
+      }
+    }
 
     console.log('📊 Query result:', {
       recordsFound: data?.length || 0,
