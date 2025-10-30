@@ -16,7 +16,7 @@ import { Header } from "@/components/Header";
 import { useFunnelData } from "@/hooks/useFunnelData";
 import { useFilterOptions } from "@/hooks/useFilterOptions";
 import { usePersistedFilters } from "@/hooks/usePersistedFilters";
-import { Clock, TrendingUp, Users, Target } from "lucide-react";
+import { TrendingUp, Users } from "lucide-react";
 import { useMemo } from "react";
 interface PerformanceFilters {
   selectedSeller: string;
@@ -129,12 +129,7 @@ const Index = () => {
               onClearFilters={clearPerformanceFilters}
             />
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              <MetricCard
-                title="Tempo Médio de Conversão"
-                value="42 dias"
-                icon={Clock}
-              />
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
               <MetricCard
                 title="Taxa de Conversão"
                 value={`${conversionRate}%`}
@@ -144,11 +139,6 @@ const Index = () => {
                 title="Total de Entradas"
                 value={totalEntries}
                 icon={Users}
-              />
-              <MetricCard
-                title="Total de Ganhos"
-                value={funnelData.ganho}
-                icon={Target}
               />
             </div>
 
