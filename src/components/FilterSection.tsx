@@ -49,7 +49,7 @@ export const FilterSection = ({
   
   return (
     <div className="space-y-4 mb-6">
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-4 items-center">
       <Select value={selectedSeller} onValueChange={onSellerChange}>
         <SelectTrigger className="bg-card">
           <SelectValue placeholder="Todos os Vendedores" />
@@ -97,45 +97,31 @@ export const FilterSection = ({
           <Button
             variant="outline"
             className={cn(
-              "justify-start text-left font-normal bg-card",
-              !startDate && "text-muted-foreground"
+              "justify-start text-left font-normal bg-card col-span-2",
+              !startDate && !endDate && "text-muted-foreground"
             )}
           >
             <CalendarIcon className="mr-2 h-4 w-4" />
-            {startDate ? format(startDate, "dd/MM/yyyy", { locale: ptBR }) : "Data Início"}
+            {startDate && endDate ? (
+              `${format(startDate, "dd/MM/yyyy", { locale: ptBR })} - ${format(endDate, "dd/MM/yyyy", { locale: ptBR })}`
+            ) : startDate ? (
+              format(startDate, "dd/MM/yyyy", { locale: ptBR })
+            ) : (
+              "Selecione o período"
+            )}
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-auto p-0 bg-card border-border shadow-lg" align="start">
           <Calendar
-            mode="single"
-            selected={startDate}
-            onSelect={onStartDateChange}
+            mode="range"
+            selected={{ from: startDate, to: endDate }}
+            onSelect={(range) => {
+              onStartDateChange(range?.from);
+              onEndDateChange(range?.to);
+            }}
             initialFocus
             className="pointer-events-auto"
-          />
-        </PopoverContent>
-      </Popover>
-
-      <Popover>
-        <PopoverTrigger asChild>
-          <Button
-            variant="outline"
-            className={cn(
-              "justify-start text-left font-normal bg-card",
-              !endDate && "text-muted-foreground"
-            )}
-          >
-            <CalendarIcon className="mr-2 h-4 w-4" />
-            {endDate ? format(endDate, "dd/MM/yyyy", { locale: ptBR }) : "Data Fim"}
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent className="w-auto p-0 bg-card border-border shadow-lg" align="start">
-          <Calendar
-            mode="single"
-            selected={endDate}
-            onSelect={onEndDateChange}
-            initialFocus
-            className="pointer-events-auto"
+            numberOfMonths={2}
           />
         </PopoverContent>
       </Popover>

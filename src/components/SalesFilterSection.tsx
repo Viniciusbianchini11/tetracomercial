@@ -62,42 +62,32 @@ export const SalesFilterSection = ({
     <div className="bg-card p-6 rounded-lg shadow-sm space-y-4">
       <h3 className="text-lg font-semibold">Filtros</h3>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-        <div className="space-y-2">
-          <label className="text-sm font-medium">Data Inicial</label>
+      <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-5 gap-4">
+        <div className="space-y-2 md:col-span-2">
+          <label className="text-sm font-medium">Período</label>
           <Popover>
             <PopoverTrigger asChild>
               <Button variant="outline" className="w-full justify-start text-left font-normal">
                 <CalendarIcon className="mr-2 h-4 w-4" />
-                {startDate ? format(startDate, "PPP", { locale: ptBR }) : "Selecione"}
+                {startDate && endDate ? (
+                  `${format(startDate, "dd/MM/yyyy", { locale: ptBR })} - ${format(endDate, "dd/MM/yyyy", { locale: ptBR })}`
+                ) : startDate ? (
+                  format(startDate, "dd/MM/yyyy", { locale: ptBR })
+                ) : (
+                  "Selecione o período"
+                )}
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0 bg-card border-border shadow-lg" align="start">
               <Calendar
-                mode="single"
-                selected={startDate}
-                onSelect={onStartDateChange}
+                mode="range"
+                selected={{ from: startDate, to: endDate }}
+                onSelect={(range) => {
+                  onStartDateChange(range?.from);
+                  onEndDateChange(range?.to);
+                }}
                 initialFocus
-              />
-            </PopoverContent>
-          </Popover>
-        </div>
-
-        <div className="space-y-2">
-          <label className="text-sm font-medium">Data Final</label>
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button variant="outline" className="w-full justify-start text-left font-normal">
-                <CalendarIcon className="mr-2 h-4 w-4" />
-                {endDate ? format(endDate, "PPP", { locale: ptBR }) : "Selecione"}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0 bg-card border-border shadow-lg" align="start">
-              <Calendar
-                mode="single"
-                selected={endDate}
-                onSelect={onEndDateChange}
-                initialFocus
+                numberOfMonths={2}
               />
             </PopoverContent>
           </Popover>
