@@ -260,24 +260,24 @@ export const useFunnelData = (filters: Filters) => {
       }
     }
 
-    // Filtro de data: comparação direta (data_resumo já é tipo date)
+    // Filtro de data: usar cast para garantir comparação correta com tipo date
     if (startNorm && endNorm) {
       const start = formatDateOnly(startNorm);
       const end = formatDateOnly(endNorm);
       if (start === end) {
-        query = query.eq("data_resumo", start);
+        query = query.eq("data_resumo::text", start);
         console.log('🔍 Date filter (single day):', start);
       } else {
-        query = query.gte("data_resumo", start).lte("data_resumo", end);
+        query = query.gte("data_resumo::text", start).lte("data_resumo::text", end);
         console.log('🔍 Date range:', { start, end });
       }
     } else if (startNorm) {
       const start = formatDateOnly(startNorm);
-      query = query.gte("data_resumo", start);
+      query = query.gte("data_resumo::text", start);
       console.log('🔍 Start date (open-ended):', start);
     } else if (endNorm) {
       const end = formatDateOnly(endNorm);
-      query = query.lte("data_resumo", end);
+      query = query.lte("data_resumo::text", end);
       console.log('🔍 End date (until):', end);
     }
     
@@ -290,12 +290,16 @@ export const useFunnelData = (filters: Filters) => {
         : 'none'
     });
 
-    const { data, error } = await query;
+    const { data, error, count } = await query;
 
     console.log('📊 Query result (resumo_filtros):', {
       recordsFound: data?.length || 0,
       error: error?.message,
-      sampleRecord: data?.[0]
+      sampleRecord: data?.[0],
+      appliedFilters: {
+        startDate: startNorm ? formatDateOnly(startNorm) : undefined,
+        endDate: endNorm ? formatDateOnly(endNorm) : undefined,
+      }
     });
 
     if (error) {
