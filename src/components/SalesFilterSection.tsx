@@ -72,7 +72,7 @@ export const SalesFilterSection = ({
                 {startDate ? format(startDate, "PPP", { locale: ptBR }) : "Selecione"}
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="start">
+            <PopoverContent className="w-auto p-0 bg-card border-border shadow-lg" align="start">
               <Calendar
                 mode="single"
                 selected={startDate}
@@ -92,7 +92,7 @@ export const SalesFilterSection = ({
                 {endDate ? format(endDate, "PPP", { locale: ptBR }) : "Selecione"}
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="start">
+            <PopoverContent className="w-auto p-0 bg-card border-border shadow-lg" align="start">
               <Calendar
                 mode="single"
                 selected={endDate}

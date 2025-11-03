@@ -26,37 +26,49 @@ export const SalesMetricsCards = ({
   };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
-      <MetricCard
-        title="Faturamento bruto"
-        value={formatCurrency(faturamentoBruto)}
-        icon={DollarSign}
-      />
-      <MetricCard
-        title="Pistas"
-        value={pistas}
-        icon={Target}
-      />
-      <MetricCard
-        title="Vendas"
-        value={vendas}
-        icon={TrendingUp}
-      />
-      <MetricCard
-        title="Taxa de Conversão"
-        value={`${taxaConversao.toFixed(1)}%`}
-        icon={Percent}
-      />
-      <MetricCard
-        title="Recorrentes"
-        value={recorrentes || "-"}
-        icon={RefreshCw}
-      />
-      <MetricCard
-        title="Fora do Lançamento"
-        value={foraLancamento}
-        icon={AlertCircle}
-      />
-    </div>
+    <ul className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
+      <li className="min-h-[14rem] list-none">
+        <MetricCard
+          title="Faturamento bruto"
+          value={formatCurrency(faturamentoBruto)}
+          icon={DollarSign}
+        />
+      </li>
+      <li className="min-h-[14rem] list-none">
+        <MetricCard
+          title="Pistas"
+          value={pistas}
+          icon={Target}
+        />
+      </li>
+      <li className="min-h-[14rem] list-none">
+        <MetricCard
+          title="Vendas"
+          value={vendas}
+          icon={TrendingUp}
+        />
+      </li>
+      <li className="min-h-[14rem] list-none">
+        <MetricCard
+          title="Taxa de Conversão"
+          value={`${taxaConversao.toFixed(1)}%`}
+          icon={Percent}
+        />
+      </li>
+      <li className="min-h-[14rem] list-none">
+        <MetricCard
+          title="Recorrentes"
+          value={recorrentes || "-"}
+          icon={RefreshCw}
+        />
+      </li>
+      <li className="min-h-[14rem] list-none">
+        <MetricCard
+          title="Fora do Lançamento"
+          value={foraLancamento}
+          icon={AlertCircle}
+        />
+      </li>
+    </ul>
   );
 };

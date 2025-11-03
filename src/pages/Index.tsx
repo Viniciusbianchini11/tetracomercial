@@ -129,18 +129,22 @@ const Index = () => {
               onClearFilters={clearPerformanceFilters}
             />
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
-              <MetricCard
-                title="Taxa de Conversão"
-                value={`${conversionRate}%`}
-                icon={TrendingUp}
-              />
-              <MetricCard
-                title="Total de Entradas"
-                value={totalEntries}
-                icon={Users}
-              />
-            </div>
+            <ul className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6">
+              <li className="min-h-[14rem] list-none">
+                <MetricCard
+                  title="Taxa de Conversão"
+                  value={`${conversionRate}%`}
+                  icon={TrendingUp}
+                />
+              </li>
+              <li className="min-h-[14rem] list-none">
+                <MetricCard
+                  title="Total de Entradas"
+                  value={totalEntries}
+                  icon={Users}
+                />
+              </li>
+            </ul>
 
             <Card>
               <CardHeader>

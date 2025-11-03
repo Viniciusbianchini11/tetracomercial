@@ -105,7 +105,7 @@ export const FilterSection = ({
             {startDate ? format(startDate, "dd/MM/yyyy", { locale: ptBR }) : "Data Início"}
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-auto p-0" align="start">
+        <PopoverContent className="w-auto p-0 bg-card border-border shadow-lg" align="start">
           <Calendar
             mode="single"
             selected={startDate}
@@ -129,7 +129,7 @@ export const FilterSection = ({
             {endDate ? format(endDate, "dd/MM/yyyy", { locale: ptBR }) : "Data Fim"}
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-auto p-0" align="start">
+        <PopoverContent className="w-auto p-0 bg-card border-border shadow-lg" align="start">
           <Calendar
             mode="single"
             selected={endDate}
