@@ -2,6 +2,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { MetricCard } from "@/components/MetricCard";
 import { FunnelStage } from "@/components/FunnelStage";
+import { VisualFunnel } from "@/components/VisualFunnel";
 import { FilterSection } from "@/components/FilterSection";
 import { SalesFilterSection } from "@/components/SalesFilterSection";
 import { SalesTable } from "@/components/SalesTable";
@@ -129,65 +130,73 @@ const Index = () => {
               onClearFilters={clearPerformanceFilters}
             />
 
-            <ul className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6">
-              <li className="min-h-[14rem] list-none">
-                <MetricCard
-                  title="Taxa de Conversão"
-                  value={`${conversionRate}%`}
-                  icon={TrendingUp}
-                />
-              </li>
-              <li className="min-h-[14rem] list-none">
-                <MetricCard
-                  title="Total de Entradas"
-                  value={totalEntries}
-                  icon={Users}
-                />
-              </li>
-            </ul>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Left side - Visual Funnel */}
+              <Card className="relative">
+                <CardHeader>
+                  <CardTitle className="text-2xl">Funil de Vendas</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <VisualFunnel
+                    stages={[
+                      {
+                        label: "Entrou no Funil",
+                        count: funnelData.entrouNoFunil,
+                        percentage: calculatePercentage(funnelData.entrouNoFunil),
+                      },
+                      {
+                        label: "Prospecção",
+                        count: funnelData.prospeccao,
+                        percentage: calculatePercentage(funnelData.prospeccao),
+                      },
+                      {
+                        label: "Negociação",
+                        count: funnelData.negociacao,
+                        percentage: calculatePercentage(funnelData.negociacao),
+                      },
+                      {
+                        label: "Fechado",
+                        count: funnelData.fechado,
+                        percentage: calculatePercentage(funnelData.fechado),
+                      },
+                    ]}
+                  />
+                </CardContent>
+              </Card>
 
+              {/* Right side - Metrics */}
+              <div className="flex flex-col gap-6">
+                <ul className="grid grid-cols-1 gap-6 list-none">
+                  <li className="min-h-[14rem]">
+                    <MetricCard
+                      title="Taxa de Conversão"
+                      value={`${conversionRate}%`}
+                      icon={TrendingUp}
+                    />
+                  </li>
+                  <li className="min-h-[14rem]">
+                    <MetricCard
+                      title="Total de Entradas"
+                      value={totalEntries}
+                      icon={Users}
+                    />
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            {/* Additional funnel stages */}
             <Card>
               <CardHeader>
-                <CardTitle className="text-2xl">Funil de Vendas</CardTitle>
+                <CardTitle className="text-xl">Detalhes do Funil</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                    <FunnelStage
-                      label="Entrou no Funil"
-                      count={funnelData.entrouNoFunil}
-                    />
-                    <FunnelStage
-                      label="Prospecção"
-                      count={funnelData.prospeccao}
-                    />
-                    <FunnelStage
-                      label="Conexão"
-                      count={funnelData.conexao}
-                    />
-                    <FunnelStage
-                      label="Negociação"
-                      count={funnelData.negociacao}
-                    />
-                    <FunnelStage
-                      label="Agendado"
-                      count={funnelData.agendado}
-                    />
-                    <FunnelStage
-                      label="Fechado"
-                      count={funnelData.fechado}
-                    />
-
-                    <div className="grid grid-cols-2 gap-8 mt-8 pt-8 border-t">
-                      <div className="text-center">
-                        <p className="text-4xl font-bold text-foreground">{funnelData.ganho}</p>
-                        <p className="text-sm text-muted-foreground mt-2">Ganho</p>
-                      </div>
-                      <div className="text-center">
-                        <p className="text-4xl font-bold text-foreground">{funnelData.perdido}</p>
-                        <p className="text-sm text-muted-foreground mt-2">Perdido</p>
-                      </div>
-                    </div>
-                  </div>
+                  <FunnelStage label="Conexão" count={funnelData.conexao} />
+                  <FunnelStage label="Agendado" count={funnelData.agendado} />
+                  <FunnelStage label="Ganho" count={funnelData.ganho} />
+                  <FunnelStage label="Perdido" count={funnelData.perdido} />
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
