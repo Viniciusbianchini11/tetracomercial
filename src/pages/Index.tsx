@@ -150,14 +150,14 @@ const Index = () => {
                         percentage: calculatePercentage(funnelData.prospeccao),
                       },
                       {
-                        label: "Negociação",
-                        count: funnelData.negociacao,
-                        percentage: calculatePercentage(funnelData.negociacao),
+                        label: "Conexão",
+                        count: funnelData.conexao,
+                        percentage: calculatePercentage(funnelData.conexao),
                       },
                       {
-                        label: "Fechado",
-                        count: funnelData.fechado,
-                        percentage: calculatePercentage(funnelData.fechado),
+                        label: "Agendado",
+                        count: funnelData.agendado,
+                        percentage: calculatePercentage(funnelData.agendado),
                       },
                     ]}
                   />
@@ -182,6 +182,22 @@ const Index = () => {
                     />
                   </li>
                 </ul>
+                
+                {/* Ganho e Perdido Card */}
+                <Card>
+                  <CardContent className="pt-6">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="text-center p-4 rounded-lg bg-muted/50">
+                        <p className="text-3xl font-bold text-foreground">{funnelData.ganho}</p>
+                        <p className="text-sm text-muted-foreground mt-2">Ganho</p>
+                      </div>
+                      <div className="text-center p-4 rounded-lg bg-muted/50">
+                        <p className="text-3xl font-bold text-foreground">{funnelData.perdido}</p>
+                        <p className="text-sm text-muted-foreground mt-2">Perdido</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
               </div>
             </div>
 
@@ -191,11 +207,9 @@ const Index = () => {
                 <CardTitle className="text-xl">Detalhes do Funil</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                  <FunnelStage label="Conexão" count={funnelData.conexao} />
-                  <FunnelStage label="Agendado" count={funnelData.agendado} />
-                  <FunnelStage label="Ganho" count={funnelData.ganho} />
-                  <FunnelStage label="Perdido" count={funnelData.perdido} />
+                <div className="grid grid-cols-2 md:grid-cols-2 gap-3">
+                  <FunnelStage label="Negociação" count={funnelData.negociacao} />
+                  <FunnelStage label="Fechado" count={funnelData.fechado} />
                 </div>
               </CardContent>
             </Card>
