@@ -132,7 +132,7 @@ const Index = () => {
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Left side - Visual Funnel */}
-              <Card className="relative">
+              <Card className="relative overflow-hidden">
                 <CardHeader>
                   <CardTitle className="text-2xl">Funil de Vendas</CardTitle>
                 </CardHeader>
@@ -155,9 +155,19 @@ const Index = () => {
                         percentage: calculatePercentage(funnelData.conexao),
                       },
                       {
+                        label: "Negociação",
+                        count: funnelData.negociacao,
+                        percentage: calculatePercentage(funnelData.negociacao),
+                      },
+                      {
                         label: "Agendado",
                         count: funnelData.agendado,
                         percentage: calculatePercentage(funnelData.agendado),
+                      },
+                      {
+                        label: "Fechado",
+                        count: funnelData.fechado,
+                        percentage: calculatePercentage(funnelData.fechado),
                       },
                     ]}
                   />
@@ -201,18 +211,6 @@ const Index = () => {
               </div>
             </div>
 
-            {/* Additional funnel stages */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-xl">Detalhes do Funil</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-2 md:grid-cols-2 gap-3">
-                  <FunnelStage label="Negociação" count={funnelData.negociacao} />
-                  <FunnelStage label="Fechado" count={funnelData.fechado} />
-                </div>
-              </CardContent>
-            </Card>
           </TabsContent>
 
           <TabsContent value="acompanhamento" className="space-y-4">
