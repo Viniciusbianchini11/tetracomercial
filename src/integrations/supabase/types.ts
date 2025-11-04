@@ -530,6 +530,33 @@ export type Database = {
         }
         Relationships: []
       }
+      ligacoes_diarias: {
+        Row: {
+          conexoes: number
+          created_at: string | null
+          data_referencia: string
+          id: string
+          nome_vendedor: string
+          tentativas: number
+        }
+        Insert: {
+          conexoes?: number
+          created_at?: string | null
+          data_referencia: string
+          id?: string
+          nome_vendedor: string
+          tentativas?: number
+        }
+        Update: {
+          conexoes?: number
+          created_at?: string | null
+          data_referencia?: string
+          id?: string
+          nome_vendedor?: string
+          tentativas?: number
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
