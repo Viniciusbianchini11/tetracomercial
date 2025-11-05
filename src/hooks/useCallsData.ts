@@ -10,18 +10,32 @@ interface CallsData {
   conexoes: number;
 }
 
-export const useCallsData = () => {
+interface CallsFilters {
+  startDate?: Date;
+  endDate?: Date;
+}
+
+export const useCallsData = (filters?: CallsFilters) => {
   const [callsData, setCallsData] = useState<CallsData[]>([]);
   const [loading, setLoading] = useState(true);
 
   const fetchCallsData = async () => {
     try {
       setLoading(true);
-      const { data, error } = await supabase
+      let query = supabase
         .from("ligacoes_diarias")
-        .select("*")
-        .order("data_referencia", { ascending: false })
-        .limit(10);
+        .select("*");
+
+      // Aplicar filtros de data se fornecidos
+      if (filters?.startDate) {
+        query = query.gte("data_referencia", filters.startDate.toISOString().split('T')[0]);
+      }
+      if (filters?.endDate) {
+        query = query.lte("data_referencia", filters.endDate.toISOString().split('T')[0]);
+      }
+
+      const { data, error } = await query
+        .order("data_referencia", { ascending: false });
 
       if (error) {
         console.error("Error fetching calls data:", error);
@@ -42,7 +56,7 @@ export const useCallsData = () => {
 
   useEffect(() => {
     fetchCallsData();
-  }, []);
+  }, [filters?.startDate, filters?.endDate]);
 
   return { callsData, loading, refetch: fetchCallsData };
 };

@@ -4,8 +4,13 @@ import { useCallsData } from "@/hooks/useCallsData";
 import { Skeleton } from "@/components/ui/skeleton";
 import { CSVUpload } from "@/components/CSVUpload";
 
-export const CallsChart = () => {
-  const { callsData, loading, refetch } = useCallsData();
+interface CallsChartProps {
+  startDate?: Date;
+  endDate?: Date;
+}
+
+export const CallsChart = ({ startDate, endDate }: CallsChartProps) => {
+  const { callsData, loading, refetch } = useCallsData({ startDate, endDate });
 
   if (loading) {
     return <Skeleton className="h-[400px] w-full" />;

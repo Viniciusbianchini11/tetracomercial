@@ -196,7 +196,10 @@ const Index = () => {
                 </ul>
                 
                 {/* Visualização de Ligações */}
-                <CallsChart />
+                <CallsChart 
+                  startDate={performanceFilters.startDate}
+                  endDate={performanceFilters.endDate}
+                />
                 
                 {/* Ganho e Perdido Card */}
                 <Card>
