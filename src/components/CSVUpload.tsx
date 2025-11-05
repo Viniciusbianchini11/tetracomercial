@@ -27,6 +27,12 @@ export const CSVUpload = ({ onUploadSuccess }: CSVUploadProps) => {
       const text = await file.text();
       const lines = text.split('\n').filter(line => line.trim());
       
+      if (lines.length < 2) {
+        toast.error("Arquivo CSV vazio ou inválido");
+        setUploading(false);
+        return;
+      }
+      
       // Skip header
       const dataLines = lines.slice(1);
       
@@ -36,14 +42,17 @@ export const CSVUpload = ({ onUploadSuccess }: CSVUploadProps) => {
       const dataReferenciaStr = dataReferencia.toISOString().split('T')[0];
 
       const records = dataLines.map(line => {
-        const [nome, tentativas, conexoes] = line.split(',').map(v => v.trim());
+        // Remove aspas e faz split por vírgula
+        const values = line.split(',').map(v => v.trim().replace(/^"|"$/g, ''));
+        const [nome, tentativas, conexoes] = values;
+        
         return {
           data_referencia: dataReferenciaStr,
           nome_vendedor: nome,
           tentativas: parseInt(tentativas) || 0,
           conexoes: parseInt(conexoes) || 0,
         };
-      }).filter(record => record.nome_vendedor);
+      }).filter(record => record.nome_vendedor && record.nome_vendedor.length > 0);
 
       if (records.length === 0) {
         toast.error("Nenhum dado válido encontrado no CSV");
@@ -51,7 +60,9 @@ export const CSVUpload = ({ onUploadSuccess }: CSVUploadProps) => {
         return;
       }
 
-      const { error } = await supabase
+      console.log("Importing records:", records);
+
+      const { data, error } = await supabase
         .from("ligacoes_diarias")
         .upsert(records, { 
           onConflict: 'data_referencia,nome_vendedor',
@@ -60,14 +71,14 @@ export const CSVUpload = ({ onUploadSuccess }: CSVUploadProps) => {
 
       if (error) {
         console.error("Error uploading CSV:", error);
-        toast.error("Erro ao fazer upload do CSV");
+        toast.error(`Erro ao fazer upload: ${error.message}`);
       } else {
         toast.success(`${records.length} registros importados com sucesso`);
         onUploadSuccess();
       }
     } catch (error) {
       console.error("Error processing CSV:", error);
-      toast.error("Erro ao processar arquivo CSV");
+      toast.error(`Erro ao processar arquivo: ${error instanceof Error ? error.message : 'Erro desconhecido'}`);
     } finally {
       setUploading(false);
       event.target.value = '';
