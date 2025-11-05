@@ -17,6 +17,7 @@ import { Header } from "@/components/Header";
 import { useFunnelData } from "@/hooks/useFunnelData";
 import { useFilterOptions } from "@/hooks/useFilterOptions";
 import { usePersistedFilters } from "@/hooks/usePersistedFilters";
+import { CallsChart } from "@/components/CallsChart";
 import { TrendingUp, Users } from "lucide-react";
 import { useMemo } from "react";
 interface PerformanceFilters {
@@ -176,7 +177,8 @@ const Index = () => {
 
               {/* Right side - Metrics */}
               <div className="flex flex-col gap-6">
-                <ul className="grid grid-cols-1 gap-6 list-none">
+                {/* Taxa de Conversão e Entradas lado a lado */}
+                <ul className="grid grid-cols-2 gap-4 list-none">
                   <li className="min-h-[14rem]">
                     <MetricCard
                       title="Taxa de Conversão"
@@ -192,6 +194,9 @@ const Index = () => {
                     />
                   </li>
                 </ul>
+                
+                {/* Visualização de Ligações */}
+                <CallsChart />
                 
                 {/* Ganho e Perdido Card */}
                 <Card>
