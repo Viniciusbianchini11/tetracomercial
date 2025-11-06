@@ -24,7 +24,8 @@ export const useCallsData = (filters?: CallsFilters) => {
       setLoading(true);
       let query = supabase
         .from("ligacoes_diarias")
-        .select("*");
+        .select("*")
+        .neq("nome_vendedor", "gerente comercial");
 
       // Aplicar filtros de data se fornecidos
       if (filters?.startDate) {
@@ -44,7 +45,25 @@ export const useCallsData = (filters?: CallsFilters) => {
         return;
       }
 
-      setCallsData(data || []);
+      // Agregar dados por vendedor quando houver múltiplos dias
+      const aggregatedData = (data || []).reduce((acc, item) => {
+        const existing = acc.find(x => x.nome_vendedor === item.nome_vendedor);
+        if (existing) {
+          existing.tentativas += item.tentativas;
+          existing.conexoes += item.conexoes;
+        } else {
+          acc.push({
+            id: item.id,
+            nome_vendedor: item.nome_vendedor,
+            tentativas: item.tentativas,
+            conexoes: item.conexoes,
+            data_referencia: item.data_referencia
+          });
+        }
+        return acc;
+      }, [] as CallsData[]);
+
+      setCallsData(aggregatedData);
     } catch (error) {
       console.error("Error fetching calls data:", error);
       toast.error("Erro ao carregar dados de ligações");
