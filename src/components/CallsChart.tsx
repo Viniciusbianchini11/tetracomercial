@@ -22,8 +22,8 @@ export const CallsChart = ({ startDate, endDate }: CallsChartProps) => {
   const totalConexoes = callsData.reduce((sum, item) => sum + item.conexoes, 0);
   const taxaConexao = totalTentativas > 0 ? ((totalConexoes / totalTentativas) * 100).toFixed(1) : "0";
 
-  // Ordenar por conexões (maior para menor) e pegar top 5
-  const sortedData = [...callsData].sort((a, b) => b.conexoes - a.conexoes).slice(0, 5);
+  // Ordenar por conexões (maior para menor)
+  const sortedData = [...callsData].sort((a, b) => b.conexoes - a.conexoes);
 
   const getPerformanceBadge = (taxa: number) => {
     if (taxa >= 50) return <Badge className="bg-green-500/10 text-green-600 hover:bg-green-500/20 text-xs px-1 py-0">Excelente</Badge>;

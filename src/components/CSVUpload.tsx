@@ -60,7 +60,9 @@ export const CSVUpload = ({ onUploadSuccess }: CSVUploadProps) => {
         return;
       }
 
-      console.log("Importing records:", records);
+      console.log("📤 Importing records:", records);
+      console.log("📅 Data de referência:", dataReferenciaStr);
+      console.log("📊 Total de registros:", records.length);
 
       const { data, error } = await supabase
         .from("ligacoes_diarias")
@@ -70,9 +72,12 @@ export const CSVUpload = ({ onUploadSuccess }: CSVUploadProps) => {
         });
 
       if (error) {
-        console.error("Error uploading CSV:", error);
+        console.error("❌ Error uploading CSV:", error);
+        console.error("❌ Error details:", JSON.stringify(error, null, 2));
         toast.error(`Erro ao fazer upload: ${error.message}`);
       } else {
+        console.log("✅ Upload successful! Data:", data);
+        console.log("✅ Records imported:", records.length);
         toast.success(`${records.length} registros importados com sucesso`);
         onUploadSuccess();
       }
