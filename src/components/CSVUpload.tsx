@@ -39,7 +39,11 @@ export const CSVUpload = ({ onUploadSuccess }: CSVUploadProps) => {
       // Data de referência é sempre 1 dia antes de hoje
       const dataReferencia = new Date();
       dataReferencia.setDate(dataReferencia.getDate() - 1);
-      const dataReferenciaStr = dataReferencia.toISOString().split('T')[0];
+      // Formatar data localmente para evitar problemas de timezone
+      const year = dataReferencia.getFullYear();
+      const month = String(dataReferencia.getMonth() + 1).padStart(2, '0');
+      const day = String(dataReferencia.getDate()).padStart(2, '0');
+      const dataReferenciaStr = `${year}-${month}-${day}`;
 
       const records = dataLines.map(line => {
         // Remove aspas e faz split por vírgula
@@ -52,7 +56,12 @@ export const CSVUpload = ({ onUploadSuccess }: CSVUploadProps) => {
           tentativas: parseInt(tentativas) || 0,
           conexoes: parseInt(conexoes) || 0,
         };
-      }).filter(record => record.nome_vendedor && record.nome_vendedor.length > 0);
+      }).filter(record => {
+        if (!record.nome_vendedor || record.nome_vendedor.length === 0) return false;
+        const nome = record.nome_vendedor.toLowerCase().trim();
+        // Filtrar "gerente comercial" e variações
+        return !nome.includes('gerente') && !nome.includes('comercial');
+      });
 
       if (records.length === 0) {
         toast.error("Nenhum dado válido encontrado no CSV");

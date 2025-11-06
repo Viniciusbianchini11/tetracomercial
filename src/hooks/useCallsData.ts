@@ -27,12 +27,20 @@ export const useCallsData = (filters?: CallsFilters) => {
         .select("*")
         .not("nome_vendedor", "ilike", "%gerente comercial%");
 
-      // Aplicar filtros de data se fornecidos
+      // Aplicar filtros de data se fornecidos (formatação local para evitar problemas de timezone)
       if (filters?.startDate) {
-        query = query.gte("data_referencia", filters.startDate.toISOString().split('T')[0]);
+        const year = filters.startDate.getFullYear();
+        const month = String(filters.startDate.getMonth() + 1).padStart(2, '0');
+        const day = String(filters.startDate.getDate()).padStart(2, '0');
+        const startDateStr = `${year}-${month}-${day}`;
+        query = query.gte("data_referencia", startDateStr);
       }
       if (filters?.endDate) {
-        query = query.lte("data_referencia", filters.endDate.toISOString().split('T')[0]);
+        const year = filters.endDate.getFullYear();
+        const month = String(filters.endDate.getMonth() + 1).padStart(2, '0');
+        const day = String(filters.endDate.getDate()).padStart(2, '0');
+        const endDateStr = `${year}-${month}-${day}`;
+        query = query.lte("data_referencia", endDateStr);
       }
 
       const { data, error } = await query
