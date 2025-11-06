@@ -25,7 +25,7 @@ export const useCallsData = (filters?: CallsFilters) => {
       let query = supabase
         .from("ligacoes_diarias")
         .select("*")
-        .neq("nome_vendedor", "gerente comercial");
+        .not("nome_vendedor", "ilike", "%gerente comercial%");
 
       // Aplicar filtros de data se fornecidos
       if (filters?.startDate) {
@@ -45,8 +45,14 @@ export const useCallsData = (filters?: CallsFilters) => {
         return;
       }
 
+      // Filtro extra no cliente (case-insensitive e espaços) para garantir remoção
+      const filtered = (data || []).filter((item: any) => {
+        const n = (item.nome_vendedor || "").trim().toLowerCase();
+        return n !== "gerente comercial" && !n.includes("gerente comercial");
+      });
+
       // Agregar dados por vendedor quando houver múltiplos dias
-      const aggregatedData = (data || []).reduce((acc, item) => {
+      const aggregatedData = filtered.reduce((acc: CallsData[], item: any) => {
         const existing = acc.find(x => x.nome_vendedor === item.nome_vendedor);
         if (existing) {
           existing.tentativas += item.tentativas;
