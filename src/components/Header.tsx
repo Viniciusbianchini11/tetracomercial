@@ -9,16 +9,17 @@ export const Header = () => {
 
   return (
     <div className="border-b bg-background">
-      <div className="max-w-7xl mx-auto px-8 py-4">
+      <div className="px-4 py-2">
         <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold text-foreground">Dashboard Comercial</h1>
-          <div className="flex gap-2">
+          <h1 className="text-lg font-bold text-foreground">Dashboard Comercial</h1>
+          <div className="flex gap-1.5">
             <Link to="/">
               <Button 
                 variant={location.pathname === "/" ? "default" : "outline"}
                 size="sm"
+                className="h-8 text-xs"
               >
-                <LayoutDashboard className="mr-2 h-4 w-4" />
+                <LayoutDashboard className="mr-1.5 h-3 w-3" />
                 Geral
               </Button>
             </Link>
@@ -26,9 +27,10 @@ export const Header = () => {
               <Button 
                 variant={location.pathname === "/vendedor" ? "default" : "outline"}
                 size="sm"
+                className="h-8 text-xs"
               >
-                <User className="mr-2 h-4 w-4" />
-                Meu Desempenho
+                <User className="mr-1.5 h-3 w-3" />
+                Vendedor
               </Button>
             </Link>
             {user && (
@@ -36,8 +38,9 @@ export const Header = () => {
                 variant="outline"
                 size="sm"
                 onClick={logout}
+                className="h-8 text-xs"
               >
-                <LogOut className="mr-2 h-4 w-4" />
+                <LogOut className="mr-1.5 h-3 w-3" />
                 Sair
               </Button>
             )}

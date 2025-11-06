@@ -103,17 +103,16 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="h-screen overflow-hidden bg-background flex flex-col">
       <Header />
-      <div className="max-w-7xl mx-auto p-8">
-
-        <Tabs defaultValue="performance" className="w-full">
-          <TabsList className="mb-6">
-            <TabsTrigger value="performance">Performance</TabsTrigger>
-            <TabsTrigger value="acompanhamento">Acompanhamento de vendas</TabsTrigger>
+      <div className="flex-1 overflow-y-auto px-4 py-3">
+        <Tabs defaultValue="performance" className="w-full h-full">
+          <TabsList className="mb-3 h-9">
+            <TabsTrigger value="performance" className="text-sm">Performance</TabsTrigger>
+            <TabsTrigger value="acompanhamento" className="text-sm">Vendas</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="performance" className="space-y-6">
+          <TabsContent value="performance" className="space-y-3 mt-0">
             <FilterSection
               sellers={sellers}
               origins={origins}
@@ -131,13 +130,13 @@ const Index = () => {
               onClearFilters={clearPerformanceFilters}
             />
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="grid grid-cols-2 gap-3">
               {/* Left side - Visual Funnel */}
               <Card className="relative overflow-hidden">
-                <CardHeader>
-                  <CardTitle className="text-2xl">Funil de Vendas</CardTitle>
+                <CardHeader className="pb-2 pt-3 px-3">
+                  <CardTitle className="text-base">Funil de Vendas</CardTitle>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="px-3 pb-3">
                   <VisualFunnel
                     stages={[
                       {
@@ -176,52 +175,56 @@ const Index = () => {
               </Card>
 
               {/* Right side - Metrics */}
-              <div className="flex flex-col gap-6">
+              <div className="flex flex-col gap-3">
                 {/* Taxa de Conversão e Entradas lado a lado */}
-                <ul className="grid grid-cols-2 gap-4 list-none">
-                  <li className="min-h-[14rem]">
-                    <MetricCard
-                      title="Taxa de Conversão"
-                      value={`${conversionRate}%`}
-                      icon={TrendingUp}
-                    />
+                <ul className="grid grid-cols-2 gap-2 list-none">
+                  <li>
+                    <Card className="h-full">
+                      <CardContent className="p-3 flex flex-col items-center justify-center h-full">
+                        <TrendingUp className="h-6 w-6 text-primary mb-1" />
+                        <p className="text-2xl font-bold text-foreground">{conversionRate}%</p>
+                        <p className="text-xs text-muted-foreground mt-1">Taxa Conversão</p>
+                      </CardContent>
+                    </Card>
                   </li>
-                  <li className="min-h-[14rem]">
-                    <MetricCard
-                      title="Total de Entradas"
-                      value={totalEntries}
-                      icon={Users}
-                    />
+                  <li>
+                    <Card className="h-full">
+                      <CardContent className="p-3 flex flex-col items-center justify-center h-full">
+                        <Users className="h-6 w-6 text-primary mb-1" />
+                        <p className="text-2xl font-bold text-foreground">{totalEntries}</p>
+                        <p className="text-xs text-muted-foreground mt-1">Total Entradas</p>
+                      </CardContent>
+                    </Card>
                   </li>
                 </ul>
                 
+                {/* Ganho e Perdido Card */}
+                <Card>
+                  <CardContent className="p-3">
+                    <div className="grid grid-cols-2 gap-2">
+                      <div className="text-center p-2 rounded-lg bg-muted/50">
+                        <p className="text-2xl font-bold text-foreground">{funnelData.ganho}</p>
+                        <p className="text-xs text-muted-foreground mt-1">Ganho</p>
+                      </div>
+                      <div className="text-center p-2 rounded-lg bg-muted/50">
+                        <p className="text-2xl font-bold text-foreground">{funnelData.perdido}</p>
+                        <p className="text-xs text-muted-foreground mt-1">Perdido</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
                 {/* Visualização de Ligações */}
                 <CallsChart 
                   startDate={performanceFilters.startDate}
                   endDate={performanceFilters.endDate}
                 />
-                
-                {/* Ganho e Perdido Card */}
-                <Card>
-                  <CardContent className="pt-6">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="text-center p-4 rounded-lg bg-muted/50">
-                        <p className="text-3xl font-bold text-foreground">{funnelData.ganho}</p>
-                        <p className="text-sm text-muted-foreground mt-2">Ganho</p>
-                      </div>
-                      <div className="text-center p-4 rounded-lg bg-muted/50">
-                        <p className="text-3xl font-bold text-foreground">{funnelData.perdido}</p>
-                        <p className="text-sm text-muted-foreground mt-2">Perdido</p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
               </div>
             </div>
 
           </TabsContent>
 
-          <TabsContent value="acompanhamento" className="space-y-4">
+          <TabsContent value="acompanhamento" className="space-y-3 mt-0">
             <SalesFilterSection
               startDate={salesFilters.salesStartDate}
               endDate={salesFilters.salesEndDate}
@@ -237,13 +240,13 @@ const Index = () => {
             />
             
             {statsLoading ? (
-              <div className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
+              <div className="space-y-3">
+                <div className="grid grid-cols-6 gap-2">
                   {[...Array(6)].map((_, i) => (
-                    <Skeleton key={i} className="h-24" />
+                    <Skeleton key={i} className="h-16" />
                   ))}
                 </div>
-                <Skeleton className="h-[400px]" />
+                <Skeleton className="h-[300px]" />
               </div>
             ) : (
               <>
@@ -256,7 +259,7 @@ const Index = () => {
                   foraLancamento={stats.foraLancamento}
                 />
                 
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                <div className="grid grid-cols-3 gap-3">
                   <TopSellersChart sellers={topSellers} />
                   <SellersRanking
                     title="Ranking Lançamento"
@@ -266,7 +269,7 @@ const Index = () => {
                   <GoalsCard />
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                <div className="grid grid-cols-3 gap-3">
                   <SellersRanking
                     title="Classificação Mensal"
                     sellers={monthlyRanking}
