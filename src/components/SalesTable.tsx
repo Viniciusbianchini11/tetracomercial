@@ -43,10 +43,12 @@ export const SalesTable = () => {
 
   const formatCurrency = (value: number | null) => {
     if (!value) return "R$ 0,00";
+    const numValue = typeof value === "string" ? parseFloat(value) : value;
+    if (isNaN(numValue)) return "R$ 0,00";
     return new Intl.NumberFormat("pt-BR", {
       style: "currency",
       currency: "BRL",
-    }).format(value);
+    }).format(numValue);
   };
 
   const formatDate = (date: string | null) => {
@@ -94,7 +96,7 @@ export const SalesTable = () => {
                     {formatCurrency(sale["VALOR FATURADO (CHEIO)"])}
                   </TableCell>
                   <TableCell className="text-right font-medium">
-                    {formatCurrency(sale["VALOR FIINAL"] || sale["VALOR FINAL"])}
+                    {formatCurrency(sale["VALOR FINAL"])}
                   </TableCell>
                 </TableRow>
               ))}

@@ -10,6 +10,8 @@ interface SalesRecord {
   VENDEDOR: string | null;
   PRODUTO: string | null;
   "VALOR LIQUIDO": number | null;
+  "VALOR FATURADO (CHEIO)": number | null;
+  "VALOR FINAL": number | null;
   DATA: string | null;
   "MÊS/ANO": string | null;
 }
@@ -27,7 +29,7 @@ export const useSalesData = () => {
       setLoading(true);
       const { data, error } = await supabase
         .from("relatorio_faturamento")
-        .select("id, NOME, \"E-MAIL\", TELEFONE, VENDEDOR, PRODUTO, \"VALOR LIQUIDO\", DATA, \"MÊS/ANO\"")
+        .select("id, NOME, \"E-MAIL\", TELEFONE, VENDEDOR, PRODUTO, \"VALOR LIQUIDO\", \"VALOR FATURADO (CHEIO)\", \"VALOR FINAL\", DATA, \"MÊS/ANO\"")
         .order("DATA", { ascending: false })
         .limit(100);
 
