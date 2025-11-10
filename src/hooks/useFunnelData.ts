@@ -343,9 +343,20 @@ export const useFunnelData = (filters: Filters) => {
       aggregated.negociacao += row.negociacao || 0;
       aggregated.agendado += row.agendado || 0;
       aggregated.fechado += row.fechado || 0;
-      aggregated.ganho += row.ganho || 0;
+      // Não usar ganho do snapshot - será buscado em tempo real
       aggregated.perdido += row.perdido || 0;
     });
+
+    // Buscar ganho em tempo real da tabela contato_status_ganho
+    const dateOverride = { start: startNorm, end: endNorm };
+    const ganhoRealTimeResult = await buildQuery('contato_status_ganho', dateOverride);
+    
+    if (ganhoRealTimeResult.error) {
+      console.error('❌ Erro ao buscar ganho em tempo real:', ganhoRealTimeResult.error);
+    } else {
+      aggregated.ganho = ganhoRealTimeResult.count || 0;
+      console.log('✅ Ganho buscado em tempo real:', aggregated.ganho);
+    }
 
     setFunnelData(aggregated);
   };
