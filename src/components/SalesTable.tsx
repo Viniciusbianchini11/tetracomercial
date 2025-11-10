@@ -81,6 +81,7 @@ export const SalesTable = () => {
                 <TableHead>Produto</TableHead>
                 <TableHead className="text-right">Valor Faturado</TableHead>
                 <TableHead className="text-right">Valor Ticket</TableHead>
+                <TableHead className="text-right">Valor Comissão</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -97,6 +98,9 @@ export const SalesTable = () => {
                   </TableCell>
                   <TableCell className="text-right font-medium">
                     {formatCurrency(sale["VALOR FINAL"])}
+                  </TableCell>
+                  <TableCell className="text-right font-medium">
+                    {formatCurrency(sale["VALOR BASE PREMIACAO"])}
                   </TableCell>
                 </TableRow>
               ))}
