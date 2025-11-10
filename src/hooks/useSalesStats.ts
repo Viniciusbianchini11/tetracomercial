@@ -2,6 +2,27 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
+// Helper functions para trabalhar com datas independente do formato
+const parseDbDate = (dateStr: string): Date => {
+  const [y, m, d] = dateStr.split("-").map(Number);
+  return new Date(y, m - 1, d);
+};
+
+const isSameLocalDate = (dateStr: string | null, target: Date): boolean => {
+  if (!dateStr) return false;
+  const dbDate = parseDbDate(dateStr);
+  return (
+    dbDate.getFullYear() === target.getFullYear() &&
+    dbDate.getMonth() === target.getMonth() &&
+    dbDate.getDate() === target.getDate()
+  );
+};
+
+const getMonthFromDbDate = (dateStr: string): string => {
+  const date = parseDbDate(dateStr);
+  return String(date.getMonth() + 1).padStart(2, '0');
+};
+
 interface SalesStats {
   faturamentoBruto: number;
   pistas: number;
@@ -111,7 +132,7 @@ export const useSalesStats = (filters?: SalesStatsFilters) => {
       if (filters?.month && filters.month !== "all") {
         filteredData = data.filter(sale => {
           if (!sale.DATA) return false;
-          const saleMonth = sale.DATA.split('-')[1];
+          const saleMonth = getMonthFromDbDate(sale.DATA);
           return saleMonth === filters.month;
         });
       }
@@ -175,9 +196,8 @@ export const useSalesStats = (filters?: SalesStatsFilters) => {
       // Calcular vendas de ontem (usando data local)
       const yesterday = new Date();
       yesterday.setDate(yesterday.getDate() - 1);
-      const yesterdayStr = `${yesterday.getFullYear()}-${String(yesterday.getDate()).padStart(2, '0')}-${String(yesterday.getMonth() + 1).padStart(2, '0')}`;
       
-      const yesterdayData = filteredData.filter(sale => sale.DATA === yesterdayStr);
+      const yesterdayData = filteredData.filter(sale => sale.DATA && isSameLocalDate(sale.DATA, yesterday));
       const yesterdayByVendedor = new Map<string, { vendas: number; faturamento: number }>();
       
       yesterdayData.forEach(sale => {
@@ -204,8 +224,7 @@ export const useSalesStats = (filters?: SalesStatsFilters) => {
 
       // Calcular vendas de hoje (VALOR FATURADO (CHEIO) + VALOR FIINAL) - usando data local
       const today = new Date();
-      const todayStr = `${today.getFullYear()}-${String(today.getDate()).padStart(2, '0')}-${String(today.getMonth() + 1).padStart(2, '0')}`;
-      const todayData = filteredData.filter(sale => sale.DATA === todayStr);
+      const todayData = filteredData.filter(sale => sale.DATA && isSameLocalDate(sale.DATA, today));
       const todayByVendedor = new Map<string, { vendas: number; faturamento: number; faturamentoFinal: number }>();
       
       todayData.forEach(sale => {
