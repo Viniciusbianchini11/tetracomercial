@@ -77,7 +77,8 @@ export const SalesTable = () => {
                 <TableHead>Telefone</TableHead>
                 <TableHead>Vendedor</TableHead>
                 <TableHead>Produto</TableHead>
-                <TableHead className="text-right">Valor</TableHead>
+                <TableHead className="text-right">Valor Faturado</TableHead>
+                <TableHead className="text-right">Valor Ticket</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -90,7 +91,10 @@ export const SalesTable = () => {
                   <TableCell>{sale.VENDEDOR || "-"}</TableCell>
                   <TableCell>{sale.PRODUTO || "-"}</TableCell>
                   <TableCell className="text-right font-medium">
-                    {formatCurrency(sale["VALOR LIQUIDO"])}
+                    {formatCurrency(sale["VALOR FATURADO (CHEIO)"])}
+                  </TableCell>
+                  <TableCell className="text-right font-medium">
+                    {formatCurrency(sale["VALOR FIINAL"] || sale["VALOR FINAL"])}
                   </TableCell>
                 </TableRow>
               ))}
