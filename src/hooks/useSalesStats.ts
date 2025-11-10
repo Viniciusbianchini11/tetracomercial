@@ -4,7 +4,7 @@ import { toast } from "sonner";
 
 // Helper functions para trabalhar com datas independente do formato
 const parseDbDate = (dateStr: string): Date => {
-  const [y, m, d] = dateStr.split("-").map(Number);
+  const [y, d, m] = dateStr.split("-").map(Number);
   return new Date(y, m - 1, d);
 };
 
