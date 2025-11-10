@@ -1,10 +1,24 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 interface TopSeller {
   vendedor: string;
   vendas: number;
   faturamento: number;
 }
+
+const SELLER_PHOTOS: Record<string, string> = {
+  "barbara": "https://tetraeducacao.com.br/barbara.png",
+  "sabrina": "https://tetraeducacao.com.br/sabrina1.png",
+  "vladmir": "https://tetraeducacao.com.br/vladimir.png",
+  "alexia": "https://tetraeducacao.com.br/alexia.png",
+  "kimberly": "https://tetraeducacao.com.br/kimberly.png",
+  "thaynara": "https://tetraeducacao.com.br/thaynara.png",
+  "wemille": "https://tetraeducacao.com.br/WEMILLE.png",
+  "geovanna": "https://tetraeducacao.com.br/geovanna.png",
+  "elton": "https://tetraeducacao.com.br/elton.png",
+  "celina": "https://tetraeducacao.com.br/celina.png",
+};
 
 interface TopSellersChartProps {
   sellers: TopSeller[];
@@ -17,6 +31,14 @@ export const TopSellersChart = ({ sellers }: TopSellersChartProps) => {
       currency: "BRL",
       minimumFractionDigits: 0,
     }).format(value);
+  };
+
+  const getSellerPhoto = (name: string) => {
+    return SELLER_PHOTOS[name.toLowerCase().trim()];
+  };
+
+  const getSellerInitials = (name: string) => {
+    return name.substring(0, 2).toUpperCase();
   };
 
   const podiumColors = [
@@ -36,6 +58,10 @@ export const TopSellersChart = ({ sellers }: TopSellersChartProps) => {
         <div className="flex items-end justify-center gap-4 min-h-[300px]">
           {sellers.length >= 2 && (
             <div className="flex flex-col items-center">
+              <Avatar className="h-16 w-16 mb-2 border-4 border-gray-300">
+                <AvatarImage src={getSellerPhoto(sellers[1].vendedor)} alt={sellers[1].vendedor} />
+                <AvatarFallback>{getSellerInitials(sellers[1].vendedor)}</AvatarFallback>
+              </Avatar>
               <div className="text-center mb-2">
                 <p className="font-bold text-sm uppercase">{sellers[1].vendedor}</p>
                 <p className="text-xs text-muted-foreground">{formatCurrency(sellers[1].faturamento)}</p>
@@ -48,6 +74,10 @@ export const TopSellersChart = ({ sellers }: TopSellersChartProps) => {
           
           {sellers.length >= 1 && (
             <div className="flex flex-col items-center">
+              <Avatar className="h-20 w-20 mb-2 border-4 border-yellow-400">
+                <AvatarImage src={getSellerPhoto(sellers[0].vendedor)} alt={sellers[0].vendedor} />
+                <AvatarFallback>{getSellerInitials(sellers[0].vendedor)}</AvatarFallback>
+              </Avatar>
               <div className="text-center mb-2">
                 <p className="font-bold text-sm uppercase">{sellers[0].vendedor}</p>
                 <p className="text-xs text-muted-foreground">{formatCurrency(sellers[0].faturamento)}</p>
@@ -60,6 +90,10 @@ export const TopSellersChart = ({ sellers }: TopSellersChartProps) => {
           
           {sellers.length >= 3 && (
             <div className="flex flex-col items-center">
+              <Avatar className="h-14 w-14 mb-2 border-4 border-orange-400">
+                <AvatarImage src={getSellerPhoto(sellers[2].vendedor)} alt={sellers[2].vendedor} />
+                <AvatarFallback>{getSellerInitials(sellers[2].vendedor)}</AvatarFallback>
+              </Avatar>
               <div className="text-center mb-2">
                 <p className="font-bold text-sm uppercase">{sellers[2].vendedor}</p>
                 <p className="text-xs text-muted-foreground">{formatCurrency(sellers[2].faturamento)}</p>
