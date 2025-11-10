@@ -224,73 +224,79 @@ const Index = () => {
 
           </TabsContent>
 
-          <TabsContent value="acompanhamento" className="space-y-3 mt-0">
-            <SalesFilterSection
-              startDate={salesFilters.salesStartDate}
-              endDate={salesFilters.salesEndDate}
-              selectedMonth={salesFilters.selectedMonth}
-              selectedYear={salesFilters.selectedYear}
-              selectedLaunch={salesFilters.selectedLaunch}
-              onStartDateChange={(value) => setSalesFilters({ salesStartDate: value })}
-              onEndDateChange={(value) => setSalesFilters({ salesEndDate: value })}
-              onMonthChange={(value) => setSalesFilters({ selectedMonth: value })}
-              onYearChange={(value) => setSalesFilters({ selectedYear: value })}
-              onLaunchChange={(value) => setSalesFilters({ selectedLaunch: value })}
-              onClearFilters={clearSalesFilters}
-            />
-            
-            {statsLoading ? (
-              <div className="space-y-3">
-                <div className="grid grid-cols-6 gap-2">
-                  {[...Array(6)].map((_, i) => (
-                    <Skeleton key={i} className="h-16" />
-                  ))}
+          <TabsContent value="acompanhamento" className="mt-0 flex flex-col h-[calc(100vh-140px)]">
+            <div className="space-y-3 flex-shrink-0">
+              <SalesFilterSection
+                startDate={salesFilters.salesStartDate}
+                endDate={salesFilters.salesEndDate}
+                selectedMonth={salesFilters.selectedMonth}
+                selectedYear={salesFilters.selectedYear}
+                selectedLaunch={salesFilters.selectedLaunch}
+                onStartDateChange={(value) => setSalesFilters({ salesStartDate: value })}
+                onEndDateChange={(value) => setSalesFilters({ salesEndDate: value })}
+                onMonthChange={(value) => setSalesFilters({ selectedMonth: value })}
+                onYearChange={(value) => setSalesFilters({ selectedYear: value })}
+                onLaunchChange={(value) => setSalesFilters({ selectedLaunch: value })}
+                onClearFilters={clearSalesFilters}
+              />
+              
+              {statsLoading ? (
+                <div className="space-y-3">
+                  <div className="grid grid-cols-6 gap-2">
+                    {[...Array(6)].map((_, i) => (
+                      <Skeleton key={i} className="h-16" />
+                    ))}
+                  </div>
+                  <Skeleton className="h-[300px]" />
                 </div>
-                <Skeleton className="h-[300px]" />
-              </div>
-            ) : (
-              <>
-                <SalesMetricsCards
-                  faturamentoBruto={stats.faturamentoBruto}
-                  pistas={stats.pistas}
-                  vendas={stats.vendas}
-                  taxaConversao={stats.taxaConversao}
-                  recorrentes={stats.recorrentes}
-                  foraLancamento={stats.foraLancamento}
-                />
-                
-                <div className="grid grid-cols-3 gap-3">
-                  <TopSellersChart sellers={topSellers} />
-                  <SellersRanking
-                    title="Ranking Lançamento"
-                    sellers={topSellers}
-                    showSalesCount={true}
+              ) : (
+                <>
+                  <SalesMetricsCards
+                    faturamentoBruto={stats.faturamentoBruto}
+                    pistas={stats.pistas}
+                    vendas={stats.vendas}
+                    taxaConversao={stats.taxaConversao}
+                    recorrentes={stats.recorrentes}
+                    foraLancamento={stats.foraLancamento}
                   />
-                  <GoalsCard />
-                </div>
+                  
+                  <div className="grid grid-cols-3 gap-3">
+                    <TopSellersChart sellers={topSellers} />
+                    <SellersRanking
+                      title="Ranking Lançamento"
+                      sellers={topSellers}
+                      showSalesCount={true}
+                    />
+                    <GoalsCard />
+                  </div>
 
-                <div className="grid grid-cols-3 gap-3">
-                  <SellersRanking
-                    title="Classificação Mensal"
-                    sellers={monthlyRanking}
-                  />
-                  <DailySales
-                    title="Dia anterior"
-                    vendas={yesterdaySales.vendas}
-                    faturamento={yesterdaySales.faturamento}
-                    porVendedor={yesterdaySales.porVendedor}
-                  />
-                  <DailySales
-                    title="Vendas do dia"
-                    vendas={todaySales.vendas}
-                    faturamento={todaySales.faturamento}
-                    faturamentoFinal={todaySales.faturamentoFinal}
-                    porVendedor={todaySales.porVendedor}
-                  />
-                </div>
+                  <div className="grid grid-cols-3 gap-3">
+                    <SellersRanking
+                      title="Classificação Mensal"
+                      sellers={monthlyRanking}
+                    />
+                    <DailySales
+                      title="Dia anterior"
+                      vendas={yesterdaySales.vendas}
+                      faturamento={yesterdaySales.faturamento}
+                      porVendedor={yesterdaySales.porVendedor}
+                    />
+                    <DailySales
+                      title="Vendas do dia"
+                      vendas={todaySales.vendas}
+                      faturamento={todaySales.faturamento}
+                      faturamentoFinal={todaySales.faturamentoFinal}
+                      porVendedor={todaySales.porVendedor}
+                    />
+                  </div>
+                </>
+              )}
+            </div>
 
+            {!statsLoading && (
+              <div className="flex-1 min-h-0 mt-3">
                 <SalesTable />
-              </>
+              </div>
             )}
           </TabsContent>
         </Tabs>

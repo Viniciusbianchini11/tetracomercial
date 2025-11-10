@@ -1,5 +1,6 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { useSalesData } from "@/hooks/useSalesData";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -61,52 +62,54 @@ export const SalesTable = () => {
   };
 
   return (
-    <Card>
-      <CardHeader>
+    <Card className="flex flex-col h-full">
+      <CardHeader className="flex-shrink-0 pb-3">
         <CardTitle>Acompanhamento de Vendas</CardTitle>
         <p className="text-sm text-muted-foreground">
           Últimas 100 vendas registradas
         </p>
       </CardHeader>
-      <CardContent>
-        <div className="rounded-md border overflow-auto">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Data</TableHead>
-                <TableHead>Cliente</TableHead>
-                <TableHead>Email</TableHead>
-                <TableHead>Telefone</TableHead>
-                <TableHead>Vendedor</TableHead>
-                <TableHead>Produto</TableHead>
-                <TableHead className="text-right">Valor Faturado</TableHead>
-                <TableHead className="text-right">Valor Ticket</TableHead>
-                <TableHead className="text-right">Valor Comissão</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {salesData.map((sale) => (
-                <TableRow key={sale.id}>
-                  <TableCell>{formatDate(sale.DATA)}</TableCell>
-                  <TableCell className="font-medium">{sale.NOME || "-"}</TableCell>
-                  <TableCell>{sale["E-MAIL"] || "-"}</TableCell>
-                  <TableCell>{sale.TELEFONE || "-"}</TableCell>
-                  <TableCell>{sale.VENDEDOR || "-"}</TableCell>
-                  <TableCell>{sale.PRODUTO || "-"}</TableCell>
-                  <TableCell className="text-right font-medium">
-                    {formatCurrency(sale["VALOR FATURADO (CHEIO)"])}
-                  </TableCell>
-                  <TableCell className="text-right font-medium">
-                    {formatCurrency(sale["VALOR FINAL"])}
-                  </TableCell>
-                  <TableCell className="text-right font-medium">
-                    {formatCurrency(sale["VALOR BASE PREMIACAO"])}
-                  </TableCell>
+      <CardContent className="flex-1 min-h-0 p-0">
+        <ScrollArea className="h-full px-6 pb-6">
+          <div className="rounded-md border">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Data</TableHead>
+                  <TableHead>Cliente</TableHead>
+                  <TableHead>Email</TableHead>
+                  <TableHead>Telefone</TableHead>
+                  <TableHead>Vendedor</TableHead>
+                  <TableHead>Produto</TableHead>
+                  <TableHead className="text-right">Valor Faturado</TableHead>
+                  <TableHead className="text-right">Valor Ticket</TableHead>
+                  <TableHead className="text-right">Valor Comissão</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
+              </TableHeader>
+              <TableBody>
+                {salesData.map((sale) => (
+                  <TableRow key={sale.id}>
+                    <TableCell>{formatDate(sale.DATA)}</TableCell>
+                    <TableCell className="font-medium">{sale.NOME || "-"}</TableCell>
+                    <TableCell>{sale["E-MAIL"] || "-"}</TableCell>
+                    <TableCell>{sale.TELEFONE || "-"}</TableCell>
+                    <TableCell>{sale.VENDEDOR || "-"}</TableCell>
+                    <TableCell>{sale.PRODUTO || "-"}</TableCell>
+                    <TableCell className="text-right font-medium">
+                      {formatCurrency(sale["VALOR FATURADO (CHEIO)"])}
+                    </TableCell>
+                    <TableCell className="text-right font-medium">
+                      {formatCurrency(sale["VALOR FINAL"])}
+                    </TableCell>
+                    <TableCell className="text-right font-medium">
+                      {formatCurrency(sale["VALOR BASE PREMIACAO"])}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        </ScrollArea>
       </CardContent>
     </Card>
   );
