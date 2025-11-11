@@ -57,7 +57,7 @@ export const useDailyReports = () => {
       
       const { data: salesData, error } = await supabase
         .from("relatorio_faturamento")
-        .select("DATA, VENDEDOR, PRODUTO, \"VALOR FINAL\", PARCELA")
+        .select("DATA, VENDEDOR, PRODUTO, \"VALOR FINAL\", Plataforma")
         .not("DATA", "is", null)
         .not("VENDEDOR", "is", null)
         .order("DATA", { ascending: false });
@@ -128,7 +128,7 @@ export const useDailyReports = () => {
         const date = convertSalesDateFormat(sale.DATA);
         const seller = normalizeSellerName(sale.VENDEDOR);
         const value = Number(sale["VALOR FINAL"]) || 0;
-        const isBoleto = sale.PARCELA?.toLowerCase().includes("boleto") || false;
+        const isBoleto = sale.Plataforma?.toUpperCase() === "BOLETO";
 
         if (!reportsByDate.has(date)) {
           reportsByDate.set(date, {
