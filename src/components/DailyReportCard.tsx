@@ -44,38 +44,38 @@ export const DailyReportCard = ({ report }: DailyReportCardProps) => {
   const formattedDate = format(new Date(report.date + "T00:00:00"), "dd/MM/yyyy");
 
   return (
-    <div className="grid grid-cols-3 gap-4">
+    <div className="grid grid-cols-3 gap-3">
       {/* Card de Vendas */}
       <Card className="overflow-hidden">
-        <div className="bg-primary text-primary-foreground p-3 text-center font-bold">
+        <div className="bg-primary text-primary-foreground px-3 py-1.5 text-center text-sm font-bold">
           RESULTADO DIÁRIO
         </div>
-        <div className="bg-primary/80 text-primary-foreground p-2 text-center font-semibold">
+        <div className="bg-primary/80 text-primary-foreground px-3 py-1 text-center text-xs font-semibold">
           {formattedDate}
         </div>
         <Table>
           <TableHeader>
-            <TableRow>
-              <TableHead className="text-center">VENDEDOR</TableHead>
-              <TableHead className="text-center">QUANTIDADE</TableHead>
-              <TableHead className="text-center">VALOR</TableHead>
-              <TableHead className="text-center">%</TableHead>
+            <TableRow className="border-b">
+              <TableHead className="text-center text-xs py-2 h-auto">VENDEDOR</TableHead>
+              <TableHead className="text-center text-xs py-2 h-auto">QTD</TableHead>
+              <TableHead className="text-center text-xs py-2 h-auto">VALOR</TableHead>
+              <TableHead className="text-center text-xs py-2 h-auto">%</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {report.sales.map((sale) => (
-              <TableRow key={sale.seller}>
-                <TableCell className="text-center font-medium">{sale.seller}</TableCell>
-                <TableCell className="text-center">{sale.quantity}</TableCell>
-                <TableCell className="text-center">{formatCurrency(sale.value)}</TableCell>
-                <TableCell className="text-center">{sale.percentage.toFixed(0)}%</TableCell>
+              <TableRow key={sale.seller} className="border-b">
+                <TableCell className="text-center text-xs py-1.5 font-medium">{sale.seller}</TableCell>
+                <TableCell className="text-center text-xs py-1.5">{sale.quantity}</TableCell>
+                <TableCell className="text-center text-xs py-1.5">{formatCurrency(sale.value)}</TableCell>
+                <TableCell className="text-center text-xs py-1.5">{sale.percentage.toFixed(0)}%</TableCell>
               </TableRow>
             ))}
-            <TableRow className="bg-muted font-bold">
-              <TableCell className="text-center">Total geral</TableCell>
-              <TableCell className="text-center">{report.totalQuantity}</TableCell>
-              <TableCell className="text-center">{formatCurrency(report.totalValue)}</TableCell>
-              <TableCell className="text-center">100%</TableCell>
+            <TableRow className="bg-muted font-bold border-t">
+              <TableCell className="text-center text-xs py-1.5">Total</TableCell>
+              <TableCell className="text-center text-xs py-1.5">{report.totalQuantity}</TableCell>
+              <TableCell className="text-center text-xs py-1.5">{formatCurrency(report.totalValue)}</TableCell>
+              <TableCell className="text-center text-xs py-1.5">100%</TableCell>
             </TableRow>
           </TableBody>
         </Table>
@@ -83,38 +83,38 @@ export const DailyReportCard = ({ report }: DailyReportCardProps) => {
 
       {/* Card de Forma de Pagamento */}
       <Card className="overflow-hidden">
-        <div className="bg-primary/80 text-primary-foreground p-2 text-center font-semibold">
+        <div className="bg-primary/80 text-primary-foreground px-3 py-1 text-center text-xs font-semibold">
           {formattedDate}
         </div>
-        <div className="bg-muted p-2 text-center font-semibold italic">
+        <div className="bg-muted px-3 py-1 text-center text-xs font-semibold italic">
           FORMA DE PAGAMENTO
         </div>
         <Table>
           <TableHeader>
-            <TableRow>
-              <TableHead className="text-center italic">VENDEDOR</TableHead>
-              <TableHead className="text-center bg-primary/20">BOLETO</TableHead>
-              <TableHead className="text-center bg-muted">CARTÃO</TableHead>
+            <TableRow className="border-b">
+              <TableHead className="text-center text-xs py-2 h-auto italic">VENDEDOR</TableHead>
+              <TableHead className="text-center text-xs py-2 h-auto bg-primary/20">BOLETO</TableHead>
+              <TableHead className="text-center text-xs py-2 h-auto bg-muted">CARTÃO</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {report.sales
               .filter(sale => sale.quantity > 0)
               .map((sale) => (
-                <TableRow key={sale.seller}>
-                  <TableCell className="text-center font-medium">{sale.seller}</TableCell>
-                  <TableCell className="text-center bg-primary/5">
+                <TableRow key={sale.seller} className="border-b">
+                  <TableCell className="text-center text-xs py-1.5 font-medium">{sale.seller}</TableCell>
+                  <TableCell className="text-center text-xs py-1.5 bg-primary/5">
                     {sale.boletoPercentage > 0 ? `${sale.boletoPercentage.toFixed(2)}%` : ""}
                   </TableCell>
-                  <TableCell className="text-center bg-muted/30">
+                  <TableCell className="text-center text-xs py-1.5 bg-muted/30">
                     {sale.cartaoPercentage > 0 ? `${sale.cartaoPercentage.toFixed(2)}%` : ""}
                   </TableCell>
                 </TableRow>
               ))}
-            <TableRow className="bg-muted font-bold">
-              <TableCell className="text-center">Total geral</TableCell>
-              <TableCell className="text-center">{report.totalBoletoPercentage.toFixed(2)}%</TableCell>
-              <TableCell className="text-center">{report.totalCartaoPercentage.toFixed(2)}%</TableCell>
+            <TableRow className="bg-muted font-bold border-t">
+              <TableCell className="text-center text-xs py-1.5">Total</TableCell>
+              <TableCell className="text-center text-xs py-1.5">{report.totalBoletoPercentage.toFixed(2)}%</TableCell>
+              <TableCell className="text-center text-xs py-1.5">{report.totalCartaoPercentage.toFixed(2)}%</TableCell>
             </TableRow>
           </TableBody>
         </Table>
@@ -122,32 +122,32 @@ export const DailyReportCard = ({ report }: DailyReportCardProps) => {
 
       {/* Card de Ligações */}
       <Card className="overflow-hidden">
-        <div className="bg-primary/80 text-primary-foreground p-2 text-center font-semibold">
+        <div className="bg-primary/80 text-primary-foreground px-3 py-1 text-center text-xs font-semibold">
           {formattedDate}
         </div>
-        <div className="bg-muted p-2 text-center font-semibold italic">
+        <div className="bg-muted px-3 py-1 text-center text-xs font-semibold italic">
           LIGAÇÕES DO DIA
         </div>
         <Table>
           <TableHeader>
-            <TableRow>
-              <TableHead className="text-center italic">VENDEDOR</TableHead>
-              <TableHead className="text-center">TENTATIVAS</TableHead>
-              <TableHead className="text-center">CONEXÕES</TableHead>
+            <TableRow className="border-b">
+              <TableHead className="text-center text-xs py-2 h-auto italic">VENDEDOR</TableHead>
+              <TableHead className="text-center text-xs py-2 h-auto">TENTATIVAS</TableHead>
+              <TableHead className="text-center text-xs py-2 h-auto">CONEXÕES</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {report.calls.map((call) => (
-              <TableRow key={call.seller}>
-                <TableCell className="text-center font-medium">{call.seller}</TableCell>
-                <TableCell className="text-center">{call.tentativas}</TableCell>
-                <TableCell className="text-center">{call.conexoes}</TableCell>
+              <TableRow key={call.seller} className="border-b">
+                <TableCell className="text-center text-xs py-1.5 font-medium">{call.seller}</TableCell>
+                <TableCell className="text-center text-xs py-1.5">{call.tentativas}</TableCell>
+                <TableCell className="text-center text-xs py-1.5">{call.conexoes}</TableCell>
               </TableRow>
             ))}
-            <TableRow className="bg-muted font-bold">
-              <TableCell className="text-center">Total geral</TableCell>
-              <TableCell className="text-center">{report.totalTentativas}</TableCell>
-              <TableCell className="text-center">{report.totalConexoes}</TableCell>
+            <TableRow className="bg-muted font-bold border-t">
+              <TableCell className="text-center text-xs py-1.5">Total</TableCell>
+              <TableCell className="text-center text-xs py-1.5">{report.totalTentativas}</TableCell>
+              <TableCell className="text-center text-xs py-1.5">{report.totalConexoes}</TableCell>
             </TableRow>
           </TableBody>
         </Table>
