@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { normalizeSellerName } from "@/lib/utils";
 
 const ACTIVE_SELLERS = [
   "SABRINA",
@@ -72,6 +73,9 @@ export const useDailyReports = () => {
         return;
       }
 
+      console.info('[Reports] Exemplo venda mais recente', salesData?.[0]);
+      console.info('[Reports] Exemplo ligação mais recente', callsData?.[0]);
+
       // Group by date
       const reportsByDate = new Map<string, DailyReport>();
 
@@ -105,20 +109,24 @@ export const useDailyReports = () => {
         }
 
         const report = reportsByDate.get(date)!;
-        const seller = call.nome_vendedor?.toUpperCase() || "";
+        const seller = normalizeSellerName(call.nome_vendedor);
         const callIndex = report.calls.findIndex(c => c.seller === seller);
+
+        // Always add to totals
+        report.totalTentativas += call.tentativas || 0;
+        report.totalConexoes += call.conexoes || 0;
 
         if (callIndex !== -1) {
           report.calls[callIndex].tentativas = call.tentativas || 0;
           report.calls[callIndex].conexoes = call.conexoes || 0;
-          report.totalTentativas += call.tentativas || 0;
-          report.totalConexoes += call.conexoes || 0;
+        } else {
+          console.debug('[Reports] Vendedor não mapeado em ligações:', call.nome_vendedor, '->', seller);
         }
       });
 
       salesData?.forEach((sale) => {
         const date = sale.DATA;
-        const seller = sale.VENDEDOR?.toUpperCase() || "";
+        const seller = normalizeSellerName(sale.VENDEDOR);
         const value = Number(sale["VALOR FINAL"]) || 0;
         const isBoleto = sale.PARCELA?.toLowerCase().includes("boleto") || false;
 
