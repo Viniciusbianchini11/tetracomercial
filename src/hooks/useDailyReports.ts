@@ -24,6 +24,12 @@ interface DailySale {
   cartaoPercentage: number;
 }
 
+interface DailyCalls {
+  seller: string;
+  tentativas: number;
+  conexoes: number;
+}
+
 interface DailyReport {
   date: string;
   sales: DailySale[];
@@ -31,6 +37,9 @@ interface DailyReport {
   totalValue: number;
   totalBoletoPercentage: number;
   totalCartaoPercentage: number;
+  calls: DailyCalls[];
+  totalTentativas: number;
+  totalConexoes: number;
 }
 
 export const useDailyReports = () => {
@@ -52,6 +61,11 @@ export const useDailyReports = () => {
         .not("VENDEDOR", "is", null)
         .order("DATA", { ascending: false });
 
+      const { data: callsData } = await supabase
+        .from("ligacoes_diarias")
+        .select("data_referencia, nome_vendedor, tentativas, conexoes")
+        .order("data_referencia", { ascending: false });
+
       if (error) {
         console.error("Error fetching sales data:", error);
         toast.error("Erro ao carregar relatórios");
@@ -60,6 +74,47 @@ export const useDailyReports = () => {
 
       // Group by date
       const reportsByDate = new Map<string, DailyReport>();
+
+      // Process calls data first to initialize dates
+      callsData?.forEach((call) => {
+        const date = call.data_referencia;
+        
+        if (!reportsByDate.has(date)) {
+          reportsByDate.set(date, {
+            date,
+            sales: ACTIVE_SELLERS.map(s => ({
+              seller: s,
+              quantity: 0,
+              value: 0,
+              percentage: 0,
+              boletoPercentage: 0,
+              cartaoPercentage: 0
+            })),
+            totalQuantity: 0,
+            totalValue: 0,
+            totalBoletoPercentage: 0,
+            totalCartaoPercentage: 0,
+            calls: ACTIVE_SELLERS.map(s => ({
+              seller: s,
+              tentativas: 0,
+              conexoes: 0
+            })),
+            totalTentativas: 0,
+            totalConexoes: 0
+          });
+        }
+
+        const report = reportsByDate.get(date)!;
+        const seller = call.nome_vendedor?.toUpperCase() || "";
+        const callIndex = report.calls.findIndex(c => c.seller === seller);
+
+        if (callIndex !== -1) {
+          report.calls[callIndex].tentativas = call.tentativas || 0;
+          report.calls[callIndex].conexoes = call.conexoes || 0;
+          report.totalTentativas += call.tentativas || 0;
+          report.totalConexoes += call.conexoes || 0;
+        }
+      });
 
       salesData?.forEach((sale) => {
         const date = sale.DATA;
@@ -81,7 +136,14 @@ export const useDailyReports = () => {
             totalQuantity: 0,
             totalValue: 0,
             totalBoletoPercentage: 0,
-            totalCartaoPercentage: 0
+            totalCartaoPercentage: 0,
+            calls: ACTIVE_SELLERS.map(s => ({
+              seller: s,
+              tentativas: 0,
+              conexoes: 0
+            })),
+            totalTentativas: 0,
+            totalConexoes: 0
           });
         }
 

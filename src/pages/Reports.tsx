@@ -1,6 +1,6 @@
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
-import { DailyReportTable } from "@/components/DailyReportTable";
+import { DailyReportCard } from "@/components/DailyReportCard";
 import { useDailyReports } from "@/hooks/useDailyReports";
 
 export const Reports = () => {
@@ -24,7 +24,7 @@ export const Reports = () => {
           </div>
         ) : (
           reports.map((report) => (
-            <DailyReportTable key={report.date} report={report} />
+            <DailyReportCard key={report.date} report={report} />
           ))
         )}
       </div>
