@@ -16,3 +16,18 @@ export function normalizeSellerName(name: string | null | undefined): string {
   
   return first.toUpperCase();
 }
+
+export function convertSalesDateFormat(dateStr: string | null | undefined): string {
+  if (!dateStr) return '';
+  
+  // Input: YYYY-DD-MM (from relatorio_faturamento)
+  // Output: YYYY-MM-DD (ISO standard)
+  const parts = dateStr.split('-');
+  
+  if (parts.length === 3) {
+    const [year, day, month] = parts;
+    return `${year}-${month}-${day}`;
+  }
+  
+  return dateStr;
+}

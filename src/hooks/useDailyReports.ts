@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { normalizeSellerName } from "@/lib/utils";
+import { normalizeSellerName, convertSalesDateFormat } from "@/lib/utils";
 
 const ACTIVE_SELLERS = [
   "SABRINA",
@@ -125,7 +125,7 @@ export const useDailyReports = () => {
       });
 
       salesData?.forEach((sale) => {
-        const date = sale.DATA;
+        const date = convertSalesDateFormat(sale.DATA);
         const seller = normalizeSellerName(sale.VENDEDOR);
         const value = Number(sale["VALOR FINAL"]) || 0;
         const isBoleto = sale.PARCELA?.toLowerCase().includes("boleto") || false;
