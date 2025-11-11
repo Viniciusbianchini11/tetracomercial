@@ -18,6 +18,7 @@ import { useFunnelData } from "@/hooks/useFunnelData";
 import { useFilterOptions } from "@/hooks/useFilterOptions";
 import { usePersistedFilters } from "@/hooks/usePersistedFilters";
 import { CallsChart } from "@/components/CallsChart";
+import { Reports } from "./Reports";
 import { TrendingUp, Users } from "lucide-react";
 import { useMemo } from "react";
 interface PerformanceFilters {
@@ -110,6 +111,7 @@ const Index = () => {
           <TabsList className="mb-3 h-9">
             <TabsTrigger value="performance" className="text-sm">Performance</TabsTrigger>
             <TabsTrigger value="acompanhamento" className="text-sm">Vendas</TabsTrigger>
+            <TabsTrigger value="relatorios" className="text-sm">Relatórios</TabsTrigger>
           </TabsList>
 
           <TabsContent value="performance" className="space-y-3 mt-0">
@@ -298,6 +300,10 @@ const Index = () => {
                 <SalesTable />
               </div>
             )}
+          </TabsContent>
+
+          <TabsContent value="relatorios" className="mt-0">
+            <Reports />
           </TabsContent>
         </Tabs>
       </div>
