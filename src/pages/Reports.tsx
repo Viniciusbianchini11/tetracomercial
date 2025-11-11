@@ -18,7 +18,7 @@ export const Reports = () => {
 
   if (loading) {
     return (
-      <div className="grid grid-cols-3 gap-4 p-6">
+      <div className="grid grid-cols-3 gap-3 px-4 pt-0">
         <Skeleton className="h-[120px]" />
         <Skeleton className="h-[120px]" />
         <Skeleton className="h-[120px]" />
@@ -36,7 +36,7 @@ export const Reports = () => {
   return (
     <div className="flex flex-col h-full">
       {/* Summary Stats */}
-      <div className="grid grid-cols-4 gap-4 p-6 pb-4">
+      <div className="grid grid-cols-4 gap-3 px-4 pt-0 pb-3">
         <Card className="p-4 border-l-4 border-l-primary bg-gradient-to-br from-background to-muted/20">
           <div className="flex items-center gap-3">
             <div className="p-3 rounded-lg bg-primary/10">
@@ -87,7 +87,7 @@ export const Reports = () => {
       </div>
 
       {/* Reports List */}
-      <div className="flex-1 px-6 pb-6">
+      <div className="flex-1 min-h-0 px-4 pb-4">
         <ScrollArea className="h-full">
           {reports.length === 0 ? (
             <div className="text-center text-muted-foreground py-12">
