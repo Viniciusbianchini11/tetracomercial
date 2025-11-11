@@ -106,7 +106,7 @@ const Index = () => {
   return (
     <div className="h-screen overflow-hidden bg-background flex flex-col">
       <Header />
-      <div className="flex-1 overflow-y-auto px-4 py-3">
+      <div className="flex-1 overflow-y-auto px-4 py-1">
         <Tabs defaultValue="performance" className="w-full h-full">
           <TabsList className="mb-3 h-9">
             <TabsTrigger value="performance" className="text-sm">Performance</TabsTrigger>
@@ -302,7 +302,7 @@ const Index = () => {
             )}
           </TabsContent>
 
-          <TabsContent value="relatorios" className="mt-0 flex flex-col h-[calc(100vh-140px)]">
+          <TabsContent value="relatorios" className="mt-0 p-0">
             <Reports />
           </TabsContent>
         </Tabs>
