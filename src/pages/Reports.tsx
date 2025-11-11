@@ -15,7 +15,7 @@ export const Reports = () => {
   }
 
   return (
-    <div className="space-y-6 py-4">
+    <div className="space-y-6">
       {reports.length === 0 ? (
         <div className="text-center text-muted-foreground py-8">
           Nenhum relatório encontrado
