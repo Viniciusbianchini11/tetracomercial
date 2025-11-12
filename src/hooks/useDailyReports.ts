@@ -4,16 +4,16 @@ import { toast } from "sonner";
 import { normalizeSellerName, convertSalesDateFormat } from "@/lib/utils";
 
 const ACTIVE_SELLERS = [
-  "SABRINA",
-  "BARBARA",
-  "ALEXIA",
-  "VLADMIR",
-  "CELINA",
-  "ELTON",
-  "GEOVANNA",
-  "THAYNARA",
-  "WEMILLE",
-  "KIMBERLY"
+  "Barbara",
+  "Sabrina",
+  "Vladmir",
+  "Alexia",
+  "Kimberly",
+  "Thaynara",
+  "Wemille",
+  "Geovanna",
+  "Elton",
+  "Celina"
 ];
 
 interface DailySale {
@@ -110,7 +110,7 @@ export const useDailyReports = () => {
 
         const report = reportsByDate.get(date)!;
         const seller = normalizeSellerName(call.nome_vendedor);
-        const callIndex = report.calls.findIndex(c => c.seller === seller);
+        const callIndex = report.calls.findIndex(c => normalizeSellerName(c.seller) === seller);
 
         // Always add to totals
         report.totalTentativas += call.tentativas || 0;
@@ -156,7 +156,7 @@ export const useDailyReports = () => {
         }
 
         const report = reportsByDate.get(date)!;
-        const sellerIndex = report.sales.findIndex(s => s.seller === seller);
+        const sellerIndex = report.sales.findIndex(s => normalizeSellerName(s.seller) === seller);
 
         if (sellerIndex !== -1) {
           report.sales[sellerIndex].quantity += 1;
