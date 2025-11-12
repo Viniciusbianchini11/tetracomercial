@@ -200,7 +200,10 @@ export const useDailyReports = () => {
         }
       });
 
-      setReports(Array.from(reportsByDate.values()));
+      const sortedReports = Array.from(reportsByDate.values()).sort((a, b) => 
+        new Date(b.date).getTime() - new Date(a.date).getTime()
+      );
+      setReports(sortedReports);
     } catch (error) {
       console.error("Error fetching daily reports:", error);
       toast.error("Erro ao carregar relatórios");
