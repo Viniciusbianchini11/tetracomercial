@@ -18,7 +18,7 @@ export const Reports = () => {
 
   if (loading) {
     return (
-      <div className="grid grid-cols-3 gap-3 px-4 pt-0">
+      <div className="grid grid-cols-3 gap-3">
         <Skeleton className="h-[120px]" />
         <Skeleton className="h-[120px]" />
         <Skeleton className="h-[120px]" />
@@ -34,9 +34,9 @@ export const Reports = () => {
   const avgDailySales = reports.length > 0 ? totalSales / reports.length : 0;
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="space-y-3">
       {/* Summary Stats */}
-      <div className="grid grid-cols-4 gap-3 px-4 pt-0 pb-3">
+      <div className="grid grid-cols-4 gap-3">
         <Card className="p-4 border-l-4 border-l-primary bg-gradient-to-br from-background to-muted/20">
           <div className="flex items-center gap-3">
             <div className="p-3 rounded-lg bg-primary/10">
@@ -87,7 +87,7 @@ export const Reports = () => {
       </div>
 
       {/* Reports List */}
-      <div className="flex-1 min-h-0 px-4 pb-4">
+      <div className="h-[calc(100vh-280px)]">
         <ScrollArea className="h-full">
           {reports.length === 0 ? (
             <div className="text-center text-muted-foreground py-12">
@@ -126,14 +126,19 @@ export const Reports = () => {
                         </div>
                         <div className="divide-y">
                           {report.sales
-                            .filter(s => s.quantity > 0)
+                            .filter((s) => s.quantity > 0)
                             .sort((a, b) => b.value - a.value)
                             .map((sale) => (
-                              <div key={sale.seller} className="grid grid-cols-4 gap-2 px-3 py-2 text-xs hover:bg-muted/30 transition-colors">
+                              <div
+                                key={sale.seller}
+                                className="grid grid-cols-4 gap-2 px-3 py-2 text-xs hover:bg-muted/30 transition-colors"
+                              >
                                 <div className="font-medium">{sale.seller}</div>
                                 <div className="text-center">{sale.quantity}</div>
                                 <div className="text-right">{formatCurrency(sale.value)}</div>
-                                <div className="text-right font-semibold text-primary">{sale.percentage.toFixed(1)}%</div>
+                                <div className="text-right font-semibold text-primary">
+                                  {sale.percentage.toFixed(1)}%
+                                </div>
                               </div>
                             ))}
                         </div>
@@ -157,10 +162,13 @@ export const Reports = () => {
                         </div>
                         <div className="divide-y">
                           {report.sales
-                            .filter(s => s.quantity > 0)
+                            .filter((s) => s.quantity > 0)
                             .sort((a, b) => b.value - a.value)
                             .map((sale) => (
-                              <div key={sale.seller} className="grid grid-cols-3 gap-2 px-3 py-2 text-xs hover:bg-muted/30 transition-colors">
+                              <div
+                                key={sale.seller}
+                                className="grid grid-cols-3 gap-2 px-3 py-2 text-xs hover:bg-muted/30 transition-colors"
+                              >
                                 <div className="font-medium">{sale.seller}</div>
                                 <div className="text-center bg-orange-50 dark:bg-orange-950/20 py-1 rounded">
                                   {sale.boletoPercentage > 0 ? `${sale.boletoPercentage.toFixed(1)}%` : "-"}
@@ -190,10 +198,13 @@ export const Reports = () => {
                         </div>
                         <div className="divide-y">
                           {report.calls
-                            .filter(c => c.tentativas > 0)
+                            .filter((c) => c.tentativas > 0)
                             .sort((a, b) => b.tentativas - a.tentativas)
                             .map((call) => (
-                              <div key={call.seller} className="grid grid-cols-3 gap-2 px-3 py-2 text-xs hover:bg-muted/30 transition-colors">
+                              <div
+                                key={call.seller}
+                                className="grid grid-cols-3 gap-2 px-3 py-2 text-xs hover:bg-muted/30 transition-colors"
+                              >
                                 <div className="font-medium">{call.seller}</div>
                                 <div className="text-center">{call.tentativas}</div>
                                 <div className="text-center font-semibold text-blue-600">{call.conexoes}</div>
