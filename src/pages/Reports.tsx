@@ -95,7 +95,7 @@ export const Reports = () => {
               <p>Nenhum relatório encontrado</p>
             </div>
           ) : (
-            <div className="space-y-6 px-4 pt-3">
+            <div className="space-y-6 pr-4">
               {reports.map((report) => (
                 <Card key={report.date} className="overflow-hidden border-2 hover:shadow-lg transition-shadow">
                   {/* Header */}
