@@ -106,7 +106,7 @@ const Index = () => {
   return (
     <div className="h-screen overflow-hidden bg-background flex flex-col">
       <Header />
-      <div className="flex-1 overflow-y-auto px-4 py-1">
+      <div className="flex-1 overflow-y-auto px-4">
         <Tabs defaultValue="performance" className="w-full h-full">
           <TabsList className="mb-3 h-9">
             <TabsTrigger value="performance" className="text-sm">Performance</TabsTrigger>
