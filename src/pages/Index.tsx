@@ -39,45 +39,54 @@ interface SalesFilters {
 
 const Index = () => {
   // Filtros Performance com persistência
-  const { filters: performanceFilters, setFilters: setPerformanceFilters, clearFilters: clearPerformanceFilters } = 
-    usePersistedFilters<PerformanceFilters>({
-      key: 'performance-filters',
-      defaultValues: {
-        selectedSeller: "all",
-        selectedOrigin: "all",
-        selectedTag: "all",
-        startDate: undefined,
-        endDate: undefined,
-      },
-    });
+  const {
+    filters: performanceFilters,
+    setFilters: setPerformanceFilters,
+    clearFilters: clearPerformanceFilters,
+  } = usePersistedFilters<PerformanceFilters>({
+    key: "performance-filters",
+    defaultValues: {
+      selectedSeller: "all",
+      selectedOrigin: "all",
+      selectedTag: "all",
+      startDate: undefined,
+      endDate: undefined,
+    },
+  });
 
   // Filtros Acompanhamento de vendas com persistência
-  const { filters: salesFilters, setFilters: setSalesFilters, clearFilters: clearSalesFilters } = 
-    usePersistedFilters<SalesFilters>({
-      key: 'sales-filters',
-      defaultValues: {
-        salesStartDate: undefined,
-        salesEndDate: undefined,
-        selectedMonth: "all",
-        selectedYear: "all",
-        selectedLaunch: "all",
-      },
-    });
+  const {
+    filters: salesFilters,
+    setFilters: setSalesFilters,
+    clearFilters: clearSalesFilters,
+  } = usePersistedFilters<SalesFilters>({
+    key: "sales-filters",
+    defaultValues: {
+      salesStartDate: undefined,
+      salesEndDate: undefined,
+      selectedMonth: "all",
+      selectedYear: "all",
+      selectedLaunch: "all",
+    },
+  });
 
   const { sellers, origins, tags } = useFilterOptions();
-  const funnelFilters = useMemo(() => ({
-    seller: performanceFilters.selectedSeller,
-    origin: performanceFilters.selectedOrigin,
-    tag: performanceFilters.selectedTag,
-    startDate: performanceFilters.startDate,
-    endDate: performanceFilters.endDate,
-  }), [
-    performanceFilters.selectedSeller,
-    performanceFilters.selectedOrigin,
-    performanceFilters.selectedTag,
-    performanceFilters.startDate,
-    performanceFilters.endDate,
-  ]);
+  const funnelFilters = useMemo(
+    () => ({
+      seller: performanceFilters.selectedSeller,
+      origin: performanceFilters.selectedOrigin,
+      tag: performanceFilters.selectedTag,
+      startDate: performanceFilters.startDate,
+      endDate: performanceFilters.endDate,
+    }),
+    [
+      performanceFilters.selectedSeller,
+      performanceFilters.selectedOrigin,
+      performanceFilters.selectedTag,
+      performanceFilters.startDate,
+      performanceFilters.endDate,
+    ],
+  );
   const { funnelData } = useFunnelData(funnelFilters);
 
   const {
@@ -96,8 +105,7 @@ const Index = () => {
   });
 
   const totalEntries = funnelData.entrouNoFunil;
-  const conversionRate =
-    totalEntries > 0 ? ((funnelData.ganho / totalEntries) * 100).toFixed(1) : "0.0";
+  const conversionRate = totalEntries > 0 ? ((funnelData.ganho / totalEntries) * 100).toFixed(1) : "0.0";
 
   const calculatePercentage = (count: number) => {
     return totalEntries > 0 ? Math.round((count / totalEntries) * 100) : 0;
@@ -109,9 +117,15 @@ const Index = () => {
       <div className="flex-1 overflow-y-auto px-4">
         <Tabs defaultValue="performance" className="w-full h-full">
           <TabsList className="mb-3 h-9">
-            <TabsTrigger value="performance" className="text-sm">Performance</TabsTrigger>
-            <TabsTrigger value="acompanhamento" className="text-sm">Vendas</TabsTrigger>
-            <TabsTrigger value="relatorios" className="text-sm">Relatórios</TabsTrigger>
+            <TabsTrigger value="performance" className="text-sm">
+              Performance
+            </TabsTrigger>
+            <TabsTrigger value="acompanhamento" className="text-sm">
+              Vendas
+            </TabsTrigger>
+            <TabsTrigger value="relatorios" className="text-sm">
+              Relatórios
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="performance" className="space-y-3 mt-0">
@@ -199,7 +213,7 @@ const Index = () => {
                     </Card>
                   </li>
                 </ul>
-                
+
                 {/* Ganho e Perdido Card */}
                 <Card>
                   <CardContent className="p-3">
@@ -217,13 +231,9 @@ const Index = () => {
                 </Card>
 
                 {/* Visualização de Ligações */}
-                <CallsChart 
-                  startDate={performanceFilters.startDate}
-                  endDate={performanceFilters.endDate}
-                />
+                <CallsChart startDate={performanceFilters.startDate} endDate={performanceFilters.endDate} />
               </div>
             </div>
-
           </TabsContent>
 
           <TabsContent value="acompanhamento" className="mt-0 flex flex-col h-[calc(100vh-140px)]">
@@ -241,7 +251,7 @@ const Index = () => {
                 onLaunchChange={(value) => setSalesFilters({ selectedLaunch: value })}
                 onClearFilters={clearSalesFilters}
               />
-              
+
               {statsLoading ? (
                 <div className="space-y-3">
                   <div className="grid grid-cols-6 gap-2">
@@ -261,22 +271,15 @@ const Index = () => {
                     recorrentes={stats.recorrentes}
                     foraLancamento={stats.foraLancamento}
                   />
-                  
+
                   <div className="grid grid-cols-3 gap-3">
                     <TopSellersChart sellers={topSellers} />
-                    <SellersRanking
-                      title="Ranking Lançamento"
-                      sellers={topSellers}
-                      showSalesCount={true}
-                    />
+                    <SellersRanking title="Ranking Lançamento" sellers={topSellers} showSalesCount={true} />
                     <GoalsCard />
                   </div>
 
                   <div className="grid grid-cols-3 gap-3">
-                    <SellersRanking
-                      title="Classificação Mensal"
-                      sellers={monthlyRanking}
-                    />
+                    <SellersRanking title="Classificação Mensal" sellers={monthlyRanking} />
                     <DailySales
                       title="Dia anterior"
                       vendas={yesterdaySales.vendas}
@@ -302,7 +305,7 @@ const Index = () => {
             )}
           </TabsContent>
 
-          <TabsContent value="relatorios" className="mt-0 p-0">
+          <TabsContent value="relatorios" className="mt-0 space-y-3">
             <Reports />
           </TabsContent>
         </Tabs>
