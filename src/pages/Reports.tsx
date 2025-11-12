@@ -34,7 +34,7 @@ export const Reports = () => {
   const avgDailySales = reports.length > 0 ? totalSales / reports.length : 0;
 
   return (
-    <div className="flex flex-col h-full gap-3">
+    <div className="flex flex-col h-full gap-3 pt-0">
       {/* Summary Stats */}
       <div className="grid grid-cols-4 gap-3 flex-shrink-0">
         <Card className="p-4 border-l-4 border-l-primary bg-gradient-to-br from-background to-muted/20">
