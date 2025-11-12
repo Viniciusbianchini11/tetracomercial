@@ -34,9 +34,9 @@ export const Reports = () => {
   const avgDailySales = reports.length > 0 ? totalSales / reports.length : 0;
 
   return (
-    <div className="space-y-3">
+    <div className="flex flex-col h-full gap-3">
       {/* Summary Stats */}
-      <div className="grid grid-cols-4 gap-3">
+      <div className="grid grid-cols-4 gap-3 flex-shrink-0">
         <Card className="p-4 border-l-4 border-l-primary bg-gradient-to-br from-background to-muted/20">
           <div className="flex items-center gap-3">
             <div className="p-3 rounded-lg bg-primary/10">
@@ -87,7 +87,7 @@ export const Reports = () => {
       </div>
 
       {/* Reports List */}
-      <div className="h-[calc(100vh-280px)]">
+      <div className="flex-1 min-h-0">
         <ScrollArea className="h-full">
           {reports.length === 0 ? (
             <div className="text-center text-muted-foreground py-12">
