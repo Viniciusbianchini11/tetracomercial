@@ -34,9 +34,9 @@ export const Reports = () => {
   const avgDailySales = reports.length > 0 ? totalSales / reports.length : 0;
 
   return (
-    <div className="flex flex-col h-full gap-3 pt-0">
+    <div className="flex flex-col h-full pt-0">
       {/* Summary Stats */}
-      <div className="grid grid-cols-4 gap-3 flex-shrink-0">
+      <div className="grid grid-cols-4 gap-3 flex-shrink-0 sticky top-0 z-10 bg-background pb-3">
         <Card className="p-4 border-l-4 border-l-primary bg-gradient-to-br from-background to-muted/20">
           <div className="flex items-center gap-3">
             <div className="p-3 rounded-lg bg-primary/10">
@@ -95,7 +95,7 @@ export const Reports = () => {
               <p>Nenhum relatório encontrado</p>
             </div>
           ) : (
-            <div className="space-y-6 pr-4">
+            <div className="space-y-6 px-4 pt-3">
               {reports.map((report) => (
                 <Card key={report.date} className="overflow-hidden border-2 hover:shadow-lg transition-shadow">
                   {/* Header */}
