@@ -87,19 +87,17 @@ export const DailyReportTable = ({ report }: DailyReportTableProps) => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {report.sales
-              .filter(sale => sale.quantity > 0)
-              .map((sale) => (
-                <TableRow key={sale.seller}>
-                  <TableCell className="text-center font-medium">{sale.seller}</TableCell>
-                  <TableCell className="text-center bg-primary/5">
-                    {sale.boletoPercentage > 0 ? `${sale.boletoPercentage.toFixed(2)}%` : ""}
-                  </TableCell>
-                  <TableCell className="text-center bg-muted/30">
-                    {sale.cartaoPercentage > 0 ? `${sale.cartaoPercentage.toFixed(2)}%` : ""}
-                  </TableCell>
-                </TableRow>
-              ))}
+            {report.sales.map((sale) => (
+              <TableRow key={sale.seller}>
+                <TableCell className="text-center font-medium">{sale.seller}</TableCell>
+                <TableCell className="text-center bg-primary/5">
+                  {sale.quantity > 0 && sale.boletoPercentage > 0 ? `${sale.boletoPercentage.toFixed(2)}%` : "-"}
+                </TableCell>
+                <TableCell className="text-center bg-muted/30">
+                  {sale.quantity > 0 && sale.cartaoPercentage > 0 ? `${sale.cartaoPercentage.toFixed(2)}%` : "-"}
+                </TableCell>
+              </TableRow>
+            ))}
             <TableRow className="bg-muted font-bold">
               <TableCell className="text-center">Total geral</TableCell>
               <TableCell className="text-center">{report.totalBoletoPercentage.toFixed(2)}%</TableCell>
