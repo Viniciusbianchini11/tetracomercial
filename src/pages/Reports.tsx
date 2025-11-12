@@ -125,8 +125,7 @@ export const Reports = () => {
                           <div className="text-right">%</div>
                         </div>
                         <div className="divide-y">
-                          {report.sales
-                            .filter((s) => s.quantity > 0)
+                          {[...report.sales]
                             .sort((a, b) => b.value - a.value)
                             .map((sale) => (
                               <div
@@ -161,8 +160,7 @@ export const Reports = () => {
                           <div className="text-center">Cartão</div>
                         </div>
                         <div className="divide-y">
-                          {report.sales
-                            .filter((s) => s.quantity > 0)
+                          {[...report.sales]
                             .sort((a, b) => b.value - a.value)
                             .map((sale) => (
                               <div
@@ -171,10 +169,10 @@ export const Reports = () => {
                               >
                                 <div className="font-medium">{sale.seller}</div>
                                 <div className="text-center bg-orange-50 dark:bg-orange-950/20 py-1 rounded">
-                                  {sale.boletoPercentage > 0 ? `${sale.boletoPercentage.toFixed(1)}%` : "-"}
+                                  {sale.boletoPercentage.toFixed(1)}%
                                 </div>
                                 <div className="text-center bg-blue-50 dark:bg-blue-950/20 py-1 rounded">
-                                  {sale.cartaoPercentage > 0 ? `${sale.cartaoPercentage.toFixed(1)}%` : "-"}
+                                  {sale.cartaoPercentage.toFixed(1)}%
                                 </div>
                               </div>
                             ))}
@@ -197,8 +195,7 @@ export const Reports = () => {
                           <div className="text-center">Conexões</div>
                         </div>
                         <div className="divide-y">
-                          {report.calls
-                            .filter((c) => c.tentativas > 0)
+                          {[...report.calls]
                             .sort((a, b) => b.tentativas - a.tentativas)
                             .map((call) => (
                               <div
