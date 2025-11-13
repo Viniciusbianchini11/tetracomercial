@@ -50,6 +50,22 @@ interface DailySales {
   }>;
 }
 
+interface MonthlyReportData {
+  sales: Array<{
+    seller: string;
+    quantity: number;
+    value: number;
+    percentage: number;
+    boletoPercentage: number;
+    cartaoPercentage: number;
+  }>;
+  calls: Array<{
+    seller: string;
+    tentativas: number;
+    conexoes: number;
+  }>;
+}
+
 interface SalesStatsFilters {
   startDate?: Date | null;
   endDate?: Date | null;
@@ -71,6 +87,7 @@ export const useSalesStats = (filters?: SalesStatsFilters) => {
   const [monthlyRanking, setMonthlyRanking] = useState<SellerRanking[]>([]);
   const [yesterdaySales, setYesterdaySales] = useState<DailySales>({ vendas: 0, faturamento: 0, porVendedor: [] });
   const [todaySales, setTodaySales] = useState<DailySales>({ vendas: 0, faturamento: 0, porVendedor: [] });
+  const [monthlyReport, setMonthlyReport] = useState<MonthlyReportData>({ sales: [], calls: [] });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -252,6 +269,102 @@ export const useSalesStats = (filters?: SalesStatsFilters) => {
           .sort((a, b) => b.vendas - a.vendas),
       });
 
+      // Calcular dados do mês atual
+      const currentMonth = new Date().getMonth() + 1;
+      const currentYear = new Date().getFullYear();
+      
+      const monthlyData = data.filter(sale => {
+        if (!sale.DATA) return false;
+        const saleDate = parseDbDate(sale.DATA);
+        return saleDate.getMonth() + 1 === currentMonth && saleDate.getFullYear() === currentYear;
+      });
+
+      // Agrupar vendas por vendedor
+      const monthlySellerMap = new Map<string, {
+        quantity: number;
+        value: number;
+        boleto: number;
+        cartao: number;
+        total: number;
+      }>();
+
+      monthlyData.forEach(sale => {
+        const vendedor = sale.VENDEDOR || "Sem vendedor";
+        const valorFinal = sale["VALOR FIINAL"] || sale["VALOR FINAL"] || 0;
+        const plataforma = sale.Plataforma?.toUpperCase() || "";
+        
+        const current = monthlySellerMap.get(vendedor) || {
+          quantity: 0,
+          value: 0,
+          boleto: 0,
+          cartao: 0,
+          total: 0,
+        };
+
+        monthlySellerMap.set(vendedor, {
+          quantity: current.quantity + 1,
+          value: current.value + valorFinal,
+          boleto: current.boleto + (plataforma.includes("BOLETO") ? 1 : 0),
+          cartao: current.cartao + (plataforma.includes("CARTÃO") || plataforma.includes("CARTAO") ? 1 : 0),
+          total: current.total + 1,
+        });
+      });
+
+      const totalMonthlyValue = Array.from(monthlySellerMap.values()).reduce((sum, s) => sum + s.value, 0);
+
+      // Buscar ligações do mês
+      const { data: callsData } = await supabase
+        .from("ligacoes_diarias")
+        .select("*")
+        .gte("data_referencia", `${currentYear}-${String(currentMonth).padStart(2, '0')}-01`)
+        .lt("data_referencia", `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-01`);
+
+      const callsMap = new Map<string, { tentativas: number; conexoes: number }>();
+      
+      callsData?.forEach(call => {
+        const seller = call.nome_vendedor || "Sem vendedor";
+        const current = callsMap.get(seller) || { tentativas: 0, conexoes: 0 };
+        callsMap.set(seller, {
+          tentativas: current.tentativas + (call.tentativas || 0),
+          conexoes: current.conexoes + (call.conexoes || 0),
+        });
+      });
+
+      // Combinar dados de vendas e ligações
+      const allSellers = new Set([
+        ...Array.from(monthlySellerMap.keys()),
+        ...Array.from(callsMap.keys())
+      ]);
+
+      const monthlySalesData = Array.from(allSellers).map(seller => {
+        const salesInfo = monthlySellerMap.get(seller) || { quantity: 0, value: 0, boleto: 0, cartao: 0, total: 0 };
+        const boletoPercentage = salesInfo.total > 0 ? (salesInfo.boleto / salesInfo.total) * 100 : 0;
+        const cartaoPercentage = salesInfo.total > 0 ? (salesInfo.cartao / salesInfo.total) * 100 : 0;
+        
+        return {
+          seller,
+          quantity: salesInfo.quantity,
+          value: salesInfo.value,
+          percentage: totalMonthlyValue > 0 ? (salesInfo.value / totalMonthlyValue) * 100 : 0,
+          boletoPercentage,
+          cartaoPercentage,
+        };
+      }).sort((a, b) => b.value - a.value);
+
+      const monthlyCallsData = Array.from(allSellers).map(seller => {
+        const callsInfo = callsMap.get(seller) || { tentativas: 0, conexoes: 0 };
+        return {
+          seller,
+          tentativas: callsInfo.tentativas,
+          conexoes: callsInfo.conexoes,
+        };
+      }).sort((a, b) => b.conexoes - a.conexoes);
+
+      setMonthlyReport({
+        sales: monthlySalesData,
+        calls: monthlyCallsData,
+      });
+
     } catch (error) {
       console.error("Error fetching sales stats:", error);
       toast.error("Erro ao carregar estatísticas");
@@ -266,6 +379,7 @@ export const useSalesStats = (filters?: SalesStatsFilters) => {
     monthlyRanking,
     yesterdaySales,
     todaySales,
+    monthlyReport,
     loading,
   };
 };
