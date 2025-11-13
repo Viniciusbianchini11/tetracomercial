@@ -91,20 +91,22 @@ export const MonthlyReportCard = ({ data }: MonthlyReportCardProps) => {
                   <div className="text-center">Cartão</div>
                 </div>
                 <div className="divide-y">
-                  {data.sales.map((sale, index) => (
-                    <div
-                      key={index}
-                      className="grid grid-cols-3 gap-1 px-2 py-1.5 text-[10px] hover:bg-muted/30 transition-colors"
-                    >
-                      <div className="font-medium uppercase truncate">{sale.seller}</div>
-                      <div className="text-center font-semibold text-orange-600">
-                        {sale.boletoPercentage.toFixed(1)}%
+                  {data.sales
+                    .filter(sale => sale.quantity > 0)
+                    .map((sale, index) => (
+                      <div
+                        key={index}
+                        className="grid grid-cols-3 gap-1 px-2 py-1.5 text-[10px] hover:bg-muted/30 transition-colors"
+                      >
+                        <div className="font-medium uppercase truncate">{sale.seller}</div>
+                        <div className="text-center font-semibold text-orange-600">
+                          {sale.boletoPercentage.toFixed(1)}%
+                        </div>
+                        <div className="text-center font-semibold text-blue-600">
+                          {sale.cartaoPercentage.toFixed(1)}%
+                        </div>
                       </div>
-                      <div className="text-center font-semibold text-blue-600">
-                        {sale.cartaoPercentage.toFixed(1)}%
-                      </div>
-                    </div>
-                  ))}
+                    ))}
                 </div>
               </div>
             </div>
@@ -119,16 +121,18 @@ export const MonthlyReportCard = ({ data }: MonthlyReportCardProps) => {
                   <div className="text-center">Conexões</div>
                 </div>
                 <div className="divide-y">
-                  {data.calls.map((call, index) => (
-                    <div
-                      key={index}
-                      className="grid grid-cols-3 gap-1 px-2 py-1.5 text-[10px] hover:bg-muted/30 transition-colors"
-                    >
-                      <div className="font-medium uppercase truncate">{call.seller}</div>
-                      <div className="text-center text-muted-foreground">{call.tentativas}</div>
-                      <div className="text-center font-semibold text-blue-600">{call.conexoes}</div>
-                    </div>
-                  ))}
+                  {data.calls
+                    .filter(call => call.tentativas > 0 || call.conexoes > 0)
+                    .map((call, index) => (
+                      <div
+                        key={index}
+                        className="grid grid-cols-3 gap-1 px-2 py-1.5 text-[10px] hover:bg-muted/30 transition-colors"
+                      >
+                        <div className="font-medium uppercase truncate">{call.seller}</div>
+                        <div className="text-center text-muted-foreground">{call.tentativas}</div>
+                        <div className="text-center font-semibold text-blue-600">{call.conexoes}</div>
+                      </div>
+                    ))}
                 </div>
               </div>
             </div>
