@@ -1,4 +1,4 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface MonthlyReportData {
@@ -29,68 +29,107 @@ export const MonthlyReportCard = ({ data }: MonthlyReportCardProps) => {
     }).format(value);
   };
 
+  const totalValue = data.sales.reduce((sum, s) => sum + s.value, 0);
+  const totalQuantity = data.sales.reduce((sum, s) => sum + s.quantity, 0);
+
   return (
-    <Card className="h-full flex flex-col">
-      <CardHeader className="pb-3">
-        <CardTitle className="text-lg">Resumo do Mês</CardTitle>
-      </CardHeader>
-      <CardContent className="flex-1 overflow-hidden p-3 pt-0">
+    <Card className="h-full flex flex-col overflow-hidden border-2">
+      {/* Header */}
+      <div className="bg-gradient-to-r from-primary to-primary/80 text-primary-foreground px-4 py-2.5 flex items-center justify-between">
+        <span className="text-sm font-bold">RESUMO DO MÊS</span>
+        <div className="flex gap-3 text-xs">
+          <span className="font-semibold">{totalQuantity} vendas</span>
+          <span className="font-semibold">{formatCurrency(totalValue)}</span>
+        </div>
+      </div>
+
+      {/* Content */}
+      <CardContent className="flex-1 overflow-hidden p-3">
         <ScrollArea className="h-full">
-          <div className="space-y-3 pr-3">
-            {/* Mini Card 1: Resultado de Vendas */}
-            <div className="rounded-lg border bg-card p-2">
-              <h4 className="text-xs font-semibold mb-2">Resultado de Vendas</h4>
-              <div className="space-y-1">
-                {data.sales.map((seller, index) => (
-                  <div key={index} className="flex items-center justify-between text-xs">
-                    <span className="font-medium uppercase truncate">{seller.seller}</span>
-                    <div className="flex items-center gap-2 flex-shrink-0">
-                      <span className="text-muted-foreground">{seller.quantity}</span>
-                      <span className="font-semibold min-w-[70px] text-right">{formatCurrency(seller.value)}</span>
-                      <span className="text-green-600 min-w-[35px] text-right">{seller.percentage.toFixed(1)}%</span>
+          <div className="space-y-3 pr-2">
+            {/* Resultado de Vendas */}
+            <div className="space-y-1">
+              <h3 className="text-xs font-bold text-primary mb-2">📊 RESULTADO DE VENDAS</h3>
+              <div className="rounded-lg border overflow-hidden">
+                <div className="bg-muted/50 grid grid-cols-4 gap-1 px-2 py-1.5 text-[10px] font-semibold">
+                  <div>Vendedor</div>
+                  <div className="text-center">Qtd</div>
+                  <div className="text-right">Valor</div>
+                  <div className="text-right">%</div>
+                </div>
+                <div className="divide-y">
+                  {data.sales.map((sale, index) => (
+                    <div
+                      key={index}
+                      className="grid grid-cols-4 gap-1 px-2 py-1.5 text-[10px] hover:bg-muted/30 transition-colors"
+                    >
+                      <div className="font-medium uppercase truncate">{sale.seller}</div>
+                      <div className="text-center">{sale.quantity}</div>
+                      <div className="text-right">{formatCurrency(sale.value)}</div>
+                      <div className="text-right font-semibold text-primary">
+                        {sale.percentage.toFixed(1)}%
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
+                <div className="bg-primary/10 grid grid-cols-4 gap-1 px-2 py-1.5 text-[10px] font-bold border-t-2">
+                  <div>TOTAL</div>
+                  <div className="text-center">{totalQuantity}</div>
+                  <div className="text-right">{formatCurrency(totalValue)}</div>
+                  <div className="text-right">100%</div>
+                </div>
               </div>
             </div>
 
-            {/* Mini Card 2: Formas de Pagamento */}
-            <div className="rounded-lg border bg-card p-2">
-              <h4 className="text-xs font-semibold mb-2">Formas de Pagamento</h4>
-              <div className="space-y-1">
-                {data.sales.map((seller, index) => (
-                  <div key={index} className="flex items-center justify-between text-xs">
-                    <span className="font-medium uppercase truncate">{seller.seller}</span>
-                    <div className="flex items-center gap-3 flex-shrink-0">
-                      <span className="text-orange-600 min-w-[40px] text-right">
-                        Boleto: {seller.boletoPercentage.toFixed(1)}%
-                      </span>
-                      <span className="text-blue-600 min-w-[40px] text-right">
-                        Cartão: {seller.cartaoPercentage.toFixed(1)}%
-                      </span>
+            {/* Formas de Pagamento */}
+            <div className="space-y-1">
+              <h3 className="text-xs font-bold text-green-600 mb-2">💳 FORMAS DE PAGAMENTO</h3>
+              <div className="rounded-lg border overflow-hidden">
+                <div className="bg-muted/50 grid grid-cols-3 gap-1 px-2 py-1.5 text-[10px] font-semibold">
+                  <div>Vendedor</div>
+                  <div className="text-center">Boleto</div>
+                  <div className="text-center">Cartão</div>
+                </div>
+                <div className="divide-y">
+                  {data.sales.map((sale, index) => (
+                    <div
+                      key={index}
+                      className="grid grid-cols-3 gap-1 px-2 py-1.5 text-[10px] hover:bg-muted/30 transition-colors"
+                    >
+                      <div className="font-medium uppercase truncate">{sale.seller}</div>
+                      <div className="text-center font-semibold text-orange-600">
+                        {sale.boletoPercentage.toFixed(1)}%
+                      </div>
+                      <div className="text-center font-semibold text-blue-600">
+                        {sale.cartaoPercentage.toFixed(1)}%
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
             </div>
 
-            {/* Mini Card 3: Ligações */}
-            <div className="rounded-lg border bg-card p-2">
-              <h4 className="text-xs font-semibold mb-2">Ligações do Mês</h4>
-              <div className="space-y-1">
-                {data.calls.map((call, index) => (
-                  <div key={index} className="flex items-center justify-between text-xs">
-                    <span className="font-medium uppercase truncate">{call.seller}</span>
-                    <div className="flex items-center gap-3 flex-shrink-0">
-                      <span className="text-muted-foreground">
-                        Tentativas: <span className="font-semibold">{call.tentativas}</span>
-                      </span>
-                      <span className="text-blue-600">
-                        Conexões: <span className="font-semibold">{call.conexoes}</span>
-                      </span>
+            {/* Ligações */}
+            <div className="space-y-1">
+              <h3 className="text-xs font-bold text-blue-600 mb-2">📞 LIGAÇÕES DO MÊS</h3>
+              <div className="rounded-lg border overflow-hidden">
+                <div className="bg-muted/50 grid grid-cols-3 gap-1 px-2 py-1.5 text-[10px] font-semibold">
+                  <div>Vendedor</div>
+                  <div className="text-center">Tentativas</div>
+                  <div className="text-center">Conexões</div>
+                </div>
+                <div className="divide-y">
+                  {data.calls.map((call, index) => (
+                    <div
+                      key={index}
+                      className="grid grid-cols-3 gap-1 px-2 py-1.5 text-[10px] hover:bg-muted/30 transition-colors"
+                    >
+                      <div className="font-medium uppercase truncate">{call.seller}</div>
+                      <div className="text-center text-muted-foreground">{call.tentativas}</div>
+                      <div className="text-center font-semibold text-blue-600">{call.conexoes}</div>
                     </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
             </div>
           </div>
