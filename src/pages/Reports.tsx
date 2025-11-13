@@ -6,6 +6,19 @@ import { TrendingUp, DollarSign, Phone, Calendar } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
+const ACTIVE_SELLERS = [
+  "Barbara",
+  "Sabrina",
+  "Vladmir",
+  "Alexia",
+  "Kimberly",
+  "Thaynara",
+  "Wemille",
+  "Geovanna",
+  "Elton",
+  "Celina"
+];
+
 const formatCurrency = (value: number): string => {
   return new Intl.NumberFormat("pt-BR", {
     style: "currency",
@@ -224,6 +237,86 @@ export const Reports = () => {
               </div>
             </div>
           </div>
+        </Card>
+      )}
+
+      {/* Daily Breakdown Table */}
+      {monthlyReports.length > 0 && (
+        <Card className="overflow-hidden border-2 mb-3 flex-shrink-0">
+          <div className="bg-gradient-to-r from-cyan-600 to-cyan-500 text-white px-6 py-3">
+            <span className="text-lg font-bold">
+              ACUMULADO - {format(new Date(), "MMMM/yyyy", { locale: ptBR }).toUpperCase()}
+            </span>
+          </div>
+          
+          <ScrollArea className="h-[400px]">
+            <div className="overflow-x-auto">
+              <table className="w-full text-xs">
+                <thead className="sticky top-0 bg-muted/80 backdrop-blur">
+                  <tr>
+                    <th className="px-3 py-2 text-left border-r font-bold">VALOR</th>
+                    <th className="px-3 py-2 text-left border-r font-bold">DATA</th>
+                    <th className="px-3 py-2 text-left border-r font-bold">DIA SEMANA</th>
+                    {ACTIVE_SELLERS.map((seller) => (
+                      <th key={seller} className="px-3 py-2 text-center border-r font-bold bg-muted">
+                        {seller.toUpperCase()}
+                      </th>
+                    ))}
+                    <th className="px-3 py-2 text-right font-bold bg-primary/10">Total geral</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {monthlyReports.map((report) => {
+                    const reportDate = new Date(report.date + "T00:00:00");
+                    const dayOfWeek = format(reportDate, "EEEE", { locale: ptBR });
+                    
+                    return (
+                      <tr key={report.date} className="border-b hover:bg-muted/30 transition-colors">
+                        <td className="px-3 py-2 border-r">
+                          <input type="checkbox" className="mr-2" />
+                        </td>
+                        <td className="px-3 py-2 border-r font-medium">
+                          {format(reportDate, "dd/MM/yyyy")}
+                        </td>
+                        <td className="px-3 py-2 border-r capitalize">{dayOfWeek}</td>
+                        {ACTIVE_SELLERS.map((seller) => {
+                          const sellerData = report.sales.find(s => s.seller === seller);
+                          const value = sellerData?.value || 0;
+                          return (
+                            <td key={seller} className="px-3 py-2 text-right border-r">
+                              {value > 0 ? formatCurrency(value) : "-"}
+                            </td>
+                          );
+                        })}
+                        <td className="px-3 py-2 text-right font-bold bg-primary/5">
+                          {formatCurrency(report.totalValue)}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                  {/* Total Row */}
+                  <tr className="bg-cyan-600/20 font-bold border-t-2">
+                    <td className="px-3 py-2 border-r"></td>
+                    <td className="px-3 py-2 border-r" colSpan={2}>Total geral</td>
+                    {ACTIVE_SELLERS.map((seller) => {
+                      const sellerTotal = monthlyReports.reduce((sum, report) => {
+                        const sellerData = report.sales.find(s => s.seller === seller);
+                        return sum + (sellerData?.value || 0);
+                      }, 0);
+                      return (
+                        <td key={seller} className="px-3 py-2 text-right border-r">
+                          {formatCurrency(sellerTotal)}
+                        </td>
+                      );
+                    })}
+                    <td className="px-3 py-2 text-right bg-primary/10">
+                      {formatCurrency(monthlyTotalRevenue)}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </ScrollArea>
         </Card>
       )}
 
