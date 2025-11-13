@@ -33,6 +33,80 @@ export const Reports = () => {
   const totalCalls = reports.reduce((sum, r) => sum + r.totalTentativas, 0);
   const avgDailySales = reports.length > 0 ? totalSales / reports.length : 0;
 
+  // Calculate monthly summary (current month)
+  const currentDate = new Date();
+  const currentMonth = currentDate.getMonth();
+  const currentYear = currentDate.getFullYear();
+  
+  const monthlyReports = reports.filter(report => {
+    const reportDate = new Date(report.date + "T00:00:00");
+    return reportDate.getMonth() === currentMonth && reportDate.getFullYear() === currentYear;
+  });
+
+  // Aggregate monthly data
+  const monthlySales = new Map<string, { 
+    quantity: number; 
+    value: number; 
+    boletoValue: number; 
+    cartaoValue: number; 
+  }>();
+  const monthlyCalls = new Map<string, { tentativas: number; conexoes: number }>();
+
+  monthlyReports.forEach(report => {
+    report.sales.forEach(sale => {
+      const existing = monthlySales.get(sale.seller) || { 
+        quantity: 0, 
+        value: 0, 
+        boletoValue: 0, 
+        cartaoValue: 0 
+      };
+      
+      const boletoValue = (sale.value * sale.boletoPercentage) / 100;
+      const cartaoValue = (sale.value * sale.cartaoPercentage) / 100;
+      
+      monthlySales.set(sale.seller, {
+        quantity: existing.quantity + sale.quantity,
+        value: existing.value + sale.value,
+        boletoValue: existing.boletoValue + boletoValue,
+        cartaoValue: existing.cartaoValue + cartaoValue
+      });
+    });
+
+    report.calls.forEach(call => {
+      const existing = monthlyCalls.get(call.seller) || { tentativas: 0, conexoes: 0 };
+      monthlyCalls.set(call.seller, {
+        tentativas: existing.tentativas + call.tentativas,
+        conexoes: existing.conexoes + call.conexoes
+      });
+    });
+  });
+
+  const monthlyTotalSales = Array.from(monthlySales.values()).reduce((sum, s) => sum + s.quantity, 0);
+  const monthlyTotalRevenue = Array.from(monthlySales.values()).reduce((sum, s) => sum + s.value, 0);
+
+  const monthlySalesArray = Array.from(monthlySales.entries()).map(([seller, data]) => ({
+    seller,
+    quantity: data.quantity,
+    value: data.value,
+    percentage: monthlyTotalRevenue > 0 ? (data.value / monthlyTotalRevenue) * 100 : 0,
+    boletoPercentage: data.value > 0 ? (data.boletoValue / data.value) * 100 : 0,
+    cartaoPercentage: data.value > 0 ? (data.cartaoValue / data.value) * 100 : 0
+  })).sort((a, b) => b.value - a.value);
+
+  const monthlyCallsArray = Array.from(monthlyCalls.entries()).map(([seller, data]) => ({
+    seller,
+    ...data
+  })).sort((a, b) => b.tentativas - a.tentativas);
+  
+  // Calculate average payment method percentages
+  const activeSellers = monthlySalesArray.filter(s => s.quantity > 0);
+  const monthlyBoletoPercentage = activeSellers.length > 0 
+    ? activeSellers.reduce((sum, s) => sum + s.boletoPercentage, 0) / activeSellers.length 
+    : 0;
+  const monthlyCartaoPercentage = activeSellers.length > 0 
+    ? activeSellers.reduce((sum, s) => sum + s.cartaoPercentage, 0) / activeSellers.length 
+    : 0;
+
   return (
     <div className="flex flex-col h-full">
       {/* Summary Stats */}
@@ -85,6 +159,124 @@ export const Reports = () => {
           </div>
         </Card>
       </div>
+
+      {/* Monthly Report */}
+      {monthlyReports.length > 0 && (
+        <Card className="overflow-hidden border-2 mb-6">
+          {/* Header */}
+          <div className="bg-gradient-to-r from-purple-600 to-purple-500 text-white px-6 py-3 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Calendar className="w-5 h-5" />
+              <span className="text-lg font-bold">
+                Resumo do Mês - {format(new Date(), "MMMM 'de' yyyy", { locale: ptBR })}
+              </span>
+            </div>
+            <div className="flex gap-6 text-sm">
+              <span className="font-semibold">{monthlyTotalSales} vendas</span>
+              <span className="font-semibold">{formatCurrency(monthlyTotalRevenue)}</span>
+            </div>
+          </div>
+
+          {/* Content Grid */}
+          <div className="grid grid-cols-3 gap-4 p-6">
+            {/* Sales Table */}
+            <div className="space-y-2">
+              <h3 className="text-sm font-bold text-primary mb-3">📊 RESULTADO DE VENDAS</h3>
+              <div className="rounded-lg border overflow-hidden">
+                <div className="bg-muted/50 grid grid-cols-4 gap-2 px-3 py-2 text-xs font-semibold">
+                  <div>Vendedor</div>
+                  <div className="text-center">Qtd</div>
+                  <div className="text-right">Valor</div>
+                  <div className="text-right">%</div>
+                </div>
+                <div className="divide-y">
+                  {monthlySalesArray.map((sale) => (
+                    <div
+                      key={sale.seller}
+                      className="grid grid-cols-4 gap-2 px-3 py-2 text-xs hover:bg-muted/30 transition-colors"
+                    >
+                      <div className="font-medium">{sale.seller}</div>
+                      <div className="text-center">{sale.quantity}</div>
+                      <div className="text-right">{formatCurrency(sale.value)}</div>
+                      <div className="text-right font-semibold text-primary">
+                        {sale.percentage.toFixed(1)}%
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <div className="bg-primary/10 grid grid-cols-4 gap-2 px-3 py-2 text-xs font-bold border-t-2">
+                  <div>TOTAL</div>
+                  <div className="text-center">{monthlyTotalSales}</div>
+                  <div className="text-right">{formatCurrency(monthlyTotalRevenue)}</div>
+                  <div className="text-right">100%</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Payment Methods */}
+            <div className="space-y-2">
+              <h3 className="text-sm font-bold text-green-600 mb-3">💳 FORMAS DE PAGAMENTO</h3>
+              <div className="rounded-lg border overflow-hidden">
+                <div className="bg-muted/50 grid grid-cols-3 gap-2 px-3 py-2 text-xs font-semibold">
+                  <div>Vendedor</div>
+                  <div className="text-center">Boleto</div>
+                  <div className="text-center">Cartão</div>
+                </div>
+                <div className="divide-y">
+                  {monthlySalesArray.map((sale) => (
+                    <div
+                      key={sale.seller}
+                      className="grid grid-cols-3 gap-2 px-3 py-2 text-xs hover:bg-muted/30 transition-colors"
+                    >
+                      <div className="font-medium">{sale.seller}</div>
+                      <div className="text-center bg-orange-50 dark:bg-orange-950/20 py-1 rounded">
+                        {sale.boletoPercentage.toFixed(1)}%
+                      </div>
+                      <div className="text-center bg-blue-50 dark:bg-blue-950/20 py-1 rounded">
+                        {sale.cartaoPercentage.toFixed(1)}%
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <div className="bg-green-600/10 grid grid-cols-3 gap-2 px-3 py-2 text-xs font-bold border-t-2">
+                  <div>MÉDIA</div>
+                  <div className="text-center">{monthlyBoletoPercentage.toFixed(1)}%</div>
+                  <div className="text-center">{monthlyCartaoPercentage.toFixed(1)}%</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Calls Table */}
+            <div className="space-y-2">
+              <h3 className="text-sm font-bold text-blue-600 mb-3">📞 LIGAÇÕES DO MÊS</h3>
+              <div className="rounded-lg border overflow-hidden">
+                <div className="bg-muted/50 grid grid-cols-3 gap-2 px-3 py-2 text-xs font-semibold">
+                  <div>Vendedor</div>
+                  <div className="text-center">Tentativas</div>
+                  <div className="text-center">Conexões</div>
+                </div>
+                <div className="divide-y">
+                  {monthlyCallsArray.map((call) => (
+                    <div
+                      key={call.seller}
+                      className="grid grid-cols-3 gap-2 px-3 py-2 text-xs hover:bg-muted/30 transition-colors"
+                    >
+                      <div className="font-medium">{call.seller}</div>
+                      <div className="text-center">{call.tentativas}</div>
+                      <div className="text-center font-semibold text-blue-600">{call.conexoes}</div>
+                    </div>
+                  ))}
+                </div>
+                <div className="bg-blue-600/10 grid grid-cols-3 gap-2 px-3 py-2 text-xs font-bold border-t-2">
+                  <div>TOTAL</div>
+                  <div className="text-center">{monthlyCallsArray.reduce((sum, c) => sum + c.tentativas, 0)}</div>
+                  <div className="text-center">{monthlyCallsArray.reduce((sum, c) => sum + c.conexoes, 0)}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </Card>
+      )}
 
       {/* Reports List */}
       <div className="flex-1 min-h-0">
