@@ -109,60 +109,9 @@ export const Reports = () => {
 
   return (
     <div className="flex flex-col h-full">
-      {/* Summary Stats */}
-      <div className="grid grid-cols-4 gap-3 flex-shrink-0 mb-3">
-        <Card className="p-4 border-l-4 border-l-primary bg-gradient-to-br from-background to-muted/20">
-          <div className="flex items-center gap-3">
-            <div className="p-3 rounded-lg bg-primary/10">
-              <TrendingUp className="w-6 h-6 text-primary" />
-            </div>
-            <div>
-              <p className="text-xs text-muted-foreground font-medium">Total de Vendas</p>
-              <p className="text-2xl font-bold">{totalSales}</p>
-            </div>
-          </div>
-        </Card>
-
-        <Card className="p-4 border-l-4 border-l-green-500 bg-gradient-to-br from-background to-green-500/5">
-          <div className="flex items-center gap-3">
-            <div className="p-3 rounded-lg bg-green-500/10">
-              <DollarSign className="w-6 h-6 text-green-600" />
-            </div>
-            <div>
-              <p className="text-xs text-muted-foreground font-medium">Faturamento Total</p>
-              <p className="text-2xl font-bold">{formatCurrency(totalRevenue)}</p>
-            </div>
-          </div>
-        </Card>
-
-        <Card className="p-4 border-l-4 border-l-blue-500 bg-gradient-to-br from-background to-blue-500/5">
-          <div className="flex items-center gap-3">
-            <div className="p-3 rounded-lg bg-blue-500/10">
-              <Phone className="w-6 h-6 text-blue-600" />
-            </div>
-            <div>
-              <p className="text-xs text-muted-foreground font-medium">Total de Ligações</p>
-              <p className="text-2xl font-bold">{totalCalls}</p>
-            </div>
-          </div>
-        </Card>
-
-        <Card className="p-4 border-l-4 border-l-orange-500 bg-gradient-to-br from-background to-orange-500/5">
-          <div className="flex items-center gap-3">
-            <div className="p-3 rounded-lg bg-orange-500/10">
-              <Calendar className="w-6 h-6 text-orange-600" />
-            </div>
-            <div>
-              <p className="text-xs text-muted-foreground font-medium">Média Diária</p>
-              <p className="text-2xl font-bold">{avgDailySales.toFixed(1)}</p>
-            </div>
-          </div>
-        </Card>
-      </div>
-
       {/* Monthly Report */}
       {monthlyReports.length > 0 && (
-        <Card className="overflow-hidden border-2 mb-6">
+        <Card className="overflow-hidden border-2 mb-3 flex-shrink-0">
           {/* Header */}
           <div className="bg-gradient-to-r from-purple-600 to-purple-500 text-white px-6 py-3 flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -277,6 +226,57 @@ export const Reports = () => {
           </div>
         </Card>
       )}
+
+      {/* Summary Stats */}
+      <div className="grid grid-cols-4 gap-3 flex-shrink-0 mb-3">
+        <Card className="p-4 border-l-4 border-l-primary bg-gradient-to-br from-background to-muted/20">
+          <div className="flex items-center gap-3">
+            <div className="p-3 rounded-lg bg-primary/10">
+              <TrendingUp className="w-6 h-6 text-primary" />
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground font-medium">Total de Vendas</p>
+              <p className="text-2xl font-bold">{totalSales}</p>
+            </div>
+          </div>
+        </Card>
+
+        <Card className="p-4 border-l-4 border-l-green-500 bg-gradient-to-br from-background to-green-500/5">
+          <div className="flex items-center gap-3">
+            <div className="p-3 rounded-lg bg-green-500/10">
+              <DollarSign className="w-6 h-6 text-green-600" />
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground font-medium">Faturamento Total</p>
+              <p className="text-2xl font-bold">{formatCurrency(totalRevenue)}</p>
+            </div>
+          </div>
+        </Card>
+
+        <Card className="p-4 border-l-4 border-l-blue-500 bg-gradient-to-br from-background to-blue-500/5">
+          <div className="flex items-center gap-3">
+            <div className="p-3 rounded-lg bg-blue-500/10">
+              <Phone className="w-6 h-6 text-blue-600" />
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground font-medium">Total de Ligações</p>
+              <p className="text-2xl font-bold">{totalCalls}</p>
+            </div>
+          </div>
+        </Card>
+
+        <Card className="p-4 border-l-4 border-l-orange-500 bg-gradient-to-br from-background to-orange-500/5">
+          <div className="flex items-center gap-3">
+            <div className="p-3 rounded-lg bg-orange-500/10">
+              <Calendar className="w-6 h-6 text-orange-600" />
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground font-medium">Média Diária</p>
+              <p className="text-2xl font-bold">{avgDailySales.toFixed(1)}</p>
+            </div>
+          </div>
+        </Card>
+      </div>
 
       {/* Reports List */}
       <div className="flex-1 min-h-0">
