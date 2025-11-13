@@ -200,11 +200,15 @@ export const Reports = () => {
                             .map((call) => (
                               <div
                                 key={call.seller}
-                                className="grid grid-cols-3 gap-2 px-3 py-2 text-xs hover:bg-muted/30 transition-colors"
+                                className={`grid grid-cols-3 gap-2 px-3 py-2 text-xs hover:bg-muted/30 transition-colors ${
+                                  call.conexoes < 15 ? 'bg-red-500/10 border-l-4 border-l-red-500' : ''
+                                }`}
                               >
                                 <div className="font-medium">{call.seller}</div>
                                 <div className="text-center">{call.tentativas}</div>
-                                <div className="text-center font-semibold text-blue-600">{call.conexoes}</div>
+                                <div className={`text-center font-semibold ${call.conexoes < 15 ? 'text-red-600' : 'text-blue-600'}`}>
+                                  {call.conexoes}
+                                </div>
                               </div>
                             ))}
                         </div>
