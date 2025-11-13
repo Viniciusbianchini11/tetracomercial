@@ -249,7 +249,7 @@ export const Reports = () => {
             </span>
           </div>
           
-          <ScrollArea className="h-[400px]">
+          <ScrollArea className="h-[300px]">
             <div className="overflow-x-auto">
               <table className="w-full text-xs">
                 <thead className="sticky top-0 bg-muted/80 backdrop-blur">
