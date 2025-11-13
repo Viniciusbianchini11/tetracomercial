@@ -12,6 +12,7 @@ import { TopSellersChart } from "@/components/sales/TopSellersChart";
 import { SellersRanking } from "@/components/sales/SellersRanking";
 import { DailySales } from "@/components/sales/DailySales";
 import { GoalsCard } from "@/components/sales/GoalsCard";
+import { MonthlyReportCard } from "@/components/sales/MonthlyReportCard";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Header } from "@/components/Header";
 import { useFunnelData } from "@/hooks/useFunnelData";
@@ -95,6 +96,7 @@ const Index = () => {
     monthlyRanking,
     yesterdaySales,
     todaySales,
+    monthlyReport,
     loading: statsLoading,
   } = useSalesStats({
     startDate: salesFilters.salesStartDate,
@@ -281,18 +283,14 @@ const Index = () => {
                   <div className="grid grid-cols-3 gap-3">
                     <SellersRanking title="Classificação Mensal" sellers={monthlyRanking} />
                     <DailySales
-                      title="Dia anterior"
-                      vendas={yesterdaySales.vendas}
-                      faturamento={yesterdaySales.faturamento}
-                      porVendedor={yesterdaySales.porVendedor}
-                    />
-                    <DailySales
-                      title="Vendas do dia"
+                      title="Vendas Diárias"
                       vendas={todaySales.vendas}
                       faturamento={todaySales.faturamento}
                       faturamentoFinal={todaySales.faturamentoFinal}
                       porVendedor={todaySales.porVendedor}
+                      yesterdayData={yesterdaySales}
                     />
+                    <MonthlyReportCard data={monthlyReport} />
                   </div>
                 </>
               )}
