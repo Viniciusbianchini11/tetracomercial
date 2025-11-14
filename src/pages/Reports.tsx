@@ -16,6 +16,15 @@ const formatCurrency = (value: number): string => {
 export const Reports = () => {
   const { reports, loading } = useDailyReports();
 
+  const formatDate = (date: string) => {
+    if (!date) return "Data inválida";
+    try {
+      return format(new Date(date + "T00:00:00"), "EEEE, dd 'de' MMMM 'de' yyyy", { locale: ptBR });
+    } catch {
+      return "Data inválida";
+    }
+  };
+
   if (loading) {
     return (
       <div className="grid grid-cols-3 gap-3">
@@ -103,7 +112,7 @@ export const Reports = () => {
                     <div className="flex items-center gap-3">
                       <Calendar className="w-5 h-5" />
                       <span className="text-lg font-bold">
-                        {format(new Date(report.date + "T00:00:00"), "EEEE, dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
+                        {formatDate(report.date)}
                       </span>
                     </div>
                     <div className="flex gap-6 text-sm">
