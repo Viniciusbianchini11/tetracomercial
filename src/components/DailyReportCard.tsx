@@ -41,7 +41,16 @@ const formatCurrency = (value: number): string => {
 };
 
 export const DailyReportCard = ({ report }: DailyReportCardProps) => {
-  const formattedDate = format(new Date(report.date + "T00:00:00"), "dd/MM/yyyy");
+  const formatDate = (date: string) => {
+    if (!date) return "-";
+    try {
+      return format(new Date(date + "T00:00:00"), "dd/MM/yyyy");
+    } catch {
+      return "-";
+    }
+  };
+  
+  const formattedDate = formatDate(report.date);
 
   return (
     <div className="grid grid-cols-3 gap-3">
