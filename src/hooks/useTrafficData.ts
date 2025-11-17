@@ -1,6 +1,21 @@
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 
+// Helper to parse numbers that may come in Brazilian format (e.g., "1.234,56")
+const parseNumberBR = (value: unknown): number => {
+  if (typeof value === "number") return isFinite(value) ? value : 0;
+  if (typeof value === "string") {
+    const cleaned = value
+      .trim()
+      .replace(/\./g, "")
+      .replace(/,/g, ".")
+      .replace(/[^\d.-]/g, "");
+    const n = parseFloat(cleaned);
+    return isFinite(n) ? n : 0;
+  }
+  return 0;
+};
+
 interface TrafficDataItem {
   "Dia": string;
   "Valor gasto": number;
@@ -52,13 +67,13 @@ export const useTrafficData = () => {
       // Calculate aggregated metrics
       const totals = rawData.reduce(
         (acc, item) => ({
-          amount_spent: acc.amount_spent + (Number(item["Valor gasto"]) || 0),
-          reach: acc.reach + (Number(item["Alcançar"]) || 0),
-          impressions: acc.impressions + (Number(item["Impressões"]) || 0),
-          link_clicks: acc.link_clicks + (Number(item["Cliques em links"]) || 0),
-          landing_page_views: acc.landing_page_views + (Number(item["Visualizações da página de destino"]) || 0),
-          video_views_3s: acc.video_views_3s + (Number(item["Visualizações de vídeo de 3 segundos"]) || 0),
-          leads: acc.leads + (Number(item["Pistas"]) || 0),
+          amount_spent: acc.amount_spent + parseNumberBR(item["Valor gasto"]),
+          reach: acc.reach + parseNumberBR(item["Alcançar"]),
+          impressions: acc.impressions + parseNumberBR(item["Impressões"]),
+          link_clicks: acc.link_clicks + parseNumberBR(item["Cliques em links"]),
+          landing_page_views: acc.landing_page_views + parseNumberBR(item["Visualizações da página de destino"]),
+          video_views_3s: acc.video_views_3s + parseNumberBR(item["Visualizações de vídeo de 3 segundos"]),
+          leads: acc.leads + parseNumberBR(item["Pistas"]),
         }),
         {
           amount_spent: 0,
@@ -81,16 +96,20 @@ export const useTrafficData = () => {
       const conversao = totals.landing_page_views > 0 ? (totals.leads / totals.landing_page_views) * 100 : 0;
 
       // Prepare daily data for chart
-      const dailyData = rawData.map((item) => {
-        const amountSpent = Number(item["Valor gasto"]) || 0;
-        const leads = Number(item["Pistas"]) || 0;
-        return {
-          date: item["Dia"],
-          amountSpent,
-          leads,
-          cpl: leads > 0 ? amountSpent / leads : 0,
-        };
-      });
+      const dailyData = rawData
+        .map((item) => {
+          const amountSpent = parseNumberBR(item["Valor gasto"]);
+          const leads = parseNumberBR(item["Pistas"]);
+          const rawDate = String(item["Dia"] ?? "").trim();
+          const date = /^\d{4}-\d{2}-\d{2}$/.test(rawDate) ? rawDate : "";
+          return {
+            date,
+            amountSpent,
+            leads,
+            cpl: leads > 0 ? amountSpent / leads : 0,
+          };
+        })
+        .filter((d) => d.date);
 
       setData({
         valorGasto: totals.amount_spent,
