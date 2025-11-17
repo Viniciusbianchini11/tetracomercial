@@ -16,15 +16,33 @@ const parseNumberBR = (value: unknown): number => {
   return 0;
 };
 
+// Helper to pick a value from an object using multiple possible keys (PT/EN)
+const pick = (obj: any, keys: string[]): any => {
+  for (const key of keys) {
+    if (obj[key] !== undefined && obj[key] !== null) return obj[key];
+  }
+  return null;
+};
+
+// Helper to get a number from an object using multiple possible keys
+const getNum = (obj: any, keys: string[]): number => {
+  return parseNumberBR(pick(obj, keys));
+};
+
+// Helper to normalize date from various field names to YYYY-MM-DD
+const normalizeDate = (obj: any): string => {
+  const rawDate = String(pick(obj, ["Dia", "Day", "Data de Criação", "Date Created"]) ?? "").trim();
+  
+  // Check if it's already in YYYY-MM-DD format
+  if (/^\d{4}-\d{2}-\d{2}$/.test(rawDate)) {
+    return rawDate;
+  }
+  
+  return "";
+};
+
 interface TrafficDataItem {
-  "Dia": string;
-  "Valor gasto": number;
-  "Alcançar": number;
-  "Impressões": number;
-  "Cliques em links": number;
-  "Visualizações da página de destino": number;
-  "Visualizações de vídeo de 3 segundos": number;
-  "Pistas": number;
+  [key: string]: any;
 }
 
 interface TrafficMetrics {
@@ -67,13 +85,13 @@ export const useTrafficData = () => {
       // Calculate aggregated metrics
       const totals = rawData.reduce(
         (acc, item) => ({
-          amount_spent: acc.amount_spent + parseNumberBR(item["Valor gasto"]),
-          reach: acc.reach + parseNumberBR(item["Alcançar"]),
-          impressions: acc.impressions + parseNumberBR(item["Impressões"]),
-          link_clicks: acc.link_clicks + parseNumberBR(item["Cliques em links"]),
-          landing_page_views: acc.landing_page_views + parseNumberBR(item["Visualizações da página de destino"]),
-          video_views_3s: acc.video_views_3s + parseNumberBR(item["Visualizações de vídeo de 3 segundos"]),
-          leads: acc.leads + parseNumberBR(item["Pistas"]),
+          amount_spent: acc.amount_spent + getNum(item, ["Valor gasto", "Amount Spent"]),
+          reach: acc.reach + getNum(item, ["Alcançar", "Reach"]),
+          impressions: acc.impressions + getNum(item, ["Impressões", "Impressions"]),
+          link_clicks: acc.link_clicks + getNum(item, ["Cliques em links", "Link Clicks"]),
+          landing_page_views: acc.landing_page_views + getNum(item, ["Visualizações da página de destino", "Landing Page Views"]),
+          video_views_3s: acc.video_views_3s + getNum(item, ["Visualizações de vídeo de 3 segundos", "3-Second Video Views"]),
+          leads: acc.leads + getNum(item, ["Pistas", "Leads"]),
         }),
         {
           amount_spent: 0,
@@ -98,10 +116,9 @@ export const useTrafficData = () => {
       // Prepare daily data for chart
       const dailyData = rawData
         .map((item) => {
-          const amountSpent = parseNumberBR(item["Valor gasto"]);
-          const leads = parseNumberBR(item["Pistas"]);
-          const rawDate = String(item["Dia"] ?? "").trim();
-          const date = /^\d{4}-\d{2}-\d{2}$/.test(rawDate) ? rawDate : "";
+          const amountSpent = getNum(item, ["Valor gasto", "Amount Spent"]);
+          const leads = getNum(item, ["Pistas", "Leads"]);
+          const date = normalizeDate(item);
           return {
             date,
             amountSpent,
