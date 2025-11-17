@@ -2,14 +2,14 @@ import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 
 interface TrafficDataItem {
-  date: string;
-  amount_spent: number;
-  reach: number;
-  impressions: number;
-  link_clicks: number;
-  landing_page_views: number;
-  video_views_3s: number;
-  leads: number;
+  "Dia": string;
+  "Valor gasto": number;
+  "Alcançar": number;
+  "Impressões": number;
+  "Cliques em links": number;
+  "Visualizações da página de destino": number;
+  "Visualizações de vídeo de 3 segundos": number;
+  "Pistas": number;
 }
 
 interface TrafficMetrics {
@@ -52,13 +52,13 @@ export const useTrafficData = () => {
       // Calculate aggregated metrics
       const totals = rawData.reduce(
         (acc, item) => ({
-          amount_spent: acc.amount_spent + (item.amount_spent || 0),
-          reach: acc.reach + (item.reach || 0),
-          impressions: acc.impressions + (item.impressions || 0),
-          link_clicks: acc.link_clicks + (item.link_clicks || 0),
-          landing_page_views: acc.landing_page_views + (item.landing_page_views || 0),
-          video_views_3s: acc.video_views_3s + (item.video_views_3s || 0),
-          leads: acc.leads + (item.leads || 0),
+          amount_spent: acc.amount_spent + (Number(item["Valor gasto"]) || 0),
+          reach: acc.reach + (Number(item["Alcançar"]) || 0),
+          impressions: acc.impressions + (Number(item["Impressões"]) || 0),
+          link_clicks: acc.link_clicks + (Number(item["Cliques em links"]) || 0),
+          landing_page_views: acc.landing_page_views + (Number(item["Visualizações da página de destino"]) || 0),
+          video_views_3s: acc.video_views_3s + (Number(item["Visualizações de vídeo de 3 segundos"]) || 0),
+          leads: acc.leads + (Number(item["Pistas"]) || 0),
         }),
         {
           amount_spent: 0,
@@ -81,12 +81,16 @@ export const useTrafficData = () => {
       const conversao = totals.landing_page_views > 0 ? (totals.leads / totals.landing_page_views) * 100 : 0;
 
       // Prepare daily data for chart
-      const dailyData = rawData.map((item) => ({
-        date: item.date,
-        amountSpent: item.amount_spent || 0,
-        leads: item.leads || 0,
-        cpl: item.leads > 0 ? (item.amount_spent || 0) / item.leads : 0,
-      }));
+      const dailyData = rawData.map((item) => {
+        const amountSpent = Number(item["Valor gasto"]) || 0;
+        const leads = Number(item["Pistas"]) || 0;
+        return {
+          date: item["Dia"],
+          amountSpent,
+          leads,
+          cpl: leads > 0 ? amountSpent / leads : 0,
+        };
+      });
 
       setData({
         valorGasto: totals.amount_spent,
