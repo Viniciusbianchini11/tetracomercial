@@ -20,6 +20,7 @@ import { useFilterOptions } from "@/hooks/useFilterOptions";
 import { usePersistedFilters } from "@/hooks/usePersistedFilters";
 import { CallsChart } from "@/components/CallsChart";
 import { Reports } from "./Reports";
+import { Traffic } from "./Traffic";
 import { TrendingUp, Users } from "lucide-react";
 import { useMemo } from "react";
 interface PerformanceFilters {
@@ -127,6 +128,9 @@ const Index = () => {
             </TabsTrigger>
             <TabsTrigger value="relatorios" className="text-sm">
               Relatórios
+            </TabsTrigger>
+            <TabsTrigger value="trafego" className="text-sm">
+              Tráfego
             </TabsTrigger>
           </TabsList>
 
@@ -305,6 +309,10 @@ const Index = () => {
 
           <TabsContent value="relatorios" className="mt-0 p-0 flex flex-col h-[calc(100vh-140px)]">
             <Reports />
+          </TabsContent>
+
+          <TabsContent value="trafego" className="mt-0 space-y-6">
+            <Traffic />
           </TabsContent>
         </Tabs>
       </div>
