@@ -14,8 +14,17 @@ interface TrafficChartProps {
 }
 
 export const TrafficChart = ({ data }: TrafficChartProps) => {
+  const formatDate = (dateStr: string) => {
+    if (!dateStr) return "Data inválida";
+    try {
+      return format(new Date(dateStr + "T00:00:00"), "dd 'de' MMM", { locale: ptBR });
+    } catch {
+      return "Data inválida";
+    }
+  };
+
   const chartData = data.map((item) => ({
-    date: format(new Date(item.date + "T00:00:00"), "dd 'de' MMM", { locale: ptBR }),
+    date: formatDate(item.date),
     "Amount Spent": item.amountSpent,
     "Leads": item.leads,
     "CPL": item.cpl,
