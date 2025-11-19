@@ -392,6 +392,276 @@ export type Database = {
         }
         Relationships: []
       }
+      entrounaconexao: {
+        Row: {
+          data_de_criacao: string | null
+          data_de_entrada_na_etapa: string | null
+          data_de_ganho: string | null
+          data_de_perdido: string | null
+          dono_do_negocio: string | null
+          email: string | null
+          etapa: string | null
+          etapa_do_funil: string | null
+          id: number
+          inserido_em: string | null
+          nome: string | null
+          origem: string | null
+          status_do_negocio: string | null
+          tags: string | null
+          telefone: string | null
+        }
+        Insert: {
+          data_de_criacao?: string | null
+          data_de_entrada_na_etapa?: string | null
+          data_de_ganho?: string | null
+          data_de_perdido?: string | null
+          dono_do_negocio?: string | null
+          email?: string | null
+          etapa?: string | null
+          etapa_do_funil?: string | null
+          id?: number
+          inserido_em?: string | null
+          nome?: string | null
+          origem?: string | null
+          status_do_negocio?: string | null
+          tags?: string | null
+          telefone?: string | null
+        }
+        Update: {
+          data_de_criacao?: string | null
+          data_de_entrada_na_etapa?: string | null
+          data_de_ganho?: string | null
+          data_de_perdido?: string | null
+          dono_do_negocio?: string | null
+          email?: string | null
+          etapa?: string | null
+          etapa_do_funil?: string | null
+          id?: number
+          inserido_em?: string | null
+          nome?: string | null
+          origem?: string | null
+          status_do_negocio?: string | null
+          tags?: string | null
+          telefone?: string | null
+        }
+        Relationships: []
+      }
+      entrounanegociacao: {
+        Row: {
+          data_de_criacao: string | null
+          data_de_entrada_na_etapa: string | null
+          data_de_ganho: string | null
+          data_de_perdido: string | null
+          dono_do_negocio: string | null
+          email: string | null
+          etapa: string | null
+          etapa_do_funil: string | null
+          id: number
+          inserido_em: string | null
+          nome: string | null
+          origem: string | null
+          status_do_negocio: string | null
+          tags: string | null
+          telefone: string | null
+        }
+        Insert: {
+          data_de_criacao?: string | null
+          data_de_entrada_na_etapa?: string | null
+          data_de_ganho?: string | null
+          data_de_perdido?: string | null
+          dono_do_negocio?: string | null
+          email?: string | null
+          etapa?: string | null
+          etapa_do_funil?: string | null
+          id?: number
+          inserido_em?: string | null
+          nome?: string | null
+          origem?: string | null
+          status_do_negocio?: string | null
+          tags?: string | null
+          telefone?: string | null
+        }
+        Update: {
+          data_de_criacao?: string | null
+          data_de_entrada_na_etapa?: string | null
+          data_de_ganho?: string | null
+          data_de_perdido?: string | null
+          dono_do_negocio?: string | null
+          email?: string | null
+          etapa?: string | null
+          etapa_do_funil?: string | null
+          id?: number
+          inserido_em?: string | null
+          nome?: string | null
+          origem?: string | null
+          status_do_negocio?: string | null
+          tags?: string | null
+          telefone?: string | null
+        }
+        Relationships: []
+      }
+      entrounaprospeccao: {
+        Row: {
+          data_de_criacao: string | null
+          data_de_entrada_na_etapa: string | null
+          data_de_ganho: string | null
+          data_de_perdido: string | null
+          dono_do_negocio: string | null
+          email: string | null
+          etapa: string | null
+          etapa_do_funil: string | null
+          id: number
+          inserido_em: string | null
+          nome: string | null
+          origem: string | null
+          status_do_negocio: string | null
+          tags: string | null
+          telefone: string | null
+        }
+        Insert: {
+          data_de_criacao?: string | null
+          data_de_entrada_na_etapa?: string | null
+          data_de_ganho?: string | null
+          data_de_perdido?: string | null
+          dono_do_negocio?: string | null
+          email?: string | null
+          etapa?: string | null
+          etapa_do_funil?: string | null
+          id?: number
+          inserido_em?: string | null
+          nome?: string | null
+          origem?: string | null
+          status_do_negocio?: string | null
+          tags?: string | null
+          telefone?: string | null
+        }
+        Update: {
+          data_de_criacao?: string | null
+          data_de_entrada_na_etapa?: string | null
+          data_de_ganho?: string | null
+          data_de_perdido?: string | null
+          dono_do_negocio?: string | null
+          email?: string | null
+          etapa?: string | null
+          etapa_do_funil?: string | null
+          id?: number
+          inserido_em?: string | null
+          nome?: string | null
+          origem?: string | null
+          status_do_negocio?: string | null
+          tags?: string | null
+          telefone?: string | null
+        }
+        Relationships: []
+      }
+      entrounoagendamento: {
+        Row: {
+          data_de_criacao: string | null
+          data_de_entrada_na_etapa: string | null
+          data_de_ganho: string | null
+          data_de_perdido: string | null
+          dono_do_negocio: string | null
+          email: string | null
+          etapa: string | null
+          etapa_do_funil: string | null
+          id: number
+          inserido_em: string | null
+          nome: string | null
+          origem: string | null
+          status_do_negocio: string | null
+          tags: string | null
+          telefone: string | null
+        }
+        Insert: {
+          data_de_criacao?: string | null
+          data_de_entrada_na_etapa?: string | null
+          data_de_ganho?: string | null
+          data_de_perdido?: string | null
+          dono_do_negocio?: string | null
+          email?: string | null
+          etapa?: string | null
+          etapa_do_funil?: string | null
+          id?: number
+          inserido_em?: string | null
+          nome?: string | null
+          origem?: string | null
+          status_do_negocio?: string | null
+          tags?: string | null
+          telefone?: string | null
+        }
+        Update: {
+          data_de_criacao?: string | null
+          data_de_entrada_na_etapa?: string | null
+          data_de_ganho?: string | null
+          data_de_perdido?: string | null
+          dono_do_negocio?: string | null
+          email?: string | null
+          etapa?: string | null
+          etapa_do_funil?: string | null
+          id?: number
+          inserido_em?: string | null
+          nome?: string | null
+          origem?: string | null
+          status_do_negocio?: string | null
+          tags?: string | null
+          telefone?: string | null
+        }
+        Relationships: []
+      }
+      entrounofechado: {
+        Row: {
+          data_de_criacao: string | null
+          data_de_entrada_na_etapa: string | null
+          data_de_ganho: string | null
+          data_de_perdido: string | null
+          dono_do_negocio: string | null
+          email: string | null
+          etapa: string | null
+          etapa_do_funil: string | null
+          id: number
+          inserido_em: string | null
+          nome: string | null
+          origem: string | null
+          status_do_negocio: string | null
+          tags: string | null
+          telefone: string | null
+        }
+        Insert: {
+          data_de_criacao?: string | null
+          data_de_entrada_na_etapa?: string | null
+          data_de_ganho?: string | null
+          data_de_perdido?: string | null
+          dono_do_negocio?: string | null
+          email?: string | null
+          etapa?: string | null
+          etapa_do_funil?: string | null
+          id?: number
+          inserido_em?: string | null
+          nome?: string | null
+          origem?: string | null
+          status_do_negocio?: string | null
+          tags?: string | null
+          telefone?: string | null
+        }
+        Update: {
+          data_de_criacao?: string | null
+          data_de_entrada_na_etapa?: string | null
+          data_de_ganho?: string | null
+          data_de_perdido?: string | null
+          dono_do_negocio?: string | null
+          email?: string | null
+          etapa?: string | null
+          etapa_do_funil?: string | null
+          id?: number
+          inserido_em?: string | null
+          nome?: string | null
+          origem?: string | null
+          status_do_negocio?: string | null
+          tags?: string | null
+          telefone?: string | null
+        }
+        Relationships: []
+      }
       entrounofunil: {
         Row: {
           data_de_criacao: string | null
@@ -554,6 +824,151 @@ export type Database = {
           id?: string
           nome_vendedor?: string
           tentativas?: number
+        }
+        Relationships: []
+      }
+      pesquisa_iea9: {
+        Row: {
+          "Atualmente, seu foco em se desenvolver no Excel está em:":
+            | string
+            | null
+          "Carimbo de data/hora": string | null
+          "Com qual e-mail você se inscreveu na  Imersão Excel Automate?":
+            | string
+            | null
+          "Com que frequência você usa o Excel no trabalho?": string | null
+          "Como você considera seus conhecimentos em Excel hoje?": string | null
+          created_at: string | null
+          id: number
+          "Já na primeira aula da Imersão Excel Automate, você vai conh":
+            | string
+            | null
+          "Para você, o que não pode faltar na Imersão Excel Automate? ":
+            | string
+            | null
+          "Por que você decidiu se inscrever na Imersão Excel Automate? ":
+            | string
+            | null
+          "Qual a sua escolaridade?": string | null
+          "Qual a sua faixa etária?": string | null
+          "Qual a sua renda pessoal mensal?": string | null
+          "Qual das opções descreveria melhor a função que você desem":
+            | string
+            | null
+          "Qual o nome da empresa em que trabalha atualmente?": string | null
+          "Qual o porte da empresa em que trabalha atualmente?": string | null
+          "Qual seu nível de senioridade?": string | null
+          "Qual seu número de WhatsApp? (Podemos enviar lembretes da aula":
+            | string
+            | null
+          "Utm Campaign": string | null
+          "Utm Content": string | null
+          "Utm Medium": string | null
+          "Utm Source": string | null
+          "Utm Term": string | null
+          "Você é...": string | null
+          "Você investiu na sua capacitação profissional com cursos e/o":
+            | string
+            | null
+          "Você tem interesse em se especializar em análise de dados e n":
+            | string
+            | null
+        }
+        Insert: {
+          "Atualmente, seu foco em se desenvolver no Excel está em:"?:
+            | string
+            | null
+          "Carimbo de data/hora"?: string | null
+          "Com qual e-mail você se inscreveu na  Imersão Excel Automate?"?:
+            | string
+            | null
+          "Com que frequência você usa o Excel no trabalho?"?: string | null
+          "Como você considera seus conhecimentos em Excel hoje?"?:
+            | string
+            | null
+          created_at?: string | null
+          id?: number
+          "Já na primeira aula da Imersão Excel Automate, você vai conh"?:
+            | string
+            | null
+          "Para você, o que não pode faltar na Imersão Excel Automate? "?:
+            | string
+            | null
+          "Por que você decidiu se inscrever na Imersão Excel Automate? "?:
+            | string
+            | null
+          "Qual a sua escolaridade?"?: string | null
+          "Qual a sua faixa etária?"?: string | null
+          "Qual a sua renda pessoal mensal?"?: string | null
+          "Qual das opções descreveria melhor a função que você desem"?:
+            | string
+            | null
+          "Qual o nome da empresa em que trabalha atualmente?"?: string | null
+          "Qual o porte da empresa em que trabalha atualmente?"?: string | null
+          "Qual seu nível de senioridade?"?: string | null
+          "Qual seu número de WhatsApp? (Podemos enviar lembretes da aula"?:
+            | string
+            | null
+          "Utm Campaign"?: string | null
+          "Utm Content"?: string | null
+          "Utm Medium"?: string | null
+          "Utm Source"?: string | null
+          "Utm Term"?: string | null
+          "Você é..."?: string | null
+          "Você investiu na sua capacitação profissional com cursos e/o"?:
+            | string
+            | null
+          "Você tem interesse em se especializar em análise de dados e n"?:
+            | string
+            | null
+        }
+        Update: {
+          "Atualmente, seu foco em se desenvolver no Excel está em:"?:
+            | string
+            | null
+          "Carimbo de data/hora"?: string | null
+          "Com qual e-mail você se inscreveu na  Imersão Excel Automate?"?:
+            | string
+            | null
+          "Com que frequência você usa o Excel no trabalho?"?: string | null
+          "Como você considera seus conhecimentos em Excel hoje?"?:
+            | string
+            | null
+          created_at?: string | null
+          id?: number
+          "Já na primeira aula da Imersão Excel Automate, você vai conh"?:
+            | string
+            | null
+          "Para você, o que não pode faltar na Imersão Excel Automate? "?:
+            | string
+            | null
+          "Por que você decidiu se inscrever na Imersão Excel Automate? "?:
+            | string
+            | null
+          "Qual a sua escolaridade?"?: string | null
+          "Qual a sua faixa etária?"?: string | null
+          "Qual a sua renda pessoal mensal?"?: string | null
+          "Qual das opções descreveria melhor a função que você desem"?:
+            | string
+            | null
+          "Qual o nome da empresa em que trabalha atualmente?"?: string | null
+          "Qual o porte da empresa em que trabalha atualmente?"?: string | null
+          "Qual seu nível de senioridade?"?: string | null
+          "Qual seu número de WhatsApp? (Podemos enviar lembretes da aula"?:
+            | string
+            | null
+          "Utm Campaign"?: string | null
+          "Utm Content"?: string | null
+          "Utm Medium"?: string | null
+          "Utm Source"?: string | null
+          "Utm Term"?: string | null
+          "Você é..."?: string | null
+          "Você investiu na sua capacitação profissional com cursos e/o"?:
+            | string
+            | null
+          "Você tem interesse em se especializar em análise de dados e n"?:
+            | string
+            | null
         }
         Relationships: []
       }

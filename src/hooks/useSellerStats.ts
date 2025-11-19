@@ -283,10 +283,42 @@ export const useSellerStats = (filters?: SellerStatsFilters) => {
 
   const fetchTotalLeads = async () => {
     try {
-      const { count } = await supabase
-        .from("leads")
+      // Extrair o nome do vendedor do email
+      const sellerName = filters?.sellerEmail?.split('@')[0].split('.')[0].toUpperCase();
+      
+      console.log('Fetching leads with filters:', {
+        sellerName,
+        startDate: filters?.startDate,
+        endDate: filters?.endDate,
+        month: filters?.month,
+        year: filters?.year
+      });
+
+      // Construir query para entrounofunil (mesma tabela usada para funil)
+      let query = supabase
+        .from("entrounofunil")
         .select("*", { count: "exact", head: true })
-        .eq("dono_do_negocio", filters?.sellerEmail);
+        .eq("dono_do_negocio", sellerName);
+
+      // Aplicar os MESMOS filtros de data que usamos em fetchSellerStats
+      if (filters?.startDate && filters?.endDate) {
+        query = query
+          .gte("data_de_entrada_na_etapa", filters.startDate.toISOString())
+          .lte("data_de_entrada_na_etapa", filters.endDate.toISOString());
+      } 
+      else if (filters?.month && filters.month !== "all" && filters?.year && filters.year !== "all") {
+        const year = parseInt(filters.year);
+        const month = parseInt(filters.month) - 1;
+        const start = startOfMonth(new Date(year, month));
+        const end = endOfMonth(new Date(year, month));
+        query = query
+          .gte("data_de_entrada_na_etapa", start.toISOString())
+          .lte("data_de_entrada_na_etapa", end.toISOString());
+      }
+
+      const { count } = await query;
+      
+      console.log('Total leads found:', count);
 
       return count || 0;
     } catch (error) {
