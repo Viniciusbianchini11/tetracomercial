@@ -1131,6 +1131,57 @@ export type Database = {
         }
         Relationships: []
       }
+      resumo_filtros_duplicate: {
+        Row: {
+          agendado: number | null
+          conexao: number | null
+          created_at: string | null
+          data_resumo: string
+          dono_do_negocio: string | null
+          entraram_no_funil: number | null
+          fechado: number | null
+          ganho: number | null
+          id: string
+          negociacao: number | null
+          origem: string | null
+          perdido: number | null
+          prospeccao: number | null
+          tipo_resumo: string
+        }
+        Insert: {
+          agendado?: number | null
+          conexao?: number | null
+          created_at?: string | null
+          data_resumo: string
+          dono_do_negocio?: string | null
+          entraram_no_funil?: number | null
+          fechado?: number | null
+          ganho?: number | null
+          id?: string
+          negociacao?: number | null
+          origem?: string | null
+          perdido?: number | null
+          prospeccao?: number | null
+          tipo_resumo: string
+        }
+        Update: {
+          agendado?: number | null
+          conexao?: number | null
+          created_at?: string | null
+          data_resumo?: string
+          dono_do_negocio?: string | null
+          entraram_no_funil?: number | null
+          fechado?: number | null
+          ganho?: number | null
+          id?: string
+          negociacao?: number | null
+          origem?: string | null
+          perdido?: number | null
+          prospeccao?: number | null
+          tipo_resumo?: string
+        }
+        Relationships: []
+      }
       resumo_funil: {
         Row: {
           agendado: number | null
@@ -1233,6 +1284,60 @@ export type Database = {
           id?: number
           lead_id?: number | null
           stage_name?: string | null
+        }
+        Relationships: []
+      }
+      trafego_geral: {
+        Row: {
+          Alcance: number | null
+          "Cliques no Link": number | null
+          "CTR Único (Taxa de Cliques no Link)": number | null
+          "Data de criação": string | null
+          Dia: string | null
+          Impressões: number | null
+          Leads: number | null
+          "Nome da Campanha": string | null
+          "Nome do Anúncio": string | null
+          "Nome do Conjunto de Anúncios": string | null
+          "Status da Campanha": string | null
+          "Status do Anúncio": string | null
+          "Valor Gasto": number | null
+          "Visualizações da Página de Destino": number | null
+          "Visualizações do Vídeo por 3 Segundos": number | null
+        }
+        Insert: {
+          Alcance?: number | null
+          "Cliques no Link"?: number | null
+          "CTR Único (Taxa de Cliques no Link)"?: number | null
+          "Data de criação"?: string | null
+          Dia?: string | null
+          Impressões?: number | null
+          Leads?: number | null
+          "Nome da Campanha"?: string | null
+          "Nome do Anúncio"?: string | null
+          "Nome do Conjunto de Anúncios"?: string | null
+          "Status da Campanha"?: string | null
+          "Status do Anúncio"?: string | null
+          "Valor Gasto"?: number | null
+          "Visualizações da Página de Destino"?: number | null
+          "Visualizações do Vídeo por 3 Segundos"?: number | null
+        }
+        Update: {
+          Alcance?: number | null
+          "Cliques no Link"?: number | null
+          "CTR Único (Taxa de Cliques no Link)"?: number | null
+          "Data de criação"?: string | null
+          Dia?: string | null
+          Impressões?: number | null
+          Leads?: number | null
+          "Nome da Campanha"?: string | null
+          "Nome do Anúncio"?: string | null
+          "Nome do Conjunto de Anúncios"?: string | null
+          "Status da Campanha"?: string | null
+          "Status do Anúncio"?: string | null
+          "Valor Gasto"?: number | null
+          "Visualizações da Página de Destino"?: number | null
+          "Visualizações do Vídeo por 3 Segundos"?: number | null
         }
         Relationships: []
       }
