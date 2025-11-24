@@ -109,7 +109,7 @@ export const useFunnelData = (filters: Filters) => {
 
       // Se houver filtro de data (normalizado), usar snapshots agregados
       if (startNorm || endNorm) {
-        console.log('🗄️ USANDO RESUMO_FILTROS (dados históricos agregados)');
+        console.log('🗄️ USANDO RESUMO_FILTROS_DUPLICATE (dados históricos agregados).');
         await fetchFromSnapshots(startNorm, endNorm);
       } else {
         console.log('⚡ USANDO TABELAS INDIVIDUAIS (dados em tempo real)');
@@ -196,7 +196,7 @@ export const useFunnelData = (filters: Filters) => {
 
     // Usar any para bypass do TypeScript já que a tabela não está nos tipos gerados
     const supabaseClient = supabase as any;
-    let query = supabaseClient.from("resumo_filtros").select("*");
+    let query = supabaseClient.from("resumo_filtros_duplicate").select("*");
 
     // Filtrar por vendedor
     if (filters.seller !== "all") {
@@ -292,7 +292,7 @@ export const useFunnelData = (filters: Filters) => {
 
     const { data, error, count } = await query;
 
-    console.log('📊 Query result (resumo_filtros):', {
+    console.log('📊 Query result (resumo_filtros_duplicate):', {
       recordsFound: data?.length || 0,
       error: error?.message,
       sampleRecord: data?.[0],
@@ -303,7 +303,7 @@ export const useFunnelData = (filters: Filters) => {
     });
 
     if (error) {
-      console.error("Error fetching resumo_filtros data:", error);
+      console.error("Error fetching resumo_filtros_duplicate data:", error);
       setFunnelData({
         entrouNoFunil: 0,
         prospeccao: 0,
@@ -319,7 +319,7 @@ export const useFunnelData = (filters: Filters) => {
 
     // Se não houver dados no snapshot, calcular ao vivo
     if (!data || data.length === 0) {
-      console.log('⚠️ Nenhum snapshot encontrado em resumo_filtros, calculando ao vivo...');
+      console.log('⚠️ Nenhum snapshot encontrado em resumo_filtros_duplicate, calculando ao vivo...');
       await fetchFromRawWithDateRange(startNorm, endNorm);
       return;
     }
