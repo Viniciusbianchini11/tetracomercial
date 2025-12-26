@@ -164,9 +164,19 @@ export const useSellerStats = (filters?: SellerStatsFilters) => {
     try {
       setLoading(true);
 
-      // Usar sellerName diretamente se fornecido, senão extrair do email
-      const sellerName = filters?.sellerName?.toUpperCase() || 
-        filters?.sellerEmail?.split('@')[0].split('.')[0].toUpperCase();
+      // Função para extrair primeiro nome do email ou nome completo
+      const extractFirstName = (input: string | undefined): string => {
+        if (!input) return '';
+        // Se for email, extrair a parte antes do @, depois pegar o primeiro nome
+        if (input.includes('@')) {
+          return input.split('@')[0].split('.')[0].toUpperCase();
+        }
+        // Se for nome, pegar a primeira palavra e remover pontos
+        return input.split(' ')[0].split('.')[0].toUpperCase();
+      };
+
+      // Extrair primeiro nome do sellerName ou sellerEmail
+      const sellerName = extractFirstName(filters?.sellerName || filters?.sellerEmail);
       
       console.log('Fetching sales for seller:', sellerName);
 
