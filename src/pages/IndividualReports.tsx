@@ -21,8 +21,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 const IndividualReports = () => {
   const { sellerOptions, origins, tags } = useFilterOptions();
   
-  // Vendedor selecionado (armazenamos o email como identificador único)
-  const [selectedSellerEmail, setSelectedSellerEmail] = useState<string>("");
+  // Vendedor selecionado (armazenamos o nome como identificador)
+  const [selectedSellerName, setSelectedSellerName] = useState<string>("");
   
   // Filtros de vendas
   const [salesStartDate, setSalesStartDate] = useState<Date | undefined>(undefined);
@@ -37,13 +37,12 @@ const IndividualReports = () => {
   const [selectedOrigin, setSelectedOrigin] = useState("all");
   const [selectedTag, setSelectedTag] = useState("all");
 
-  // Encontrar o vendedor selecionado com base no email
-  const selectedSeller = sellerOptions.find((seller) => seller.email === selectedSellerEmail);
+  // Encontrar o vendedor selecionado com base no nome
+  const selectedSeller = sellerOptions.find((seller) => seller.name === selectedSellerName);
 
   // useSellerStats usa o NOME do vendedor (coluna VENDEDOR na relatorio_faturamento)
   const { stats, monthlySales, loading: statsLoading } = useSellerStats({
-    sellerEmail: selectedSellerEmail || undefined,
-    sellerName: selectedSeller?.name || undefined,
+    sellerName: selectedSellerName || undefined,
     startDate: salesStartDate,
     endDate: salesEndDate,
     month: selectedMonth,
@@ -53,7 +52,7 @@ const IndividualReports = () => {
 
   // useFunnelData usa o NOME do vendedor (coluna dono_do_negocio nas tabelas de funil)
   const { funnelData } = useFunnelData({
-    seller: selectedSeller?.name || "all",
+    seller: selectedSellerName || "all",
     origin: selectedOrigin,
     tag: selectedTag,
     startDate: funnelStartDate,
@@ -87,7 +86,7 @@ const IndividualReports = () => {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <Select value={selectedSellerEmail} onValueChange={setSelectedSellerEmail}>
+            <Select value={selectedSellerName} onValueChange={setSelectedSellerName}>
               <SelectTrigger className="w-full md:w-[400px] bg-card">
                 <SelectValue placeholder="Escolha um vendedor...">
                   {selectedSeller && (
@@ -103,7 +102,7 @@ const IndividualReports = () => {
               </SelectTrigger>
               <SelectContent>
                 {sellerOptions.map((seller) => (
-                  <SelectItem key={seller.email} value={seller.email || ""}>
+                  <SelectItem key={seller.name} value={seller.name}>
                     <div className="flex items-center gap-2">
                       <Avatar className="h-6 w-6">
                         <AvatarImage src={seller.photo || undefined} alt={seller.name} />
@@ -118,7 +117,7 @@ const IndividualReports = () => {
           </CardContent>
         </Card>
 
-        {!selectedSellerEmail ? (
+        {!selectedSellerName ? (
           <Card className="p-12">
             <div className="text-center text-muted-foreground">
               <UserSearch className="h-16 w-16 mx-auto mb-4 opacity-50" />
