@@ -155,7 +155,7 @@ export const useSalesStats = (filters?: SalesStatsFilters) => {
       }
 
       // Calcular estatísticas gerais
-      const faturamentoBruto = filteredData.reduce((sum, sale) => sum + (sale["VALOR FATURADO (CHEIO)"] || 0), 0);
+      const faturamentoBruto = filteredData.reduce((sum, sale) => sum + (sale["VALOR FATURADO"] || 0), 0);
       const vendas = filteredData.length;
       
       // Usar pistas da tabela entrounofunil
@@ -164,12 +164,10 @@ export const useSalesStats = (filters?: SalesStatsFilters) => {
       // Taxa de conversão (vendas / pistas * 100)
       const taxaConversao = pistas > 0 ? (vendas / pistas) * 100 : 0;
       
-      // Contar recorrentes (parcelas > 1)
+      // Contar recorrentes (FORMA DE PAGAMENTO que indica recorrência)
       const recorrentes = filteredData.filter(sale => {
-        const parcela = sale.PARCELAS;
-        if (!parcela) return false;
-        const num = parseInt(parcela.split('/')[0]);
-        return num > 1;
+        const formaPagamento = sale["FORMA DE PAGAMENTO"]?.toUpperCase() || "";
+        return formaPagamento.includes("RECORR") || formaPagamento.includes("ASSINATURA");
       }).length;
       
       // Contar fora do lançamento
@@ -186,11 +184,14 @@ export const useSalesStats = (filters?: SalesStatsFilters) => {
         foraLancamento,
       });
 
-      // Calcular ranking de vendedores (usando VALOR FIINAL)
+      // Calcular ranking de vendedores (usando VALOR FIINAL) - excluir LINK DIRETO
       const sellerMap = new Map<string, { vendas: number; faturamento: number }>();
       
       filteredData.forEach(sale => {
         const vendedor = sale.VENDEDOR || "Sem vendedor";
+        // Excluir "LINK DIRETO" dos rankings
+        if (vendedor.toUpperCase().includes("LINK DIRETO")) return;
+        
         const valorFinal = sale["VALOR FIINAL"] || sale["VALOR FINAL"] || 0;
         const current = sellerMap.get(vendedor) || { vendas: 0, faturamento: 0 };
         sellerMap.set(vendedor, {
