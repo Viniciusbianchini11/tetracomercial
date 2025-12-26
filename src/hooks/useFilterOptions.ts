@@ -19,11 +19,11 @@ export const useFilterOptions = () => {
 
   const fetchFilterOptions = async () => {
     try {
-      // Buscar vendedores ativos na tabela vendedores (nome + email + foto)
-      const { data: sellersData, error: sellersError } = await (supabase as any)
+      // Buscar vendedores ativos na tabela vendedores (Nome + Email + Link Foto)
+      const { data: sellersData, error: sellersError } = await supabase
         .from("vendedores")
-        .select("nome, email, foto, ativo")
-        .eq("ativo", true);
+        .select('"Nome", "Email", "Link Foto", "Ativo?"')
+        .eq("Ativo?", "Ativo");
 
       if (sellersError) {
         console.error("Error fetching vendedores:", sellersError);
@@ -31,9 +31,9 @@ export const useFilterOptions = () => {
 
       const options: SellerOption[] =
         sellersData?.map((item: any) => ({
-          name: item.nome,
-          email: item.email,
-          photo: item.foto,
+          name: item.Nome,
+          email: item.Email,
+          photo: item["Link Foto"],
         })) || [];
 
       // Mantém compatibilidade: lista simples apenas com o nome

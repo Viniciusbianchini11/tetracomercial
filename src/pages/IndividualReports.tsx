@@ -16,11 +16,12 @@ import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useFilterOptions } from "@/hooks/useFilterOptions";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 const IndividualReports = () => {
   const { sellerOptions, origins, tags } = useFilterOptions();
   
-  // Vendedor selecionado
+  // Vendedor selecionado (armazenamos o email como identificador único)
   const [selectedSellerEmail, setSelectedSellerEmail] = useState<string>("");
   
   // Filtros de vendas
@@ -36,8 +37,10 @@ const IndividualReports = () => {
   const [selectedOrigin, setSelectedOrigin] = useState("all");
   const [selectedTag, setSelectedTag] = useState("all");
 
+  // Encontrar o vendedor selecionado com base no email
   const selectedSeller = sellerOptions.find((seller) => seller.email === selectedSellerEmail);
 
+  // useSellerStats usa o NOME do vendedor (coluna VENDEDOR na relatorio_faturamento)
   const { stats, monthlySales, loading: statsLoading } = useSellerStats({
     sellerEmail: selectedSellerEmail || undefined,
     sellerName: selectedSeller?.name || undefined,
@@ -48,8 +51,9 @@ const IndividualReports = () => {
     launch: selectedLaunch,
   });
 
+  // useFunnelData usa o NOME do vendedor (coluna dono_do_negocio nas tabelas de funil)
   const { funnelData } = useFunnelData({
-    seller: selectedSellerEmail || "all",
+    seller: selectedSeller?.name || "all",
     origin: selectedOrigin,
     tag: selectedTag,
     startDate: funnelStartDate,
@@ -85,12 +89,28 @@ const IndividualReports = () => {
           <CardContent>
             <Select value={selectedSellerEmail} onValueChange={setSelectedSellerEmail}>
               <SelectTrigger className="w-full md:w-[400px] bg-card">
-                <SelectValue placeholder="Escolha um vendedor..." />
+                <SelectValue placeholder="Escolha um vendedor...">
+                  {selectedSeller && (
+                    <div className="flex items-center gap-2">
+                      <Avatar className="h-6 w-6">
+                        <AvatarImage src={selectedSeller.photo || undefined} alt={selectedSeller.name} />
+                        <AvatarFallback>{selectedSeller.name.charAt(0)}</AvatarFallback>
+                      </Avatar>
+                      <span>{selectedSeller.name}</span>
+                    </div>
+                  )}
+                </SelectValue>
               </SelectTrigger>
               <SelectContent>
                 {sellerOptions.map((seller) => (
-                  <SelectItem key={seller.email} value={seller.email}>
-                    {seller.name}
+                  <SelectItem key={seller.email} value={seller.email || ""}>
+                    <div className="flex items-center gap-2">
+                      <Avatar className="h-6 w-6">
+                        <AvatarImage src={seller.photo || undefined} alt={seller.name} />
+                        <AvatarFallback>{seller.name.charAt(0)}</AvatarFallback>
+                      </Avatar>
+                      <span>{seller.name}</span>
+                    </div>
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -107,7 +127,7 @@ const IndividualReports = () => {
           </Card>
         ) : (
           <>
-            <h2 className="text-xl font-semibold mb-4">Funil de Vendas - {selectedSeller?.name || selectedSellerEmail}</h2>
+            <h2 className="text-xl font-semibold mb-4">Funil de Vendas - {selectedSeller?.name}</h2>
             <div className="space-y-4 mb-6">
               <div className="flex flex-wrap gap-4">
                 <Popover>
@@ -236,7 +256,7 @@ const IndividualReports = () => {
               />
             </div>
 
-            <h2 className="text-xl font-semibold mb-4">Vendas - {selectedSeller}</h2>
+            <h2 className="text-xl font-semibold mb-4">Vendas - {selectedSeller?.name}</h2>
             <SalesFilterSection
               startDate={salesStartDate}
               endDate={salesEndDate}
