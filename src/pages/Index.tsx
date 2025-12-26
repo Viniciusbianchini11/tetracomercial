@@ -307,7 +307,7 @@ const Index = () => {
             )}
           </TabsContent>
 
-          <TabsContent value="relatorios" className="mt-0 p-0 flex flex-col h-[calc(100vh-140px)]">
+          <TabsContent value="relatorios" className="mt-0 h-[calc(100vh-140px)] overflow-hidden">
             <Reports />
           </TabsContent>
 
