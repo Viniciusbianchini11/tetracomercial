@@ -166,7 +166,7 @@ export const useSalesStats = (filters?: SalesStatsFilters) => {
       
       // Contar recorrentes (parcelas > 1)
       const recorrentes = filteredData.filter(sale => {
-        const parcela = sale.PARCELA;
+        const parcela = sale.PARCELAS;
         if (!parcela) return false;
         const num = parseInt(parcela.split('/')[0]);
         return num > 1;
@@ -291,7 +291,7 @@ export const useSalesStats = (filters?: SalesStatsFilters) => {
       monthlyData.forEach(sale => {
         const vendedor = sale.VENDEDOR || "Sem vendedor";
         const valorFinal = sale["VALOR FIINAL"] || sale["VALOR FINAL"] || 0;
-        const plataforma = sale.Plataforma?.toUpperCase() || "";
+        const formaPagamento = sale["FORMA DE PAGAMENTO"]?.toUpperCase() || "";
         
         const current = monthlySellerMap.get(vendedor) || {
           quantity: 0,
@@ -304,8 +304,8 @@ export const useSalesStats = (filters?: SalesStatsFilters) => {
         monthlySellerMap.set(vendedor, {
           quantity: current.quantity + 1,
           value: current.value + valorFinal,
-          boleto: current.boleto + (plataforma.includes("BOLETO") ? 1 : 0),
-          cartao: current.cartao + (plataforma.includes("CARTÃO") || plataforma.includes("CARTAO") ? 1 : 0),
+          boleto: current.boleto + (formaPagamento.includes("BOLETO") ? 1 : 0),
+          cartao: current.cartao + (formaPagamento.includes("CARTÃO") || formaPagamento.includes("CARTAO") ? 1 : 0),
           total: current.total + 1,
         });
       });
