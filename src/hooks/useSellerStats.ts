@@ -221,7 +221,7 @@ export const useSellerStats = (filters?: SellerStatsFilters) => {
 
       // Calcular agregações a partir dos dados retornados
       const faturamentoBruto = (data || []).reduce(
-        (sum, sale) => sum + toNumber(sale["VALOR FATURADO (CHEIO)"]),
+        (sum, sale) => sum + toNumber(sale["VALOR FATURADO"]),
         0
       );
 
