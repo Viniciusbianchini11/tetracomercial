@@ -62,22 +62,14 @@ export const useSellerStats = (filters?: SellerStatsFilters) => {
     sellerEmail: string
   ): Promise<number> => {
     try {
-      const sellerEmailNormalized = (sellerEmail || "").toLowerCase().trim();
-      const sellerName = filters?.sellerName?.toUpperCase() || 
-        sellerEmailNormalized.split('@')[0]?.split('.')[0]?.toUpperCase();
+      // Extrair o nome do vendedor do email
+      const sellerName = sellerEmail.split('@')[0].split('.')[0].toUpperCase();
       
-      // Buscar registros de entrounofunil do vendedor priorizando email
-      let query = supabase
+      // Buscar registros de entrounofunil do vendedor
+      const { data: funnelEntries, error } = await supabase
         .from("entrounofunil")
-        .select("data_de_entrada_na_etapa, nome, email, telefone, dono_do_negocio");
-
-      if (sellerEmailNormalized) {
-        query = query.eq("email", sellerEmailNormalized);
-      } else if (sellerName) {
-        query = query.ilike("dono_do_negocio", `%${sellerName}%`);
-      }
-
-      const { data: funnelEntries, error } = await query;
+        .select("data_de_entrada_na_etapa, nome, email, telefone, dono_do_negocio")
+        .ilike("dono_do_negocio", `%${sellerName}%`);
 
       if (error) {
         console.error('Error fetching funnel entries:', error);
@@ -172,23 +164,17 @@ export const useSellerStats = (filters?: SellerStatsFilters) => {
     try {
       setLoading(true);
 
-      // Usar sellerName diretamente (prioridade) ou extrair do email
+      // Usar sellerName diretamente se fornecido, senão extrair do email
       const sellerName = filters?.sellerName?.toUpperCase() || 
-        filters?.sellerEmail?.split('@')[0]?.split('.')[0]?.toUpperCase();
+        filters?.sellerEmail?.split('@')[0].split('.')[0].toUpperCase();
       
       console.log('Fetching sales for seller:', sellerName);
 
-      if (!sellerName) {
-        console.log('No seller name provided, skipping fetch');
-        setLoading(false);
-        return;
-      }
-
-      // Construir query base - filtrar pela coluna VENDEDOR (nome do vendedor)
+      // Construir query base com filtros comuns
       let query = supabase
         .from("relatorio_faturamento")
-        .select('"VALOR FATURADO", "VALOR FINAL", "MÊS/ANO", "E-MAIL", NOME, TELEFONE, DATA, "LANÇAMENTO", ANO, VENDEDOR')
-        .ilike("VENDEDOR", `%${sellerName}%`);
+        .select('"VALOR FATURADO (CHEIO)", "VALOR FINAL", "MÊS/ANO", "E-MAIL", NOME, TELEFONE, DATA')
+        .eq("VENDEDOR", sellerName); // Usar eq exato, não ilike
 
       // Se temos startDate e endDate, usar eles
       if (filters?.startDate && filters?.endDate) {
@@ -237,7 +223,7 @@ export const useSellerStats = (filters?: SellerStatsFilters) => {
 
       // Calcular agregações a partir dos dados retornados
       const faturamentoBruto = (data || []).reduce(
-        (sum, sale) => sum + toNumber(sale["VALOR FATURADO (CHEIO)"] || sale["VALOR FATURADO"]),
+        (sum, sale) => sum + toNumber(sale["VALOR FATURADO"]),
         0
       );
 
@@ -299,9 +285,9 @@ export const useSellerStats = (filters?: SellerStatsFilters) => {
 
   const fetchTotalLeads = async () => {
     try {
-      // Usar sellerName diretamente (prioridade) ou extrair do email
+      // Usar sellerName diretamente se fornecido, senão extrair do email
       const sellerName = filters?.sellerName?.toUpperCase() || 
-        filters?.sellerEmail?.split('@')[0]?.split('.')[0]?.toUpperCase();
+        filters?.sellerEmail?.split('@')[0].split('.')[0].toUpperCase();
       
       console.log('Fetching leads with filters:', {
         sellerName,
@@ -311,15 +297,11 @@ export const useSellerStats = (filters?: SellerStatsFilters) => {
         year: filters?.year
       });
 
-      if (!sellerName) {
-        return 0;
-      }
-
-      // Construir query para entrounofunil (buscar por dono_do_negocio com ILIKE)
+      // Construir query para entrounofunil (mesma tabela usada para funil)
       let query = supabase
         .from("entrounofunil")
         .select("*", { count: "exact", head: true })
-        .ilike("dono_do_negocio", `%${sellerName}%`);
+        .eq("dono_do_negocio", sellerName);
 
       // Aplicar os MESMOS filtros de data que usamos em fetchSellerStats
       if (filters?.startDate && filters?.endDate) {

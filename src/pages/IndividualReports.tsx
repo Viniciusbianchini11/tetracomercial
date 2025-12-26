@@ -16,13 +16,12 @@ import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useFilterOptions } from "@/hooks/useFilterOptions";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 const IndividualReports = () => {
-  const { sellerOptions, origins, tags } = useFilterOptions();
+  const { sellers, origins, tags } = useFilterOptions();
   
-  // Vendedor selecionado (armazenamos o nome como identificador)
-  const [selectedSellerName, setSelectedSellerName] = useState<string>("");
+  // Vendedor selecionado
+  const [selectedSeller, setSelectedSeller] = useState<string>("");
   
   // Filtros de vendas
   const [salesStartDate, setSalesStartDate] = useState<Date | undefined>(undefined);
@@ -37,12 +36,8 @@ const IndividualReports = () => {
   const [selectedOrigin, setSelectedOrigin] = useState("all");
   const [selectedTag, setSelectedTag] = useState("all");
 
-  // Encontrar o vendedor selecionado com base no nome
-  const selectedSeller = sellerOptions.find((seller) => seller.name === selectedSellerName);
-
-  // useSellerStats usa o NOME do vendedor (coluna VENDEDOR na relatorio_faturamento)
   const { stats, monthlySales, loading: statsLoading } = useSellerStats({
-    sellerName: selectedSellerName || undefined,
+    sellerName: selectedSeller || undefined,
     startDate: salesStartDate,
     endDate: salesEndDate,
     month: selectedMonth,
@@ -50,9 +45,8 @@ const IndividualReports = () => {
     launch: selectedLaunch,
   });
 
-  // useFunnelData usa o NOME do vendedor (coluna dono_do_negocio nas tabelas de funil)
   const { funnelData } = useFunnelData({
-    seller: selectedSellerName || "all",
+    seller: selectedSeller || "all",
     origin: selectedOrigin,
     tag: selectedTag,
     startDate: funnelStartDate,
@@ -86,30 +80,14 @@ const IndividualReports = () => {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <Select value={selectedSellerName} onValueChange={setSelectedSellerName}>
+            <Select value={selectedSeller} onValueChange={setSelectedSeller}>
               <SelectTrigger className="w-full md:w-[400px] bg-card">
-                <SelectValue placeholder="Escolha um vendedor...">
-                  {selectedSeller && (
-                    <div className="flex items-center gap-2">
-                      <Avatar className="h-6 w-6">
-                        <AvatarImage src={selectedSeller.photo || undefined} alt={selectedSeller.name} />
-                        <AvatarFallback>{selectedSeller.name.charAt(0)}</AvatarFallback>
-                      </Avatar>
-                      <span>{selectedSeller.name}</span>
-                    </div>
-                  )}
-                </SelectValue>
+                <SelectValue placeholder="Escolha um vendedor..." />
               </SelectTrigger>
               <SelectContent>
-                {sellerOptions.map((seller) => (
-                  <SelectItem key={seller.name} value={seller.name}>
-                    <div className="flex items-center gap-2">
-                      <Avatar className="h-6 w-6">
-                        <AvatarImage src={seller.photo || undefined} alt={seller.name} />
-                        <AvatarFallback>{seller.name.charAt(0)}</AvatarFallback>
-                      </Avatar>
-                      <span>{seller.name}</span>
-                    </div>
+                {sellers.map((seller) => (
+                  <SelectItem key={seller} value={seller}>
+                    {seller}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -117,7 +95,7 @@ const IndividualReports = () => {
           </CardContent>
         </Card>
 
-        {!selectedSellerName ? (
+        {!selectedSeller ? (
           <Card className="p-12">
             <div className="text-center text-muted-foreground">
               <UserSearch className="h-16 w-16 mx-auto mb-4 opacity-50" />
@@ -126,7 +104,7 @@ const IndividualReports = () => {
           </Card>
         ) : (
           <>
-            <h2 className="text-xl font-semibold mb-4">Funil de Vendas - {selectedSeller?.name}</h2>
+            <h2 className="text-xl font-semibold mb-4">Funil de Vendas - {selectedSeller}</h2>
             <div className="space-y-4 mb-6">
               <div className="flex flex-wrap gap-4">
                 <Popover>
@@ -255,7 +233,7 @@ const IndividualReports = () => {
               />
             </div>
 
-            <h2 className="text-xl font-semibold mb-4">Vendas - {selectedSeller?.name}</h2>
+            <h2 className="text-xl font-semibold mb-4">Vendas - {selectedSeller}</h2>
             <SalesFilterSection
               startDate={salesStartDate}
               endDate={salesEndDate}

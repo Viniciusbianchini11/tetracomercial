@@ -51,12 +51,7 @@ export const useFunnelData = (filters: Filters) => {
     let query = supabase.from(tableName).select("*", { count: "exact", head: true });
 
     if (filters.seller !== "all") {
-      const seller = filters.seller;
-      if (seller.includes("@")) {
-        query = query.eq("email", seller);
-      } else {
-        query = query.eq("dono_do_negocio", seller);
-      }
+      query = query.eq("dono_do_negocio", filters.seller);
     }
 
     if (filters.origin !== "all") {

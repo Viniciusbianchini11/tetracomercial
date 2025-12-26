@@ -1401,33 +1401,6 @@ export type Database = {
         }
         Relationships: []
       }
-      vendedores: {
-        Row: {
-          "Ativo?": string | null
-          Email: string | null
-          id: number
-          "Link Foto": string | null
-          Nome: string
-          "Nome Clint": string | null
-        }
-        Insert: {
-          "Ativo?"?: string | null
-          Email?: string | null
-          id?: number
-          "Link Foto"?: string | null
-          Nome: string
-          "Nome Clint"?: string | null
-        }
-        Update: {
-          "Ativo?"?: string | null
-          Email?: string | null
-          id?: number
-          "Link Foto"?: string | null
-          Nome?: string
-          "Nome Clint"?: string | null
-        }
-        Relationships: []
-      }
     }
     Views: {
       vw_leads_daily_stage_counts: {
