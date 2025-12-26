@@ -1004,6 +1004,7 @@ export type Database = {
           "DIA SEMANA": string | null
           "E-MAIL": string | null
           EXECUÇÃO: string | null
+          "FORMA DE PAGAMENTO": string | null
           id: number
           inserido_em: string | null
           LANÇAMENTO: string | null
@@ -1011,17 +1012,19 @@ export type Database = {
           MÊS: string | null
           "MÊS/ANO": string | null
           NOME: string | null
-          PARCELA: string | null
+          PARCELAS: string | null
+          PARCIAL: string | null
           Plataforma: string | null
           PRODUTO: string | null
           "PRODUTO FINAL": string | null
           TELEFONE: string | null
           "VALOR BASE PREMIACAO": number | null
           "VALOR BRUTO": number | null
-          "VALOR FATURADO (CHEIO)": number | null
+          "VALOR FATURADO": number | null
           "VALOR FINAL": number | null
-          "VALOR LIQUIDO": number | null
           "VALOR PADRÃO PRODUTO": number | null
+          "VALOR RECEBIDO": number | null
+          "VALOR TICKET": number | null
           VENDEDOR: string | null
         }
         Insert: {
@@ -1031,6 +1034,7 @@ export type Database = {
           "DIA SEMANA"?: string | null
           "E-MAIL"?: string | null
           EXECUÇÃO?: string | null
+          "FORMA DE PAGAMENTO"?: string | null
           id?: number
           inserido_em?: string | null
           LANÇAMENTO?: string | null
@@ -1038,17 +1042,19 @@ export type Database = {
           MÊS?: string | null
           "MÊS/ANO"?: string | null
           NOME?: string | null
-          PARCELA?: string | null
+          PARCELAS?: string | null
+          PARCIAL?: string | null
           Plataforma?: string | null
           PRODUTO?: string | null
           "PRODUTO FINAL"?: string | null
           TELEFONE?: string | null
           "VALOR BASE PREMIACAO"?: number | null
           "VALOR BRUTO"?: number | null
-          "VALOR FATURADO (CHEIO)"?: number | null
+          "VALOR FATURADO"?: number | null
           "VALOR FINAL"?: number | null
-          "VALOR LIQUIDO"?: number | null
           "VALOR PADRÃO PRODUTO"?: number | null
+          "VALOR RECEBIDO"?: number | null
+          "VALOR TICKET"?: number | null
           VENDEDOR?: string | null
         }
         Update: {
@@ -1058,6 +1064,7 @@ export type Database = {
           "DIA SEMANA"?: string | null
           "E-MAIL"?: string | null
           EXECUÇÃO?: string | null
+          "FORMA DE PAGAMENTO"?: string | null
           id?: number
           inserido_em?: string | null
           LANÇAMENTO?: string | null
@@ -1065,17 +1072,19 @@ export type Database = {
           MÊS?: string | null
           "MÊS/ANO"?: string | null
           NOME?: string | null
-          PARCELA?: string | null
+          PARCELAS?: string | null
+          PARCIAL?: string | null
           Plataforma?: string | null
           PRODUTO?: string | null
           "PRODUTO FINAL"?: string | null
           TELEFONE?: string | null
           "VALOR BASE PREMIACAO"?: number | null
           "VALOR BRUTO"?: number | null
-          "VALOR FATURADO (CHEIO)"?: number | null
+          "VALOR FATURADO"?: number | null
           "VALOR FINAL"?: number | null
-          "VALOR LIQUIDO"?: number | null
           "VALOR PADRÃO PRODUTO"?: number | null
+          "VALOR RECEBIDO"?: number | null
+          "VALOR TICKET"?: number | null
           VENDEDOR?: string | null
         }
         Relationships: []
