@@ -18,10 +18,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useFilterOptions } from "@/hooks/useFilterOptions";
 
 const IndividualReports = () => {
-  const { sellers, origins, tags } = useFilterOptions();
+  const { sellerOptions, origins, tags } = useFilterOptions();
   
   // Vendedor selecionado
-  const [selectedSeller, setSelectedSeller] = useState<string>("");
+  const [selectedSellerEmail, setSelectedSellerEmail] = useState<string>("");
   
   // Filtros de vendas
   const [salesStartDate, setSalesStartDate] = useState<Date | undefined>(undefined);
@@ -36,8 +36,11 @@ const IndividualReports = () => {
   const [selectedOrigin, setSelectedOrigin] = useState("all");
   const [selectedTag, setSelectedTag] = useState("all");
 
+  const selectedSeller = sellerOptions.find((seller) => seller.email === selectedSellerEmail);
+
   const { stats, monthlySales, loading: statsLoading } = useSellerStats({
-    sellerName: selectedSeller || undefined,
+    sellerEmail: selectedSellerEmail || undefined,
+    sellerName: selectedSeller?.name || undefined,
     startDate: salesStartDate,
     endDate: salesEndDate,
     month: selectedMonth,
@@ -46,7 +49,7 @@ const IndividualReports = () => {
   });
 
   const { funnelData } = useFunnelData({
-    seller: selectedSeller || "all",
+    seller: selectedSellerEmail || "all",
     origin: selectedOrigin,
     tag: selectedTag,
     startDate: funnelStartDate,
@@ -80,14 +83,14 @@ const IndividualReports = () => {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <Select value={selectedSeller} onValueChange={setSelectedSeller}>
+            <Select value={selectedSellerEmail} onValueChange={setSelectedSellerEmail}>
               <SelectTrigger className="w-full md:w-[400px] bg-card">
                 <SelectValue placeholder="Escolha um vendedor..." />
               </SelectTrigger>
               <SelectContent>
-                {sellers.map((seller) => (
-                  <SelectItem key={seller} value={seller}>
-                    {seller}
+                {sellerOptions.map((seller) => (
+                  <SelectItem key={seller.email} value={seller.email}>
+                    {seller.name}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -95,7 +98,7 @@ const IndividualReports = () => {
           </CardContent>
         </Card>
 
-        {!selectedSeller ? (
+        {!selectedSellerEmail ? (
           <Card className="p-12">
             <div className="text-center text-muted-foreground">
               <UserSearch className="h-16 w-16 mx-auto mb-4 opacity-50" />
@@ -104,7 +107,7 @@ const IndividualReports = () => {
           </Card>
         ) : (
           <>
-            <h2 className="text-xl font-semibold mb-4">Funil de Vendas - {selectedSeller}</h2>
+            <h2 className="text-xl font-semibold mb-4">Funil de Vendas - {selectedSeller?.name || selectedSellerEmail}</h2>
             <div className="space-y-4 mb-6">
               <div className="flex flex-wrap gap-4">
                 <Popover>

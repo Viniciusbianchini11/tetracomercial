@@ -1,8 +1,15 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
+type SellerOption = {
+  name: string;
+  email: string;
+  photo?: string | null;
+};
+
 export const useFilterOptions = () => {
   const [sellers, setSellers] = useState<string[]>([]);
+  const [sellerOptions, setSellerOptions] = useState<SellerOption[]>([]);
   const [origins, setOrigins] = useState<string[]>([]);
   const [tags, setTags] = useState<string[]>([]);
 
@@ -12,27 +19,37 @@ export const useFilterOptions = () => {
 
   const fetchFilterOptions = async () => {
     try {
-      // Fetch unique sellers
-      const { data: sellersData } = await supabase
-        .from("leads")
-        .select("dono_do_negocio")
-        .not("dono_do_negocio", "is", null);
+      // Buscar vendedores ativos na tabela vendedores (nome + email + foto)
+      const { data: sellersData, error: sellersError } = await (supabase as any)
+        .from("vendedores")
+        .select("nome, email, foto, ativo")
+        .eq("ativo", true);
 
-      const uniqueSellers = [
-        ...new Set(sellersData?.map((item) => item.dono_do_negocio).filter(Boolean) as string[]),
-      ];
-      setSellers(uniqueSellers);
+      if (sellersError) {
+        console.error("Error fetching vendedores:", sellersError);
+      }
+
+      const options: SellerOption[] =
+        sellersData?.map((item: any) => ({
+          name: item.nome,
+          email: item.email,
+          photo: item.foto,
+        })) || [];
+
+      // Mantém compatibilidade: lista simples apenas com o nome
+      setSellers(options.map((opt) => opt.name).filter(Boolean));
+      setSellerOptions(options.filter((opt) => opt.email && opt.name));
 
       // Fetch unique origins from all funnel tables
       const originsTables = [
-        'entrounofunil',
-        'contato_prospeccao',
-        'contato_conexao',
-        'contato_negociacao',
-        'contato_agendado',
-        'contato_fechado',
-        'contato_status_ganho',
-        'contato_status_perdido'
+        "entrounofunil",
+        "contato_prospeccao",
+        "contato_conexao",
+        "contato_negociacao",
+        "contato_agendado",
+        "contato_fechado",
+        "contato_status_ganho",
+        "contato_status_perdido",
       ];
 
       const allOrigins: string[] = [];
@@ -42,7 +59,7 @@ export const useFilterOptions = () => {
           .from(table as any)
           .select("origem")
           .not("origem", "is", null);
-        
+
         if (data) {
           allOrigins.push(...data.map((item: any) => item.origem).filter(Boolean));
         }
@@ -69,5 +86,5 @@ export const useFilterOptions = () => {
     }
   };
 
-  return { sellers, origins, tags };
+  return { sellers, sellerOptions, origins, tags };
 };
