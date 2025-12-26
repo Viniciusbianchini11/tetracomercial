@@ -1,6 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { LayoutDashboard, User, LogOut } from "lucide-react";
+import { LayoutDashboard, User, LogOut, UserSearch } from "lucide-react";
 import { useSellerAuth } from "@/contexts/SellerAuthContext";
 
 export const Header = () => {
@@ -21,6 +21,16 @@ export const Header = () => {
               >
                 <LayoutDashboard className="mr-1.5 h-3 w-3" />
                 Geral
+              </Button>
+            </Link>
+            <Link to="/relatorios-individuais">
+              <Button 
+                variant={location.pathname === "/relatorios-individuais" ? "default" : "outline"}
+                size="sm"
+                className="h-8 text-xs"
+              >
+                <UserSearch className="mr-1.5 h-3 w-3" />
+                Relatórios Individuais
               </Button>
             </Link>
             <Link to="/vendedor">

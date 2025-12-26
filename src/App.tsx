@@ -9,6 +9,7 @@ import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import SellerDashboard from "./pages/SellerDashboard";
 import SellerLogin from "./pages/SellerLogin";
+import IndividualReports from "./pages/IndividualReports";
 
 const queryClient = new QueryClient();
 
@@ -21,6 +22,7 @@ const App = () => (
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<Index />} />
+            <Route path="/relatorios-individuais" element={<IndividualReports />} />
             <Route path="/vendedor/login" element={<SellerLogin />} />
             <Route 
               path="/vendedor" 

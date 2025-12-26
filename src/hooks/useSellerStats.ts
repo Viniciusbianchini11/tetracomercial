@@ -19,6 +19,7 @@ interface MonthlySales {
 
 interface SellerStatsFilters {
   sellerEmail?: string;
+  sellerName?: string; // Permite passar o nome diretamente
   startDate?: Date;
   endDate?: Date;
   month?: string;
@@ -45,10 +46,10 @@ export const useSellerStats = (filters?: SellerStatsFilters) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (filters?.sellerEmail) {
+    if (filters?.sellerEmail || filters?.sellerName) {
       fetchSellerStats();
     }
-  }, [filters?.sellerEmail, filters?.startDate, filters?.endDate, filters?.month, filters?.year, filters?.launch]);
+  }, [filters?.sellerEmail, filters?.sellerName, filters?.startDate, filters?.endDate, filters?.month, filters?.year, filters?.launch]);
 
   const getPhoneLast8Digits = (phone: string | null): string | null => {
     if (!phone) return null;
@@ -163,10 +164,11 @@ export const useSellerStats = (filters?: SellerStatsFilters) => {
     try {
       setLoading(true);
 
-      // Extrair o nome do vendedor do email (primeira parte antes do ponto)
-      const sellerName = filters?.sellerEmail?.split('@')[0].split('.')[0].toUpperCase();
+      // Usar sellerName diretamente se fornecido, senão extrair do email
+      const sellerName = filters?.sellerName?.toUpperCase() || 
+        filters?.sellerEmail?.split('@')[0].split('.')[0].toUpperCase();
       
-      console.log('Fetching sales for seller:', sellerName, 'from email:', filters?.sellerEmail);
+      console.log('Fetching sales for seller:', sellerName);
 
       // Construir query base com filtros comuns
       let query = supabase
@@ -283,8 +285,9 @@ export const useSellerStats = (filters?: SellerStatsFilters) => {
 
   const fetchTotalLeads = async () => {
     try {
-      // Extrair o nome do vendedor do email
-      const sellerName = filters?.sellerEmail?.split('@')[0].split('.')[0].toUpperCase();
+      // Usar sellerName diretamente se fornecido, senão extrair do email
+      const sellerName = filters?.sellerName?.toUpperCase() || 
+        filters?.sellerEmail?.split('@')[0].split('.')[0].toUpperCase();
       
       console.log('Fetching leads with filters:', {
         sellerName,
