@@ -172,22 +172,23 @@ export const useSellerStats = (filters?: SellerStatsFilters) => {
     try {
       setLoading(true);
 
-      const sellerEmail = filters?.sellerEmail?.toLowerCase().trim();
+      // Usar sellerName diretamente (prioridade) ou extrair do email
       const sellerName = filters?.sellerName?.toUpperCase() || 
-        sellerEmail?.split('@')[0]?.split('.')[0]?.toUpperCase();
+        filters?.sellerEmail?.split('@')[0]?.split('.')[0]?.toUpperCase();
       
-      console.log('Fetching sales for seller:', sellerEmail || sellerName);
+      console.log('Fetching sales for seller:', sellerName);
 
-      // Construir query base com filtros comuns
+      if (!sellerName) {
+        console.log('No seller name provided, skipping fetch');
+        setLoading(false);
+        return;
+      }
+
+      // Construir query base - filtrar pela coluna VENDEDOR (nome do vendedor)
       let query = supabase
         .from("relatorio_faturamento")
-        .select('"VALOR FATURADO", "VALOR FINAL", "MÊS/ANO", "E-MAIL", NOME, TELEFONE, DATA, "LANÇAMENTO", ANO, VENDEDOR');
-      
-      if (sellerEmail) {
-        query = query.eq("E-MAIL", sellerEmail);
-      } else if (sellerName) {
-        query = query.eq("VENDEDOR", sellerName); // Usar eq exato, não ilike
-      }
+        .select('"VALOR FATURADO", "VALOR FINAL", "MÊS/ANO", "E-MAIL", NOME, TELEFONE, DATA, "LANÇAMENTO", ANO, VENDEDOR')
+        .ilike("VENDEDOR", `%${sellerName}%`);
 
       // Se temos startDate e endDate, usar eles
       if (filters?.startDate && filters?.endDate) {
@@ -298,29 +299,27 @@ export const useSellerStats = (filters?: SellerStatsFilters) => {
 
   const fetchTotalLeads = async () => {
     try {
-      const sellerEmail = filters?.sellerEmail?.toLowerCase().trim();
+      // Usar sellerName diretamente (prioridade) ou extrair do email
       const sellerName = filters?.sellerName?.toUpperCase() || 
-        sellerEmail?.split('@')[0]?.split('.')[0]?.toUpperCase();
+        filters?.sellerEmail?.split('@')[0]?.split('.')[0]?.toUpperCase();
       
       console.log('Fetching leads with filters:', {
         sellerName,
-        sellerEmail,
         startDate: filters?.startDate,
         endDate: filters?.endDate,
         month: filters?.month,
         year: filters?.year
       });
 
-      // Construir query para entrounofunil (mesma tabela usada para funil)
+      if (!sellerName) {
+        return 0;
+      }
+
+      // Construir query para entrounofunil (buscar por dono_do_negocio com ILIKE)
       let query = supabase
         .from("entrounofunil")
-        .select("*", { count: "exact", head: true });
-
-      if (sellerEmail) {
-        query = query.eq("email", sellerEmail);
-      } else if (sellerName) {
-        query = query.eq("dono_do_negocio", sellerName);
-      }
+        .select("*", { count: "exact", head: true })
+        .ilike("dono_do_negocio", `%${sellerName}%`);
 
       // Aplicar os MESMOS filtros de data que usamos em fetchSellerStats
       if (filters?.startDate && filters?.endDate) {
