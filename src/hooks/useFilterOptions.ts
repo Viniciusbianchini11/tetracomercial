@@ -20,14 +20,17 @@ export const useFilterOptions = () => {
   const fetchFilterOptions = async () => {
     try {
       // Buscar vendedores ativos na tabela vendedores (Nome + Email + Link Foto)
-      const { data: sellersData, error: sellersError } = await supabase
+      // Usar as any porque as colunas têm nomes com caracteres especiais
+      const { data: sellersData, error: sellersError } = await (supabase as any)
         .from("vendedores")
-        .select('"Nome", "Email", "Link Foto", "Ativo?"')
+        .select("Nome, Email, \"Link Foto\", \"Ativo?\"")
         .eq("Ativo?", "Ativo");
 
       if (sellersError) {
         console.error("Error fetching vendedores:", sellersError);
       }
+
+      console.log("Vendedores ativos encontrados:", sellersData?.length);
 
       const options: SellerOption[] =
         sellersData?.map((item: any) => ({
@@ -38,7 +41,8 @@ export const useFilterOptions = () => {
 
       // Mantém compatibilidade: lista simples apenas com o nome
       setSellers(options.map((opt) => opt.name).filter(Boolean));
-      setSellerOptions(options.filter((opt) => opt.email && opt.name));
+      // Incluir vendedores mesmo sem email (como Link Direto, CS)
+      setSellerOptions(options.filter((opt) => opt.name));
 
       // Fetch unique origins from all funnel tables
       const originsTables = [
