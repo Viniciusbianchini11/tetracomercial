@@ -173,8 +173,8 @@ export const useSellerStats = (filters?: SellerStatsFilters) => {
       // Construir query base com filtros comuns
       let query = supabase
         .from("relatorio_faturamento")
-        .select('"VALOR FATURADO (CHEIO)", "VALOR FINAL", "MÊS/ANO", "E-MAIL", NOME, TELEFONE, DATA')
-        .eq("VENDEDOR", sellerName); // Usar eq exato, não ilike
+        .select('"VALOR FATURADO", "VALOR FINAL", "MÊS/ANO", "E-MAIL", NOME, TELEFONE, DATA, VENDEDOR')
+        .ilike("VENDEDOR", `%${sellerName}%`);
 
       // Se temos startDate e endDate, usar eles
       if (filters?.startDate && filters?.endDate) {
@@ -301,7 +301,7 @@ export const useSellerStats = (filters?: SellerStatsFilters) => {
       let query = supabase
         .from("entrounofunil")
         .select("*", { count: "exact", head: true })
-        .eq("dono_do_negocio", sellerName);
+        .ilike("dono_do_negocio", `%${sellerName}%`);
 
       // Aplicar os MESMOS filtros de data que usamos em fetchSellerStats
       if (filters?.startDate && filters?.endDate) {
