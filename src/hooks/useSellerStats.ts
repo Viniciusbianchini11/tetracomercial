@@ -181,7 +181,7 @@ export const useSellerStats = (filters?: SellerStatsFilters) => {
       // Construir query base com filtros comuns
       let query = supabase
         .from("relatorio_faturamento")
-        .select('"VALOR FATURADO (CHEIO)", "VALOR FINAL", "MÊS/ANO", "E-MAIL", NOME, TELEFONE, DATA');
+        .select('"VALOR FATURADO", "VALOR FINAL", "MÊS/ANO", "E-MAIL", NOME, TELEFONE, DATA, "LANÇAMENTO", ANO, VENDEDOR');
       
       if (sellerEmail) {
         query = query.eq("E-MAIL", sellerEmail);
